@@ -1,5 +1,51 @@
 # Hướng dẫn chạy dự án DA DƯỠNG
 
+## Bước 0 — Lấy code về máy (dành cho người mới / đồng đội trong nhóm)
+
+Nếu bạn clone dự án lần đầu từ GitHub, làm theo đúng thứ tự sau:
+
+```bash
+git clone https://github.com/ThongLuc2k3/Healthy_Skin.git
+cd Healthy_Skin
+```
+
+**Cài dependencies (cả frontend + backend):**
+
+```bash
+npm install
+cd server
+npm install
+cd ..
+```
+
+**Tạo file cấu hình riêng (`.env`) — bắt buộc, KHÔNG dùng chung với người khác:**
+
+Repo chỉ chứa file mẫu (`.env.example`), không chứa key/secret thật (bị `.gitignore` chặn có chủ đích). Mỗi người tự tạo file `.env` riêng trên máy mình:
+
+```bash
+# Ở thư mục gốc dự án
+cp .env.example .env
+
+# Trong thư mục server/
+cd server
+cp .env.example .env
+cd ..
+```
+
+Sau đó mở `server/.env` vừa tạo và tự điền 2 giá trị quan trọng:
+
+1. **`JWT_SECRET`** — tự tạo chuỗi ngẫu nhiên riêng, không dùng chung với ai:
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+   ```
+   Copy kết quả dán vào `JWT_SECRET=` trong `server/.env`.
+
+2. **`GEMINI_API_KEY`** — chỉ cần nếu muốn dùng tính năng quét ảnh thật (xem chi tiết ở mục "Bật tính năng quét ảnh thật" bên dưới). Có thể để trống lúc đầu, các tính năng khác vẫn chạy bình thường — chỉ riêng quét ảnh sẽ báo lỗi rõ ràng thay vì crash.
+
+File `.env` gốc (`VITE_API_BASE_URL=http://localhost:4000/api`) thường không cần sửa nếu chạy backend ở cổng mặc định 4000.
+
+Sau bước này, xem tiếp **Bước 2** bên dưới để chạy thử. Lưu ý: **không bao giờ commit file `.env`** (chỉ commit `.env.example`) — nếu `git status` hiện file `.env` đang chờ commit, đó là dấu hiệu bất thường, cần kiểm tra lại `.gitignore` trước khi commit.
+
 ## Yêu cầu trước khi chạy
 
 - Đã cài [Node.js](https://nodejs.org/) (khuyến nghị bản 20 trở lên) và `npm` đi kèm.
@@ -14,10 +60,10 @@
 
 ## Bước 1 — Cài dependencies
 
-Chỉ cần làm **một lần** đầu tiên, hoặc mỗi khi `package.json` thay đổi:
+Chỉ cần làm **một lần** đầu tiên, hoặc mỗi khi `package.json` thay đổi (nếu đã làm ở Bước 0 khi mới clone thì có thể bỏ qua):
 
 ```bash
-cd "/home/thongluc/Khóa Luận Tốt Nghiệp/Healthy_Skin"
+cd đường-dẫn-tới-thư-mục-dự-án
 npm install
 ```
 

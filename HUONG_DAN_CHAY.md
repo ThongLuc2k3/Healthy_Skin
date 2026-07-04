@@ -59,7 +59,7 @@ Sau bước này, xem tiếp **Bước 2** bên dưới để chạy thử. Lưu
   with C++" hoặc dùng WSL2).
 
 ## Bước 1 — Cài dependencies
-
+ 
 Chỉ cần làm **một lần** đầu tiên, hoặc mỗi khi `package.json` thay đổi (nếu đã làm ở Bước 0 khi mới clone thì có thể bỏ qua):
 
 ```bash

@@ -1,0 +1,69 @@
+[
+  {
+    "id": "bs_nguyen_van_a",
+    "name": "BS. Nguyễn Văn A",
+    "specialty": "Da liễu",
+    "clinic_name": "Phòng khám Da liễu ABC",
+    "area_vi": "Quận 1, TP.HCM",
+    "bio_vi": "10 năm kinh nghiệm điều trị da mụn, da nhạy cảm. Tốt nghiệp Đại học Y Dược TP.HCM.",
+    "certifications": [
+      { "title_vi": "Chứng chỉ hành nghề Da liễu", "image_url": "placeholder", "verified": false }
+    ],
+    "rating_avg": 4.6,
+    "reviews": [
+      { "user_display": "Người dùng ẩn danh", "rating": 5, "comment_vi": "Tư vấn kỹ, dễ hiểu." },
+      { "user_display": "Người dùng ẩn danh", "rating": 4, "comment_vi": "Phòng khám hơi đông nhưng bác sĩ tận tâm." }
+    ],
+    "available_slots": ["Thứ 3 - 14:00", "Thứ 5 - 16:00", "Thứ 7 - 09:00"]
+  },
+  {
+    "id": "bs_tran_thi_b",
+    "name": "BS. Trần Thị B",
+    "specialty": "Da liễu thẩm mỹ",
+    "clinic_name": "Trung tâm Da liễu & Thẩm mỹ B",
+    "area_vi": "Quận 3, TP.HCM",
+    "bio_vi": "Chuyên điều trị nám, tàn nhang, chăm sóc da lão hoá. 8 năm kinh nghiệm lâm sàng.",
+    "certifications": [
+      { "title_vi": "Chứng chỉ hành nghề Da liễu", "image_url": "placeholder", "verified": false },
+      { "title_vi": "Chứng chỉ Laser thẩm mỹ", "image_url": "placeholder", "verified": false }
+    ],
+    "rating_avg": 4.8,
+    "reviews": [
+      { "user_display": "Người dùng ẩn danh", "rating": 5, "comment_vi": "Rất chuyên nghiệp, giải thích cặn kẽ." }
+    ],
+    "available_slots": ["Thứ 2 - 10:00", "Thứ 4 - 15:00"]
+  },
+  {
+    "id": "bs_le_van_c",
+    "name": "BS. Lê Văn C",
+    "specialty": "Dinh dưỡng",
+    "clinic_name": "Phòng khám Dinh dưỡng C",
+    "area_vi": "Quận 7, TP.HCM",
+    "bio_vi": "Chuyên tư vấn dinh dưỡng cho người có bệnh lý nền (tiểu đường, gout, gan nhiễm mỡ).",
+    "certifications": [
+      { "title_vi": "Chứng chỉ hành nghề Dinh dưỡng", "image_url": "placeholder", "verified": false }
+    ],
+    "rating_avg": 4.4,
+    "reviews": [
+      { "user_display": "Người dùng ẩn danh", "rating": 4, "comment_vi": "Tư vấn thực đơn khá chi tiết." },
+      { "user_display": "Người dùng ẩn danh", "rating": 5, "comment_vi": "Rất phù hợp cho người có bệnh nền." }
+    ],
+    "available_slots": ["Thứ 3 - 09:00", "Thứ 6 - 14:00"]
+  },
+  {
+    "id": "bs_pham_thi_d",
+    "name": "BS. Phạm Thị D",
+    "specialty": "Da liễu nhi & người lớn",
+    "clinic_name": "Phòng khám Da liễu Gia đình D",
+    "area_vi": "TP. Thủ Đức",
+    "bio_vi": "Điều trị viêm da cơ địa, chàm, dị ứng da cho mọi lứa tuổi.",
+    "certifications": [
+      { "title_vi": "Chứng chỉ hành nghề Da liễu", "image_url": "placeholder", "verified": false }
+    ],
+    "rating_avg": 4.7,
+    "reviews": [
+      { "user_display": "Người dùng ẩn danh", "rating": 5, "comment_vi": "Bác sĩ rất kiên nhẫn và nhẹ nhàng." }
+    ],
+    "available_slots": ["Thứ 4 - 08:30", "Thứ 7 - 10:30"]
+  }
+]

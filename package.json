@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:server": "npm --prefix server run dev",
-    "dev:all": "concurrently -n FRONTEND,BACKEND -c blue,green \"npm run dev\" \"npm run dev:server\"",
+    "dev:all": "node scripts/dev-all.mjs",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
@@ -23,7 +23,6 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
-    "concurrently": "^9.2.3",
     "oxlint": "^1.71.0",
     "vite": "^8.1.1"
   }

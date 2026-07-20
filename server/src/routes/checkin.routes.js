@@ -5,6 +5,7 @@ import { requireAuth } from '../middleware/auth.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
 import { checkinLimiter } from '../middleware/rateLimit.js'
 import { upsertCheckin, getCheckinByDate, getCheckinRawById, getCalendar } from '../services/checkinService.js'
+import { applyCheckinFeedback } from '../services/roadmapService.js'
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -52,7 +53,19 @@ router.post(
       mealFile: req.files?.mealPhoto?.[0],
     })
 
-    res.json(result)
+    let feedbackPreview = null
+    if (result?.roadmapId) {
+      const feedback = applyCheckinFeedback(
+        req.userId,
+        result.roadmapId,
+        result.date,
+        skincareTasksCompleted,
+        result.mealDescription || '',
+      )
+      feedbackPreview = feedback?.preview ?? null
+    }
+
+    res.json({ ...result, feedbackPreview })
   }),
 )
 

@@ -9,6 +9,8 @@ import {
   CameraIcon,
   PlayIcon,
   ChatBubbleIcon,
+  GamepadIcon,
+  CalendarIcon,
 } from '../components/Icons'
 import { useAuth } from '../context/AuthContext'
 
@@ -29,9 +31,19 @@ const FEATURES = [
     desc: 'Tìm thủ công hoặc quét ảnh thật bằng AI để kiểm tra ngay mức độ phù hợp với cơ địa của bạn.',
   },
   {
+    icon: CalendarIcon,
+    title: 'Có lộ trình cải thiện riêng',
+    desc: 'Sau khi có kết quả, bạn có thể tạo kế hoạch theo mục tiêu, ngân sách, nhịp sống và sản phẩm đang dùng thay vì chỉ xem danh sách gợi ý tĩnh.',
+  },
+  {
     icon: PlayIcon,
     title: 'Góc truyền động lực',
     desc: 'Video & nội dung ngắn về skincare, dinh dưỡng, giảm cân lành mạnh — giữ động lực trên hành trình của bạn.',
+  },
+  {
+    icon: GamepadIcon,
+    title: 'Skin Lab vui nhộn',
+    desc: 'Mini quiz và thử thách nho nhỏ để người dùng quay lại mỗi ngày, giúp app giống một hệ sinh thái sống động hơn.',
   },
   {
     icon: ChatBubbleIcon,

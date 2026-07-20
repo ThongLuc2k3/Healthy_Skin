@@ -1,5 +1,11 @@
 import 'dotenv/config'
 
+const defaultCorsOrigins = ['http://localhost:5173', 'http://localhost:5174']
+const corsOrigins = (process.env.CORS_ORIGIN || defaultCorsOrigins.join(','))
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean)
+
 const config = {
   port: Number(process.env.PORT) || 4000,
   jwtSecret: process.env.JWT_SECRET || 'da_duong_dev_secret_change_me',
@@ -7,7 +13,7 @@ const config = {
   geminiApiKey: process.env.GEMINI_API_KEY || '',
   geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
   dbPath: process.env.DB_PATH || './data/da_duong.sqlite',
-  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  corsOrigins,
 }
 
 if (!process.env.JWT_SECRET) {

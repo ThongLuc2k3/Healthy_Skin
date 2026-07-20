@@ -42,7 +42,8 @@ Sau đó mở `server/.env` vừa tạo và tự điền 2 giá trị quan trọ
 
 2. **`GEMINI_API_KEY`** — chỉ cần nếu muốn dùng tính năng quét ảnh thật (xem chi tiết ở mục "Bật tính năng quét ảnh thật" bên dưới). Có thể để trống lúc đầu, các tính năng khác vẫn chạy bình thường — chỉ riêng quét ảnh sẽ báo lỗi rõ ràng thay vì crash.
 
-File `.env` gốc (`VITE_API_BASE_URL=http://localhost:4000/api`) thường không cần sửa nếu chạy backend ở cổng mặc định 4000.
+File `.env` gốc thường có thể để nguyên khi dev local. Frontend Vite sẽ tự proxy `/api` sang backend
+`http://localhost:4000`, nên không cần hard-code `VITE_API_BASE_URL` chỉ để chạy máy local.
 
 Sau bước này, xem tiếp **Bước 2** bên dưới để chạy thử. Lưu ý: **không bao giờ commit file `.env`** (chỉ commit `.env.example`) — nếu `git status` hiện file `.env` đang chờ commit, đó là dấu hiệu bất thường, cần kiểm tra lại `.gitignore` trước khi commit.
 
@@ -107,10 +108,11 @@ cp .env.example .env
 cd ..
 ```
 
-Cấu hình `VITE_API_BASE_URL` cho frontend (chỉ cần nếu backend chạy ở cổng khác 4000):
+Cấu hình `VITE_API_BASE_URL` cho frontend (chỉ cần nếu frontend phải gọi backend ở domain/port khác,
+ví dụ backend đã deploy lên internet hoặc không muốn dùng Vite proxy):
 
 ```bash
-cp .env.example .env    # ở thư mục gốc dự án, tuỳ chỉnh VITE_API_BASE_URL nếu cần
+cp .env.example .env    # ở thư mục gốc dự án, chỉ chỉnh VITE_API_BASE_URL nếu thực sự cần
 ```
 
 Chạy cả 2 server cùng lúc từ thư mục gốc:
@@ -119,9 +121,10 @@ Chạy cả 2 server cùng lúc từ thư mục gốc:
 npm run dev:all
 ```
 
-Frontend chạy ở `http://localhost:5173`, backend ở `http://localhost:4000`. Vào **Đăng nhập** trên
-thanh điều hướng để tạo tài khoản — hồ sơ cơ địa sẽ tự đồng bộ lên server, dùng lại được trên thiết
-bị khác khi đăng nhập cùng tài khoản.
+Script này tự chọn cổng trống cho cả frontend và backend. Nếu `5173` hoặc `4000` đang bận, nó sẽ nhảy
+sang cổng khác và tự nối frontend với backend bằng `VITE_API_BASE_URL` phù hợp. Vào **Đăng nhập** trên
+thanh điều hướng để tạo tài khoản — hồ sơ cơ địa sẽ tự đồng bộ lên server, dùng lại được trên thiết bị
+khác khi đăng nhập cùng tài khoản.
 
 ### Bật tính năng quét ảnh thật (AI đọc ảnh + suy luận bằng Gemini)
 
@@ -165,6 +168,27 @@ lỗi rõ ràng, và người dùng vẫn có thể dùng ô tìm kiếm thủ c
 | `npm run dev:server` | Chỉ chạy backend (không chạy frontend) |
 | `npm run dev:all` | Chạy song song frontend + backend |
 | `npm --prefix server run seed` | Nạp lại dữ liệu từ `src/data/*.json` vào database SQLite |
+| `npm --prefix server run seed:demo` | Tạo lại tài khoản demo + profile + lịch sử scan + roadmap + streak + lịch hẹn mẫu |
+
+### Seed dữ liệu demo để quay video
+
+Nếu bạn muốn có sẵn tài khoản và dữ liệu đẹp để quay màn hình:
+
+```bash
+npm --prefix server run seed:demo
+```
+
+Script này sẽ:
+
+- seed lại dữ liệu skincare/food/chuyên gia mẫu
+- tạo hoặc làm mới 2 tài khoản demo
+- tạo profile, roadmap, check-in nhiều ngày, lịch sử scan
+- tạo 1 lịch hẹn mẫu kèm báo cáo tư vấn demo cho tài khoản chính
+
+Thông tin đăng nhập demo:
+
+- `demo.main@da-duong.local` / `Demo123!@#`
+- `demo.alt@da-duong.local` / `Demo123!@#`
 
 ## Build & deploy (khi cần đưa lên internet để demo)
 
@@ -187,11 +211,12 @@ lại frontend.
 
 ## Xử lý sự cố thường gặp
 
-- **Lỗi "port 5173 đã được dùng"**: chạy `npm run dev -- --port 5174` để đổi cổng khác.
+- **Lỗi "port 5173 đã được dùng"**: frontend có thể tự nhảy sang `5174` hoặc cổng khác. Điều này không còn làm hỏng đăng nhập trong dev mode vì Vite proxy `/api` về backend.
+- **Lỗi `EADDRINUSE ... :4000`**: nếu bạn dùng `npm run dev:all`, script mới sẽ tự tránh cổng bận. Lỗi này chỉ còn đáng lo khi bạn chạy riêng `npm run dev:server` và đã có tiến trình khác giữ cổng `4000`.
 - **Cài `npm install` bị lỗi**: xóa `node_modules` và `package-lock.json` rồi chạy lại `npm install`.
 - **Trang trắng / lỗi console**: mở DevTools (F12) trong trình duyệt, tab Console để xem chi tiết lỗi.
 - **Lỗi quét ảnh: "Tính năng quét ảnh thật chưa sẵn sàng"**: chưa cấu hình `GEMINI_API_KEY` trong `server/.env` — xem Bước 4. Trong lúc chờ, dùng ô tìm kiếm thủ công ở trang Quét thử.
 - **Lỗi quét ảnh: "Không thể phân tích ảnh lúc này" (mã 502)**: key sai/hết hạn, hoặc vượt giới hạn free tier của Gemini (mặc định 1.500 request/ngày) — kiểm tra log server để xem lỗi chi tiết từ Gemini API.
 - **Lỗi "Quá nhiều lần thử..." / "Bạn đã quét quá nhiều lần..." (mã 429)**: đang bị rate limit do gọi API quá nhanh/nhiều lần liên tiếp — đợi khoảng 15 phút rồi thử lại (xem mục "Bảo mật API").
-- **Trang Kết quả/Quét thử không đăng nhập được / không lưu hồ sơ lên server**: kiểm tra backend có đang chạy không (`npm run dev:server` hoặc `npm run dev:all`), và `VITE_API_BASE_URL` trong `.env` ở thư mục gốc có trỏ đúng cổng backend (mặc định `http://localhost:4000/api`).
+- **Trang Kết quả/Quét thử không đăng nhập được / không lưu hồ sơ lên server**: kiểm tra backend có đang chạy không (`npm run dev:server` hoặc `npm run dev:all`). Nếu đang dev local, ưu tiên bỏ trống `VITE_API_BASE_URL` để frontend dùng Vite proxy; chỉ đặt biến này khi thật sự cần gọi sang domain/port khác.
 - **`npm install` trong `server/` báo lỗi biên dịch `better-sqlite3`**: cần có `gcc`, `g++`, `make`, `python3` trên máy (xem mục "Yêu cầu trước khi chạy").

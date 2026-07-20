@@ -11,6 +11,7 @@ const LINKS = [
   { to: '/motivation', label: 'Động lực' },
   { to: '/roadmap', label: 'Lộ trình' },
   { to: '/checkin', label: 'Điểm danh' },
+  { to: '/skin-lab', label: 'Skin Lab' },
   { to: '/experts', label: 'Chuyên gia' },
 ]
 

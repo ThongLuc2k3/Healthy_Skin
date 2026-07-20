@@ -30,8 +30,29 @@ if (listExperts().length === 0) {
 
 const app = express()
 
+function isLoopbackOrigin(origin) {
+  try {
+    const url = new URL(origin)
+    return ['localhost', '127.0.0.1'].includes(url.hostname)
+  } catch {
+    return false
+  }
+}
+
 app.use(helmet())
-app.use(cors({ origin: config.corsOrigin }))
+app.use(
+  cors({
+    origin(origin, callback) {
+      // Cho phép request không có Origin (curl, healthcheck, server-to-server)
+      // và nhiều cổng localhost khi Vite tự tăng port do cổng mặc định đang bận.
+      if (!origin || config.corsOrigins.includes(origin) || isLoopbackOrigin(origin)) {
+        callback(null, true)
+        return
+      }
+      callback(new Error(`CORS origin không được phép: ${origin}`))
+    },
+  }),
+)
 app.use(express.json({ limit: '50kb' }))
 app.use('/api', generalLimiter)
 

@@ -1,5 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 const TOKEN_KEY = 'da_duong_token'
+const REQUEST_TIMEOUT_MS = 15000
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY)
@@ -21,17 +22,28 @@ async function request(path, { method = 'GET', body, isFormData = false, auth = 
     if (token) headers.Authorization = `Bearer ${token}`
   }
 
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+
   let response
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
       method,
       headers,
+      signal: controller.signal,
       body: isFormData ? body : body ? JSON.stringify(body) : undefined,
     })
-  } catch {
-    const err = new Error('Không thể kết nối tới máy chủ. Backend có thể chưa chạy.')
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      const err = new Error('Máy chủ phản hồi quá chậm hoặc không phản hồi. Kiểm tra backend rồi thử lại.')
+      err.timeout = true
+      throw err
+    }
+    const err = new Error('Không thể kết nối tới máy chủ. Backend có thể chưa chạy hoặc bị chặn do cấu hình mạng/CORS.')
     err.offline = true
     throw err
+  } finally {
+    clearTimeout(timeoutId)
   }
 
   const contentType = response.headers.get('content-type') || ''
@@ -50,9 +62,22 @@ async function request(path, { method = 'GET', body, isFormData = false, auth = 
 // không gửi được header Authorization — tải về dạng blob rồi tạo object URL để hiển thị.
 export async function fetchAuthedBlobUrl(path) {
   const token = getToken()
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  let response
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      signal: controller.signal,
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+  } catch (error) {
+    clearTimeout(timeoutId)
+    if (error?.name === 'AbortError') {
+      throw new Error('Tải file quá chậm hoặc không phản hồi.')
+    }
+    throw new Error('Không tải được file từ máy chủ.')
+  }
+  clearTimeout(timeoutId)
   if (!response.ok) throw new Error('Không tải được ảnh.')
   const blob = await response.blob()
   return URL.createObjectURL(blob)

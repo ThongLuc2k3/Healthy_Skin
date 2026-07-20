@@ -32,3 +32,257 @@ body {
     transform: translateY(0);
   }
 }
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes softGlow {
+  0%,
+  100% {
+    box-shadow: 0 18px 45px -32px rgba(16, 185, 129, 0.42);
+  }
+  50% {
+    box-shadow: 0 26px 60px -34px rgba(16, 185, 129, 0.56);
+  }
+}
+
+@keyframes swapIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.992);
+    filter: saturate(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: saturate(1);
+  }
+}
+
+@keyframes swapInForward {
+  from {
+    opacity: 0;
+    transform: translateX(18px) translateY(8px) scale(0.992);
+    filter: saturate(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0) scale(1);
+    filter: saturate(1);
+  }
+}
+
+@keyframes swapInBackward {
+  from {
+    opacity: 0;
+    transform: translateX(-18px) translateY(8px) scale(0.992);
+    filter: saturate(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0) scale(1);
+    filter: saturate(1);
+  }
+}
+
+@keyframes auroraShift {
+  0% {
+    transform: translate3d(-3%, -2%, 0) scale(1);
+    opacity: 0.48;
+  }
+  50% {
+    transform: translate3d(3%, 2%, 0) scale(1.06);
+    opacity: 0.72;
+  }
+  100% {
+    transform: translate3d(-3%, -2%, 0) scale(1);
+    opacity: 0.48;
+  }
+}
+
+@keyframes blobFloat {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(16px, -18px, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.motion-rise {
+  animation: riseIn 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+
+.motion-glow {
+  animation:
+    riseIn 560ms cubic-bezier(0.22, 1, 0.36, 1) both,
+    softGlow 2.8s ease-in-out 700ms infinite;
+  will-change: transform, opacity, box-shadow;
+}
+
+.motion-swap {
+  animation: swapIn 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity, filter;
+}
+
+.motion-swap-forward {
+  animation: swapInForward 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity, filter;
+}
+
+.motion-swap-backward {
+  animation: swapInBackward 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity, filter;
+}
+
+.motion-stagger-1 {
+  animation-delay: 80ms;
+}
+
+.motion-stagger-2 {
+  animation-delay: 150ms;
+}
+
+.motion-stagger-3 {
+  animation-delay: 220ms;
+}
+
+.motion-stagger-4 {
+  animation-delay: 290ms;
+}
+
+.motion-stagger-5 {
+  animation-delay: 360ms;
+}
+
+.aurora-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.aurora-layer {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  z-index: 0;
+}
+
+.aurora-layer::before {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  background:
+    radial-gradient(circle at 18% 24%, color-mix(in srgb, var(--aurora-a) 26%, transparent) 0, transparent 42%),
+    radial-gradient(circle at 78% 18%, color-mix(in srgb, var(--aurora-b) 22%, transparent) 0, transparent 40%),
+    radial-gradient(circle at 56% 78%, color-mix(in srgb, var(--aurora-c) 18%, transparent) 0, transparent 46%);
+  filter: blur(28px);
+  animation: auroraShift 16s ease-in-out infinite;
+}
+
+.phase-blob {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(34px);
+  opacity: 0.42;
+  z-index: 0;
+  animation: blobFloat 14s ease-in-out infinite;
+}
+
+.phase-blob-a {
+  top: -40px;
+  right: -26px;
+  height: 180px;
+  width: 180px;
+  background: color-mix(in srgb, var(--blob-a) 58%, transparent);
+}
+
+.phase-blob-b {
+  bottom: 10%;
+  left: -34px;
+  height: 160px;
+  width: 160px;
+  background: color-mix(in srgb, var(--blob-b) 52%, transparent);
+  animation-delay: 2.1s;
+}
+
+.phase-blob-c {
+  bottom: -56px;
+  right: 18%;
+  height: 140px;
+  width: 140px;
+  background: color-mix(in srgb, var(--blob-c) 44%, transparent);
+  animation-delay: 3.6s;
+}
+
+.aurora-content {
+  position: relative;
+  z-index: 1;
+}
+
+.surface-tint {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(248, 250, 252, 0.92)),
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.68), transparent 56%);
+  backdrop-filter: blur(10px);
+}
+
+.surface-tint-strong {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(240, 253, 250, 0.94)),
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.7), transparent 52%);
+  backdrop-filter: blur(12px);
+}
+
+.motion-hover-lift {
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease,
+    background-color 220ms ease;
+}
+
+.motion-hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .motion-rise,
+  .motion-glow,
+  .motion-swap,
+  .motion-swap-forward,
+  .motion-swap-backward,
+  .motion-stagger-1,
+  .motion-stagger-2,
+  .motion-stagger-3,
+  .motion-stagger-4,
+  .motion-stagger-5,
+  .aurora-layer::before,
+  .phase-blob {
+    animation: none !important;
+  }
+
+  .motion-hover-lift,
+  .motion-hover-lift:hover {
+    transition: none !important;
+    transform: none !important;
+  }
+}

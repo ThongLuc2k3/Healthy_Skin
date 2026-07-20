@@ -25,14 +25,14 @@ npm run lint     # kiểm tra lỗi lint
 
 ```bash
 npm install
-cp .env.example .env               # tuỳ chỉnh VITE_API_BASE_URL nếu cần
+cp .env.example .env               # thường có thể giữ nguyên khi dev local
 
 cd server
 npm install
 cp .env.example .env               # điền JWT_SECRET, GEMINI_API_KEY nếu có
 cd ..
 
-npm run dev:all   # chạy song song frontend (5173) + backend (4000)
+npm run dev:all   # tự chọn cổng trống cho frontend/backend và nối 2 tiến trình với nhau
 ```
 
 Không có `GEMINI_API_KEY` vẫn chạy được bình thường — chỉ riêng tính năng quét ảnh thật ở trang Quét
@@ -58,3 +58,9 @@ Frontend là SPA build bằng Vite, có sẵn `public/_redirects` (Netlify) và 
 Backend (`server/`) là một Node.js/Express app độc lập, cần deploy riêng lên một dịch vụ hỗ trợ
 Node.js chạy liên tục (Render, Railway, Fly.io, VPS...) — không deploy được lên Vercel/Netlify dạng
 static hosting như frontend.
+
+## Ghi chú dev mode
+
+`npm run dev:all` hiện tự dò cổng trống, ví dụ frontend có thể chạy ở `5174` còn backend ở `4001`
+nếu `5173/4000` đang bận. Script sẽ tự truyền `VITE_API_BASE_URL` tương ứng cho frontend, nên không
+cần tự sửa lại `.env` chỉ vì xung đột cổng local.

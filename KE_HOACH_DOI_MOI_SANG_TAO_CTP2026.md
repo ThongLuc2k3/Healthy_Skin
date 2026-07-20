@@ -1,6 +1,6 @@
 # Kế hoạch bổ sung & tích hợp Đổi mới sáng tạo — Dự án DA DƯỠNG
 ## Đáp ứng "Thể lệ chương trình đào tạo — Thúc đẩy năng lực đổi mới sáng tạo gắn với phát triển bền vững" (2026)
-
+những vùng trống nền trắng trong web có ý tưởng nền động hay di chuyển gì đó bắt mắt k?
 > Tài liệu này để giao việc cho AI/con người thực hiện tiếp. Mỗi task có Input/Output/Cách làm rõ
 > ràng để một AI khác (hoặc thành viên nhóm) có thể cầm lên làm ngay không cần hỏi lại ngữ cảnh.
 >

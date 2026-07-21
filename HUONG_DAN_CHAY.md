@@ -192,22 +192,27 @@ Thông tin đăng nhập demo:
 
 ## Build & deploy (khi cần đưa lên internet để demo)
 
-```bash
-npm run build
-```
+Repo đã có sẵn `render.yaml` để deploy toàn bộ ứng dụng lên **Render free bằng một web service duy
+nhất**. Cấu hình này sẽ:
 
-Kết quả nằm trong thư mục `dist/`. Dự án đã có sẵn cấu hình định tuyến SPA cho:
+- cài dependencies ở root và trong `server/`
+- build frontend Vite ra `dist/`
+- start backend Express trong `server/`
+- phục vụ luôn frontend SPA cùng API `/api` trên một domain
 
-- **Netlify**: file `public/_redirects`
-- **Vercel**: file `vercel.json`
+Nếu cần làm thủ công trên Render, dùng các giá trị tương đương:
 
-Chỉ cần kéo thư mục dự án lên Vercel/Netlify (hoặc dùng CLI của họ) là deploy được, không cần cấu
-hình thêm — đây là phần **frontend**.
+- `Build Command`: `npm install && npm --prefix server install && npm run build`
+- `Start Command`: `cd server && npm start`
+- `Root Directory`: thư mục gốc của repo
 
-Backend (`server/`) là app Node.js/Express độc lập, **không deploy được lên Vercel/Netlify dạng
-static hosting** — cần một dịch vụ hỗ trợ Node.js chạy liên tục (Render, Railway, Fly.io, VPS...).
-Sau khi deploy backend, cập nhật `VITE_API_BASE_URL` ở `.env` gốc trỏ tới URL backend đó rồi build
-lại frontend.
+Sau khi deploy, vào dashboard Render và thêm biến môi trường tối thiểu:
+
+- `JWT_SECRET` — bắt buộc cho backend production
+- `GEMINI_API_KEY` — chỉ cần nếu muốn bật quét ảnh thật
+
+Vì frontend và backend chạy chung một service nên không cần chỉnh `VITE_API_BASE_URL` cho Render.
+`src/lib/apiClient.js` sẽ gọi cùng origin qua `/api`.
 
 ## Xử lý sự cố thường gặp
 

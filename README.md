@@ -52,12 +52,18 @@ cần thẻ thanh toán, tại [Google AI Studio](https://aistudio.google.com/ap
 
 ## Deploy
 
-Frontend là SPA build bằng Vite, có sẵn `public/_redirects` (Netlify) và `vercel.json` (Vercel) để
-điều hướng client-side routing. Build ra thư mục `dist/` rồi deploy lên Vercel hoặc Netlify.
+Repo đã có `render.yaml` để deploy toàn bộ ứng dụng lên **Render free bằng một web service duy nhất**.
+Render sẽ build frontend vào `dist/` rồi backend Express trong `server/` phục vụ luôn SPA đó cùng API
+`/api`, nên không cần cấu hình CORS giữa hai domain riêng.
 
-Backend (`server/`) là một Node.js/Express app độc lập, cần deploy riêng lên một dịch vụ hỗ trợ
-Node.js chạy liên tục (Render, Railway, Fly.io, VPS...) — không deploy được lên Vercel/Netlify dạng
-static hosting như frontend.
+Nếu muốn deploy thủ công thay vì dùng blueprint, cấu hình tương đương là:
+
+- Build command: `npm install && npm --prefix server install && npm run build`
+- Start command: `cd server && npm start`
+- Root directory: thư mục gốc của repo
+
+Khi tạo service trên Render, nhớ đặt các biến môi trường cần thiết trong dashboard, tối thiểu là
+`JWT_SECRET`. Nếu dùng quét ảnh thật thì thêm `GEMINI_API_KEY`.
 
 ## Ghi chú dev mode
 

@@ -92,8 +92,8 @@ app.use('/api/experts', expertsRoutes)
 if (hasClientBuild) {
   app.use(express.static(clientDistPath))
 
-  app.get(/^(?!\/api\/).*/, (req, res, next) => {
-    if (req.method !== 'GET' || path.extname(req.path) || !req.accepts('html')) {
+  app.use((req, res, next) => {
+    if (req.method !== 'GET' || req.path.startsWith('/api/') || path.extname(req.path) || !req.accepts('html')) {
       next()
       return
     }

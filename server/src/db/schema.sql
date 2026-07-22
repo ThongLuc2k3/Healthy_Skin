@@ -131,3 +131,14 @@ CREATE TABLE IF NOT EXISTS expert_bookings (
 );
 
 CREATE INDEX IF NOT EXISTS idx_expert_bookings_user ON expert_bookings(user_id);
+
+CREATE TABLE IF NOT EXISTS website_reviews (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id INTEGER NOT NULL,
+  rating INTEGER CHECK(rating >= 1 AND rating <= 5) DEFAULT 5,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
+

@@ -32,6 +32,7 @@ function spawnChild(name, args, env) {
   const child = spawn(npmCmd, args, {
     env,
     stdio: 'inherit',
+    shell: isWindows,
   })
 
   child.on('error', (error) => {

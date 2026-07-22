@@ -13,6 +13,7 @@ const LINKS = [
   { to: '/checkin', label: 'Điểm danh' },
   { to: '/skin-lab', label: 'Skin Lab' },
   { to: '/experts', label: 'Chuyên gia' },
+  { to: '/reviews', label: 'Diễn đàn' },
 ]
 
 function NavBar() {

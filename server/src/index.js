@@ -20,6 +20,7 @@ import chatRoutes from './routes/chat.routes.js'
 import roadmapRoutes from './routes/roadmap.routes.js'
 import checkinRoutes from './routes/checkin.routes.js'
 import expertsRoutes from './routes/experts.routes.js'
+import reviewRoutes from './routes/review.routes.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const clientDistPath = path.resolve(__dirname, '../../dist')
@@ -88,6 +89,19 @@ app.use('/api/chat', chatRoutes)
 app.use('/api/roadmap', roadmapRoutes)
 app.use('/api/checkin', checkinRoutes)
 app.use('/api/experts', expertsRoutes)
+app.use('/api/reviews', reviewRoutes)
+app.use(express.static(path.join(process.cwd(), 'public')))
+app.use('/uploads', express.static(path.join(process.cwd(), 'public/uploads')))
+app.use(cors())
+app.use(
+  '/uploads',
+  (req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin') 
+    next()
+  },
+  express.static(path.join(process.cwd(), 'public/uploads'))
+)
 
 if (hasClientBuild) {
   app.use(express.static(clientDistPath))

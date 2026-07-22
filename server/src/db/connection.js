@@ -33,5 +33,7 @@ ensureColumn('profiles', 'consent_given_at', 'TEXT')
 ensureColumn('profiles', 'face_photo_path', 'TEXT')
 ensureColumn('profiles', 'face_photo_mime', 'TEXT')
 ensureColumn('profiles', 'diagnosed_conditions', "TEXT NOT NULL DEFAULT '[]'")
+ensureColumn('website_reviews', 'image_path', 'TEXT')
+ensureColumn('website_reviews', 'image_mime', 'TEXT')
 
 export default db

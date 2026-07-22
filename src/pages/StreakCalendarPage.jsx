@@ -5,9 +5,9 @@ import { apiClient } from '../lib/apiClient'
 import { FlameIcon } from '../components/Icons'
 
 const STATUS_STYLE = {
-  full: 'bg-emerald-500 text-white',
-  partial: 'bg-amber-300 text-amber-900',
-  none: 'bg-slate-100 text-slate-300',
+  full: 'bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 shadow-glow',
+  partial: 'bg-amber-500/20 border border-amber-400/50 text-amber-300 shadow-glow',
+  none: 'glass border border-cyan-400/10 text-slate-500 opacity-60',
 }
 
 const STATUS_LABEL = {
@@ -43,12 +43,12 @@ function StreakCalendarPage() {
 
   if (ready && !user) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <h1 className="text-xl font-semibold text-slate-900">Cần đăng nhập</h1>
-        <p className="mt-2 text-sm text-slate-500">Đăng nhập để xem lịch theo dõi điểm danh của bạn.</p>
+      <div className="mx-auto max-w-lg px-4 py-20 text-center">
+        <h1 className="text-2xl font-bold text-gradient-cyan">Cần đăng nhập</h1>
+        <p className="mt-3 text-sm text-slate-300">Đăng nhập để xem lịch theo dõi điểm danh của bạn.</p>
         <Link
           to="/login"
-          className="mt-6 inline-block rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5"
+          className="mt-6 inline-block rounded-xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 shadow-glow transition hover:bg-cyan-300"
         >
           Đăng nhập
         </Link>
@@ -57,56 +57,56 @@ function StreakCalendarPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10">
+    <div className="mx-auto max-w-2xl px-4 py-12">
       <div className="text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Lịch theo dõi &amp; streak</h1>
-        <p className="mt-2 text-sm text-slate-500">30 ngày gần nhất — mỗi ô là một ngày điểm danh.</p>
+        <h1 className="text-3xl font-extrabold tracking-tight text-gradient-cyan text-shadow-glow sm:text-4xl">Lịch theo dõi &amp; streak</h1>
+        <p className="mt-3 text-base text-slate-300/90">30 ngày gần nhất — mỗi ô là một ngày điểm danh.</p>
       </div>
 
-      <div className="mt-6">
-        {status === 'loading' && <p className="text-center text-sm text-slate-400">Đang tải...</p>}
+      <div className="mt-8">
+        {status === 'loading' && <p className="text-center text-sm text-cyan-300/70">Đang tải...</p>}
         {status === 'error' && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">{errorMessage}</p>
+          <p className="rounded-xl bg-rose-500/10 border border-rose-500/30 px-4 py-3 text-sm font-medium text-rose-300">{errorMessage}</p>
         )}
 
         {status === 'ready' && calendar && (
           <>
-            <div className="flex items-center justify-center gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-4">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500 text-white">
-                <FlameIcon className="h-5 w-5" />
+            <div className="flex items-center justify-center gap-3 rounded-3xl glass-strong border border-cyan-400/25 p-6 shadow-glow-lg">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-glow">
+                <FlameIcon className="h-6 w-6 text-amber-400" />
               </span>
-              <div>
-                <p className="text-2xl font-bold text-emerald-800">{calendar.streak} ngày</p>
-                <p className="text-xs font-medium text-emerald-700">streak liên tiếp hiện tại</p>
+              <div className="text-left">
+                <p className="text-3xl font-extrabold text-white">{calendar.streak} ngày</p>
+                <p className="text-xs font-mono font-semibold text-cyan-300 uppercase tracking-wider">streak liên tiếp hiện tại</p>
               </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-7 gap-1.5 sm:gap-2">
+            <div className="mt-8 grid grid-cols-7 gap-2 sm:gap-3">
               {calendar.days.map((day) => (
                 <div
                   key={day.date}
                   title={`${day.date} — ${STATUS_LABEL[day.status]}`}
-                  className={`flex aspect-square items-center justify-center rounded-lg text-xs font-semibold ${STATUS_STYLE[day.status]}`}
+                  className={`flex aspect-square items-center justify-center rounded-xl text-xs font-bold transition-all hover:scale-105 ${STATUS_STYLE[day.status]}`}
                 >
                   {formatDayLabel(day.date)}
                 </div>
               ))}
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500">
-              <span className="flex items-center gap-1.5">
-                <span className="h-3 w-3 rounded bg-emerald-500" /> Đủ cả hai
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-xs text-slate-400">
+              <span className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded bg-emerald-500/40 border border-emerald-400" /> Đủ cả hai
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-3 w-3 rounded bg-amber-300" /> Thiếu một phần
+              <span className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded bg-amber-500/40 border border-amber-400" /> Thiếu một phần
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="h-3 w-3 rounded bg-slate-100" /> Chưa điểm danh
+              <span className="flex items-center gap-2">
+                <span className="h-3 w-3 rounded glass border border-cyan-400/20" /> Chưa điểm danh
               </span>
             </div>
 
-            <div className="mt-6 text-center">
-              <Link to="/checkin" className="text-sm font-semibold text-emerald-700">
+            <div className="mt-8 text-center">
+              <Link to="/checkin" className="text-sm font-semibold text-cyan-300 hover:underline">
                 ← Điểm danh hôm nay
               </Link>
             </div>

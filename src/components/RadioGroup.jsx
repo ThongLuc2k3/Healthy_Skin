@@ -8,10 +8,10 @@ function RadioGroup({ name, options, value, onChange }) {
         return (
           <label
             key={option.id}
-            className={`relative flex cursor-pointer items-center justify-center gap-1.5 rounded-xl border px-4 py-3.5 text-center text-sm font-medium transition-all ${
+            className={`relative flex cursor-pointer items-center justify-center gap-2 rounded-xl border px-4 py-3.5 text-center text-sm font-medium transition-all ${
               checked
-                ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-sm ring-2 ring-emerald-500/30'
-                : 'border-slate-200 bg-white text-slate-600 hover:border-emerald-200 hover:bg-emerald-50/40'
+                ? 'border-cyan-400 bg-cyan-500/20 text-cyan-200 shadow-glow ring-1 ring-cyan-400'
+                : 'border-cyan-400/20 glass text-slate-300 hover:border-cyan-400/50 hover:bg-slate-800/60 hover:text-white'
             }`}
           >
             <input
@@ -22,7 +22,7 @@ function RadioGroup({ name, options, value, onChange }) {
               onChange={() => onChange(option.id)}
               className="sr-only"
             />
-            {checked && <CheckCircleIcon className="h-4 w-4 shrink-0" />}
+            {checked && <CheckCircleIcon className="h-4 w-4 shrink-0 text-cyan-300" />}
             {option.label}
           </label>
         )

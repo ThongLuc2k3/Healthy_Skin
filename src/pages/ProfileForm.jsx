@@ -10,7 +10,7 @@ import { SKIN_TYPES, ALLERGIES, CONDITIONS, GOALS, OTHER_OPTION_ID } from '../da
 function OtherNoteInput({ id, label, value, onChange }) {
   return (
     <div className="mt-3">
-      <label htmlFor={id} className="text-xs font-medium text-slate-500">
+      <label htmlFor={id} className="text-xs font-medium text-cyan-300/80">
         {label}
       </label>
       <textarea
@@ -19,7 +19,7 @@ function OtherNoteInput({ id, label, value, onChange }) {
         onChange={(e) => onChange(e.target.value)}
         rows={2}
         placeholder="Mô tả bằng lời của bạn, AI sẽ dựa vào đây để hiểu rõ hơn..."
-        className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+        className="mt-1.5 w-full rounded-xl bg-slate-900/90 border border-cyan-400/20 px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 focus:outline-none"
       />
     </div>
   )
@@ -64,12 +64,12 @@ function ProfileForm() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12">
+    <div className="mx-auto max-w-3xl px-4 py-12">
       <div className="text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+        <h1 className="text-3xl font-extrabold tracking-tight text-gradient-cyan text-shadow-glow sm:text-4xl">
           Hồ sơ cơ địa của bạn
         </h1>
-        <p className="mt-2 text-sm text-slate-500">
+        <p className="mt-3 text-base text-slate-300/90 max-w-xl mx-auto">
           Thông tin này chỉ dùng để cá nhân hóa gợi ý trên thiết bị của bạn. Không chắc chắn ở mục nào?
           Chọn "Khác" và mô tả bằng lời của bạn — AI sẽ dựa vào đó để hiểu rõ hơn.
         </p>
@@ -77,11 +77,11 @@ function ProfileForm() {
 
       <form
         onSubmit={handleSubmit}
-        className="mt-8 space-y-8 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8"
+        className="mt-10 space-y-8 rounded-3xl glass-strong border border-cyan-400/25 p-6 shadow-glow-lg sm:p-8"
       >
         <section>
-          <h2 className="flex items-center gap-1.5 text-base font-semibold text-slate-900">
-            Loại da <span className="text-red-500">*</span>
+          <h2 className="flex items-center gap-1.5 text-base font-semibold text-gradient-cyan">
+            Loại da <span className="text-rose-400">*</span>
           </h2>
           <div className="mt-3">
             <RadioGroup
@@ -104,11 +104,11 @@ function ProfileForm() {
           )}
         </section>
 
-        <hr className="border-slate-100" />
+        <hr className="border-cyan-400/15" />
 
         <section>
-          <h2 className="text-base font-semibold text-slate-900">Dị ứng thực phẩm</h2>
-          <p className="text-sm text-slate-500">Chọn tất cả những gì phù hợp (không bắt buộc)</p>
+          <h2 className="text-base font-semibold text-gradient-cyan">Dị ứng thực phẩm</h2>
+          <p className="mt-1 text-sm text-slate-400">Chọn tất cả những gì phù hợp (không bắt buộc)</p>
           <div className="mt-3">
             <CheckboxGroup
               name="allergies"
@@ -127,11 +127,11 @@ function ProfileForm() {
           )}
         </section>
 
-        <hr className="border-slate-100" />
+        <hr className="border-cyan-400/15" />
 
         <section>
-          <h2 className="text-base font-semibold text-slate-900">Bệnh lý nền liên quan dinh dưỡng</h2>
-          <p className="text-sm text-slate-500">Chọn tất cả những gì phù hợp (không bắt buộc)</p>
+          <h2 className="text-base font-semibold text-gradient-cyan">Bệnh lý nền liên quan dinh dưỡng</h2>
+          <p className="mt-1 text-sm text-slate-400">Chọn tất cả những gì phù hợp (không bắt buộc)</p>
           <div className="mt-3">
             <CheckboxGroup
               name="conditions"
@@ -150,11 +150,11 @@ function ProfileForm() {
           )}
         </section>
 
-        <hr className="border-slate-100" />
+        <hr className="border-cyan-400/15" />
 
         <section>
-          <h2 className="text-base font-semibold text-slate-900">Mục tiêu của bạn</h2>
-          <p className="text-sm text-slate-500">Chọn tất cả những gì phù hợp (không bắt buộc)</p>
+          <h2 className="text-base font-semibold text-gradient-cyan">Mục tiêu của bạn</h2>
+          <p className="mt-1 text-sm text-slate-400">Chọn tất cả những gì phù hợp (không bắt buộc)</p>
           <div className="mt-3">
             <CheckboxGroup name="goals" options={GOALS} values={goals} onChange={setGoals} />
           </div>
@@ -170,18 +170,18 @@ function ProfileForm() {
 
         {user && (
           <>
-            <hr className="border-slate-100" />
+            <hr className="border-cyan-400/15" />
             <ExtendedProfileSection />
           </>
         )}
 
         {error && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">{error}</p>
+          <p className="rounded-xl bg-rose-500/10 border border-rose-500/30 px-4 py-2.5 text-sm font-medium text-rose-300">{error}</p>
         )}
 
         <button
           type="submit"
-          className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-600/30"
+          className="w-full rounded-xl bg-cyan-400 px-6 py-3.5 text-base font-semibold text-slate-950 shadow-glow-lg transition hover:bg-cyan-300 hover:scale-[1.01]"
         >
           Xem gợi ý cho tôi
         </button>

@@ -21,8 +21,6 @@ function CustomRoadmapPage() {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  // Danh sách "nên tránh" theo hồ sơ hiện tại — dùng để cảnh báo mềm khi việc tự nhập
-  // trùng ý với một item bị gắn cờ nên tránh. KHÔNG chặn lưu, chỉ nhắc nhở.
   const avoidItems = useMemo(() => {
     if (!isProfileComplete(profile)) return []
     const skincareAvoid = getRecommendations(profile, skincare)[RESULT.AVOID]
@@ -76,12 +74,12 @@ function CustomRoadmapPage() {
 
   if (ready && !user) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <h1 className="text-xl font-semibold text-slate-900">Cần đăng nhập</h1>
-        <p className="mt-2 text-sm text-slate-500">Đăng nhập để tự thiết kế lộ trình riêng.</p>
+      <div className="mx-auto max-w-lg px-4 py-20 text-center">
+        <h1 className="text-2xl font-bold text-gradient-cyan">Cần đăng nhập</h1>
+        <p className="mt-3 text-sm text-slate-300">Đăng nhập để tự thiết kế lộ trình riêng.</p>
         <Link
           to="/login"
-          className="mt-6 inline-block rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20"
+          className="mt-6 inline-block rounded-xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 shadow-glow transition hover:bg-cyan-300"
         >
           Đăng nhập
         </Link>
@@ -91,12 +89,12 @@ function CustomRoadmapPage() {
 
   if (!isProfileComplete(profile)) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <h1 className="text-xl font-semibold text-slate-900">Chưa có hồ sơ cơ địa</h1>
-        <p className="mt-2 text-sm text-slate-500">Vui lòng khai báo hồ sơ trước khi tự thiết kế lộ trình.</p>
+      <div className="mx-auto max-w-lg px-4 py-20 text-center">
+        <h1 className="text-2xl font-bold text-gradient-cyan">Chưa có hồ sơ cơ địa</h1>
+        <p className="mt-3 text-sm text-slate-300">Vui lòng khai báo hồ sơ trước khi tự thiết kế lộ trình.</p>
         <Link
           to="/profile"
-          className="mt-6 inline-block rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20"
+          className="mt-6 inline-block rounded-xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 shadow-glow transition hover:bg-cyan-300"
         >
           Điền hồ sơ ngay
         </Link>
@@ -105,20 +103,20 @@ function CustomRoadmapPage() {
   }
 
   return (
-    <div className="mx-auto max-w-xl px-4 py-10">
+    <div className="mx-auto max-w-xl px-4 py-12">
       <div className="text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Tự thiết kế lộ trình</h1>
-        <p className="mt-2 text-sm text-slate-500">
+        <h1 className="text-3xl font-extrabold tracking-tight text-gradient-cyan text-shadow-glow sm:text-4xl">Tự thiết kế lộ trình</h1>
+        <p className="mt-3 text-base text-slate-300/90">
           Bỏ qua lộ trình tự sinh — tự chọn mục tiêu, số ngày và việc muốn làm mỗi ngày.
         </p>
-        <Link to="/roadmap" className="mt-2 inline-block text-sm font-semibold text-emerald-700">
+        <Link to="/roadmap" className="mt-3 inline-block text-sm font-semibold text-cyan-300 hover:underline">
           ← Dùng lộ trình hệ thống tự sinh thay vào đó
         </Link>
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+      <form onSubmit={handleSubmit} className="mt-8 space-y-6 rounded-3xl glass-strong border border-cyan-400/25 p-7 shadow-glow-lg">
         <div>
-          <label htmlFor="goal" className="text-sm font-medium text-slate-700">
+          <label htmlFor="goal" className="text-sm font-semibold text-slate-200">
             Mục tiêu chính
           </label>
           <input
@@ -127,12 +125,12 @@ function CustomRoadmapPage() {
             value={goal}
             onChange={(e) => setGoal(e.target.value)}
             placeholder="Ví dụ: Giảm mụn trong 2 tuần"
-            className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+            className="mt-2 w-full rounded-xl bg-slate-900/90 border border-cyan-400/20 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
           />
         </div>
 
         <div>
-          <label htmlFor="durationDays" className="text-sm font-medium text-slate-700">
+          <label htmlFor="durationDays" className="text-sm font-semibold text-slate-200">
             Số ngày mong muốn
           </label>
           <input
@@ -142,30 +140,30 @@ function CustomRoadmapPage() {
             max={MAX_DURATION_DAYS}
             value={durationDays}
             onChange={(e) => setDurationDays(Number(e.target.value))}
-            className="mt-1 w-32 rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+            className="mt-2 w-32 rounded-xl bg-slate-900/90 border border-cyan-400/20 px-4 py-2.5 text-sm text-white focus:border-cyan-400 focus:outline-none"
           />
         </div>
 
         <div>
-          <p className="text-sm font-medium text-slate-700">Việc muốn làm mỗi ngày</p>
-          <div className="mt-2 space-y-2">
+          <p className="text-sm font-semibold text-slate-200">Việc muốn làm mỗi ngày</p>
+          <div className="mt-3 space-y-3">
             {tasks.map((task, index) => {
               const warning = findWarning(task)
               return (
                 <div key={index}>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <input
                       type="text"
                       value={task}
                       onChange={(e) => updateTask(index, e.target.value)}
                       placeholder="Ví dụ: Đắp mặt nạ đất sét"
-                      className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+                      className="flex-1 rounded-xl bg-slate-900/90 border border-cyan-400/20 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
                     />
                     {tasks.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeTask(index)}
-                        className="flex items-center justify-center rounded-lg px-2 py-2 text-red-500 hover:bg-red-50"
+                        className="flex items-center justify-center rounded-xl p-2.5 text-rose-400 hover:bg-rose-500/20"
                         aria-label="Xoá việc"
                       >
                         <TrashIcon className="h-4 w-4" />
@@ -173,8 +171,8 @@ function CustomRoadmapPage() {
                     )}
                   </div>
                   {warning && (
-                    <p className="mt-1 flex items-start gap-1.5 rounded-lg bg-amber-50 px-3 py-1.5 text-xs text-amber-800">
-                      <WarningIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    <p className="mt-2 flex items-start gap-2 rounded-xl bg-amber-500/15 border border-amber-500/30 px-3.5 py-2 text-xs text-amber-200">
+                      <WarningIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-400" />
                       {warning}
                     </p>
                   )}
@@ -185,20 +183,20 @@ function CustomRoadmapPage() {
           <button
             type="button"
             onClick={addTask}
-            className="mt-2 rounded-lg border border-dashed border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-500 hover:border-emerald-300 hover:text-emerald-700"
+            className="mt-3 rounded-xl border border-dashed border-cyan-400/30 px-4 py-2 text-sm font-medium text-cyan-300 hover:border-cyan-400 hover:bg-cyan-500/10"
           >
             + Thêm việc
           </button>
         </div>
 
         {errorMessage && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">{errorMessage}</p>
+          <p className="rounded-xl bg-rose-500/10 border border-rose-500/30 px-4 py-2.5 text-sm font-medium text-rose-300">{errorMessage}</p>
         )}
 
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5 disabled:opacity-60"
+          className="w-full rounded-xl bg-cyan-400 px-6 py-3.5 text-sm font-semibold text-slate-950 shadow-glow transition hover:bg-cyan-300 disabled:opacity-60"
         >
           {submitting ? 'Đang lưu...' : 'Lưu lộ trình riêng của tôi'}
         </button>

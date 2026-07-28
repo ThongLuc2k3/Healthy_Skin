@@ -11,8 +11,11 @@ const THEME = {
   [RESULT.AVOID]: { badge: 'bg-red-100 text-red-700', icon: XCircleIcon },
 }
 
-function formatDate(sqliteUtcString) {
-  const date = new Date(sqliteUtcString.replace(' ', 'T') + 'Z')
+function formatDate(timestamp) {
+  // PostgreSQL trả ISO 8601 có timezone; vẫn chấp nhận định dạng SQLite cũ
+  // để dữ liệu/API cache cũ không làm trang lịch sử bị "Invalid Date".
+  const normalized = timestamp.includes('T') ? timestamp : `${timestamp.replace(' ', 'T')}Z`
+  const date = new Date(normalized)
   return date.toLocaleString('vi-VN', { dateStyle: 'medium', timeStyle: 'short' })
 }
 

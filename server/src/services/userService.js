@@ -22,6 +22,11 @@ export async function createUser(email, password) {
   return rows[0]
 }
 
+export async function setUserPassword(id, password) {
+  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS)
+  await query('UPDATE users SET password_hash = $1 WHERE id = $2', [passwordHash, id])
+}
+
 export function verifyPassword(password, passwordHash) {
   return bcrypt.compare(password, passwordHash)
 }

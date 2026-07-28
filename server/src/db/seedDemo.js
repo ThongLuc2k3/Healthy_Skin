@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url'
 import { initDatabase, closeDatabase } from './connection.js'
 import { seed, seedExperts } from './seed.js'
-import { createUser, findUserByEmail } from '../services/userService.js'
+import { createUser, findUserByEmail, setUserPassword } from '../services/userService.js'
 import { saveProfile, giveConsent } from '../services/profileService.js'
 
 const DEMO_EMAIL = process.env.DEMO_EMAIL || 'demo@daduong.local'
@@ -13,7 +13,13 @@ async function seedDemo() {
   await seedExperts()
 
   let user = await findUserByEmail(DEMO_EMAIL)
-  if (!user) user = await createUser(DEMO_EMAIL, DEMO_PASSWORD)
+  if (user) {
+    // Seed phải có tính lặp lại: tài khoản đã tồn tại vẫn được đưa về đúng
+    // mật khẩu demo được in ra ở cuối script.
+    await setUserPassword(user.id, DEMO_PASSWORD)
+  } else {
+    user = await createUser(DEMO_EMAIL, DEMO_PASSWORD)
+  }
 
   await saveProfile(user.id, {
     skinType: 'da_hon_hop',

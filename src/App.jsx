@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import NavBar from './components/NavBar'
 import HomePage from './pages/HomePage'
 import ProfileForm from './pages/ProfileForm'
@@ -21,10 +21,10 @@ import SkinPlaygroundPage from './pages/SkinPlaygroundPage'
 
 function App() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#02040b] text-slate-100 antialiased selection:bg-cyan-500/30 selection:text-white noise">
-      {/* Background ambient radial glow layers matching Web A */}
-      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_0%,#0a1a2e_0%,#050b18_50%,#02040b_100%)]" />
-      <div className="pointer-events-none fixed inset-0 -z-10 grid-bg opacity-40 mask-fade-b" />
+    <div className="relative min-h-screen overflow-x-hidden bg-gradient-to-br from-[#e4eff3] via-[#d8e5ec] to-[#eaf2f5] text-[#0F4C5C] antialiased selection:bg-[#0F4C5C]/20 selection:text-[#0F4C5C]">
+      {/* Background ambient radial glow layers matching light glass theme */}
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-gradient-to-br from-[#e4eff3] via-[#d8e5ec] to-[#eaf2f5]" />
+      <div className="pointer-events-none fixed inset-0 -z-10 grid-bg opacity-30 mask-fade-b" />
 
       <NavBar />
       <main className="relative z-10">
@@ -53,4 +53,6 @@ function App() {
   )
 }
 
+
 export default App
+

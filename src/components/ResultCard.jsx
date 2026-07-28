@@ -4,18 +4,18 @@ import ExplainButton from './ExplainButton'
 
 const THEME = {
   [RESULT.SUITABLE]: {
-    wrap: 'border-emerald-500/30 glass text-slate-100 shadow-glow',
-    badge: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40',
+    wrap: 'border-emerald-500/30 glass text-[#183B3B] shadow-glow',
+    badge: 'bg-emerald-500/20 text-emerald-800 border border-emerald-500/40',
     icon: CheckCircleIcon,
   },
   [RESULT.CAUTION]: {
-    wrap: 'border-amber-500/30 glass text-slate-100 shadow-glow',
-    badge: 'bg-amber-500/20 text-amber-300 border border-amber-500/40',
+    wrap: 'border-amber-500/30 glass text-[#183B3B] shadow-glow',
+    badge: 'bg-amber-500/20 text-amber-800 border border-amber-500/40',
     icon: WarningIcon,
   },
   [RESULT.AVOID]: {
-    wrap: 'border-rose-500/30 glass text-slate-100 shadow-glow',
-    badge: 'bg-rose-500/20 text-rose-300 border border-rose-500/40',
+    wrap: 'border-rose-500/30 glass text-[#183B3B] shadow-glow',
+    badge: 'bg-rose-500/20 text-rose-800 border border-rose-500/40',
     icon: XCircleIcon,
   },
 }
@@ -34,8 +34,8 @@ function ResultCard({ item, result, reason }) {
           {result}
         </span>
       </div>
-      <h3 className="mt-3 text-lg font-bold text-gradient-cyan">{item.name_vi}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-slate-300/80">{reason}</p>
+      <h3 className="mt-3 text-lg font-bold text-[#183B3B]">{item.name_vi}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-[#183B3B] opacity-90">{reason}</p>
       <ExplainButton nameVi={item.name_vi} category={item.category} result={result} reason={reason} />
     </div>
   )

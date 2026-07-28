@@ -19,9 +19,7 @@ function HomePage() {
         <Analysis />
         <SectionSeam />
         <Technology />
-        <SectionSeam />
         <Dashboard />
-        <SectionSeam />
         <Routine />
         <CTA />
       </main>

@@ -1,27 +1,56 @@
-import { useEffect, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { useEffect, useState, useRef } from 'react'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { motion, useScroll, useSpring, AnimatePresence } from 'framer-motion'
-import { UserIcon, MenuIcon, XIcon, LogOutIcon } from './Icons'
+import {
+  UserIcon,
+  MenuIcon,
+  XIcon,
+  LogOutIcon,
+  HomeIcon,
+  CameraIcon,
+  DocumentIcon,
+  HistoryIcon,
+  FlameIcon,
+  MapIcon,
+  CheckCircleIcon,
+  SparklesIcon,
+  StethoscopeIcon
+} from './Icons'
 import { useAuth } from '../context/AuthContext'
 
 const LINKS = [
-  { to: '/', label: 'Trang chủ', end: true },
-  { to: '/profile', label: 'Hồ sơ' },
-  { to: '/results', label: 'Kết quả' },
-  { to: '/scan', label: 'Quét thử' },
-  { to: '/history', label: 'Lịch sử' },
-  { to: '/motivation', label: 'Động lực' },
-  { to: '/roadmap', label: 'Lộ trình' },
-  { to: '/checkin', label: 'Điểm danh' },
-  { to: '/skin-lab', label: 'Skin Lab' },
-  { to: '/experts', label: 'Chuyên gia' },
+  { to: '/', label: 'Trang chủ', end: true, icon: HomeIcon },
+  { to: '/profile', label: 'Hồ sơ', icon: UserIcon },
+  { to: '/scan', label: 'Quét thử', icon: CameraIcon },
+  { to: '/results', label: 'Kết quả', icon: DocumentIcon },
+  { to: '/motivation', label: 'Động lực', icon: FlameIcon },
+  { to: '/experts', label: 'Chuyên gia', icon: StethoscopeIcon },
+  { to: '/history', label: 'Lịch sử', icon: HistoryIcon },
+  { to: '/checkin', label: 'Điểm danh', icon: CheckCircleIcon },
+  { to: '/roadmap', label: 'Lộ trình', icon: MapIcon },
+  { to: '/skin-lab', label: 'Skin Lab', icon: SparklesIcon },
 ]
 
 function NavBar() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const timeoutRef = useRef(null)
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    setOpen(true)
+  }
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setOpen(false)
+    }, 250)
+  }
+
+  const isHome = location.pathname === '/'
 
   const { scrollYProgress } = useScroll()
   const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 30 })
@@ -46,23 +75,23 @@ function NavBar() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled
-            ? 'bg-[#02040b]/85 backdrop-blur-xl border-b border-cyan-400/20 shadow-glow-lg'
-            : 'bg-transparent'
+          !isHome || scrolled
+            ? 'bg-[#02040b]/85 backdrop-blur-xl border-b border-cyan-400/20 shadow-glow-lg py-3.5'
+            : 'bg-transparent py-3.5'
         }`}
       >
+
         {/* Full-width wide container */}
-        <div className="w-full flex items-center justify-between px-6 py-3.5 sm:px-10 lg:px-14">
-          {/* Brand Logo from /logo.png */}
-          <NavLink to="/" className="flex items-center gap-3 group shrink-0">
-            <span className="relative grid h-10 w-10 place-items-center rounded-xl glass border border-cyan-400/30 overflow-hidden p-1">
+        <div className="w-full flex items-center justify-between px-6 lg:py-2 sm:py-1 sm:px-5 lg:px-14">
+          {/* Brand Logo */}
+          <NavLink to="/" className="flex items-center group shrink-0">
+            <div className="flex items-center cursor-pointer h-10">
               <img
-                src="/logo.png"
+                src="/logo1.png"
                 alt="DA DƯỠNG AI Logo"
-                className="h-full w-full object-contain filter drop-shadow-[0_0_8px_rgba(34,211,238,0.4)]"
+                className="object-cover h-30 w-auto"
               />
-              <span className="absolute inset-0 rounded-xl shadow-glow opacity-0 group-hover:opacity-100 transition-opacity" />
-            </span>
+            </div>
             <span className="font-display text-lg font-extrabold tracking-tight text-white">
               DA DƯỠNG<span className="text-cyan-300"> AI</span>
             </span>
@@ -77,7 +106,7 @@ function NavBar() {
                 end={l.end}
                 className={({ isActive }) =>
                   `px-3.5 py-2 text-sm transition-colors relative group ${
-                    isActive ? 'text-cyan-300 font-semibold' : 'text-slate-300 hover:text-cyan-200'
+                    isActive ? 'text-cyan-300 font-semibold' : 'text-slate-100 hover:text-cyan-200'
                   }`
                 }
               >
@@ -123,8 +152,10 @@ function NavBar() {
 
             {/* Mobile Menu Trigger button */}
             <button
-              className="lg:hidden grid h-10 w-10 place-items-center rounded-xl glass border border-cyan-400/30 text-cyan-300"
+              className="lg:hidden grid h-10 w-10 place-items-center  text-cyan-300"
               onClick={() => setOpen((v) => !v)}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
               aria-label="Toggle menu"
             >
               {open ? <XIcon className="h-5 w-5 text-cyan-300" /> : <MenuIcon className="h-5 w-5 text-cyan-300" />}
@@ -146,26 +177,32 @@ function NavBar() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed top-20 left-4 right-4 z-40 lg:hidden glass-strong rounded-3xl p-5 border border-cyan-400/25 shadow-glow-lg"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            className="fixed top-20 left-4 right-4 z-40 lg:hidden bg-[#050c1e]/95 backdrop-blur-2xl rounded-3xl p-4 border border-cyan-400/30 shadow-glow-lg text-white"
           >
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              {LINKS.map((l) => (
-                <NavLink
-                  key={l.to}
-                  to={l.to}
-                  end={l.end}
-                  onClick={() => setOpen(false)}
-                  className={({ isActive }) =>
-                    `block px-4 py-2.5 text-sm rounded-xl transition-all ${
-                      isActive
-                        ? 'bg-cyan-500/20 text-cyan-300 font-semibold border border-cyan-400/30'
-                        : 'text-slate-200 hover:text-cyan-300 hover:bg-cyan-500/10'
-                    }`
-                  }
-                >
-                  {l.label}
-                </NavLink>
-              ))}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-sm">
+              {LINKS.map((l) => {
+                const Icon = l.icon
+                return (
+                  <NavLink
+                    key={l.to}
+                    to={l.to}
+                    end={l.end}
+                    onClick={() => setOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-4 py-3 text-sm rounded-2xl transition-all border ${
+                        isActive
+                          ? 'bg-gradient-to-r from-cyan-500/30 to-teal-500/30 text-cyan-300 font-bold border-cyan-400/60 shadow-glow'
+                          : 'bg-[#0b172a]/70 text-slate-100 hover:text-cyan-300 hover:bg-cyan-500/20 border-cyan-500/20 hover:border-cyan-400/40'
+                      }`
+                    }
+                  >
+                    {Icon && <Icon className="h-5 w-5 shrink-0 text-cyan-400" />}
+                    <span className="truncate">{l.label}</span>
+                  </NavLink>
+                )
+              })}
             </div>
 
             {user && (
@@ -188,3 +225,6 @@ function NavBar() {
 }
 
 export default NavBar
+
+
+

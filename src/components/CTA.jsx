@@ -1,26 +1,62 @@
 import { Link } from 'react-router-dom'
 import { ArrowLeftIcon, SearchIcon, ShieldIcon } from './Icons'
 import { Reveal } from './ui'
+import {
+  FloatingCosmeticDecoration,
+  CreamJar,
+  SerumDropper,
+  PerfumeBottle,
+  SunscreenTube,
+} from '../CosmeticDecoration'
 
 export default function CTA() {
   return (
-    <section id="cta" className="relative py-28 sm:py-36 overflow-hidden noise bg-[#02040b]">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,#0a1a2e_0%,#050b18_55%,#02040b_100%)]" />
-      <div className="absolute left-1/2 top-1/2 h-[55vh] w-[80vw] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-400/10 blur-[130px] animate-pulseGlow" />
-      <div className="absolute inset-0 grid-bg opacity-20 mask-fade-b" />
-
+    <section id="cta" className="relative py-20 sm:py-28 bg-gradient-to-br from-[#e4eff3] via-[#d8e5ec] to-[#eaf2f5] overflow-hidden">
+      {/* Animated Floating Cosmetic Decorations to fill empty space */}
+      <FloatingCosmeticDecoration
+        Icon={CreamJar}
+        size="w-52 h-52 sm:w-68 sm:h-68 lg:w-80 lg:h-80"
+        className="top-4 left-1 sm:left-6 xl:left-12 opacity-85 lg:opacity-100"
+        yRange={[-28, 28, -28]}
+        duration={5.0}
+        delay={0.2}
+        accent="#38bdf8"
+        parallaxOffset={-70}
+      />
+      <FloatingCosmeticDecoration
+        Icon={SerumDropper}
+        size="w-44 h-44 sm:w-56 sm:h-56 lg:w-68 lg:h-68"
+        className="bottom-4 left-2 sm:left-10 xl:left-20 opacity-80 lg:opacity-95"
+        yRange={[22, -22, 22]}
+        duration={4.6}
+        delay={0.4}
+        accent="#14b8a6"
+        parallaxOffset={60}
+      />
+      <FloatingCosmeticDecoration
+        Icon={PerfumeBottle}
+        size="w-52 h-52 sm:w-68 sm:h-68 lg:w-80 lg:h-80"
+        className="top-4 right-1 sm:right-6 xl:right-12 opacity-85 lg:opacity-100"
+        yRange={[28, -28, 28]}
+        duration={5.4}
+        delay={0.3}
+        accent="#fb7185"
+        parallaxOffset={70}
+      />
+      <FloatingCosmeticDecoration
+        Icon={SunscreenTube}
+        size="w-44 h-44 sm:w-56 sm:h-56 lg:w-68 lg:h-68"
+        className="bottom-4 right-2 sm:right-10 xl:right-20 opacity-80 lg:opacity-95"
+        yRange={[-24, 24, -24]}
+        duration={4.8}
+        delay={0.5}
+        accent="#f59e0b"
+        parallaxOffset={-60}
+      />
       <div className="relative mx-auto max-w-4xl px-6 text-center">
-        <Reveal>
-          <div className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 shadow-glow border border-cyan-400/20">
-            <SearchIcon className="h-3.5 w-3.5 text-cyan-300" />
-            <span className="font-mono text-[11px] uppercase tracking-[0.28em] text-cyan-200 font-semibold">
-              BẮT ĐẦU VỚI DA DƯỠNG
-            </span>
-          </div>
-        </Reveal>
 
         <Reveal delay={0.08}>
-          <h2 className="mt-6 font-display text-4xl sm:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight text-gradient-cyan text-shadow-glow">
+          <h2 className="mt-6 font-display text-4xl sm:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tight text-[#16715d]">
             Đúng da, đúng dưỡng chất.
             <br />
             Từ trong ra ngoài.
@@ -28,7 +64,7 @@ export default function CTA() {
         </Reveal>
 
         <Reveal delay={0.16}>
-          <p className="mx-auto mt-6 max-w-xl text-base sm:text-lg text-slate-300/90 leading-relaxed font-medium">
+          <p className="mx-auto mt-6 max-w-xl text-base sm:text-lg text-[#0F4C5C]/80 leading-relaxed font-medium">
             Chỉ cần khai báo loại da, dị ứng và mục tiêu một lần để nhận ngay gợi ý sản phẩm mỹ phẩm &amp; thực phẩm phù hợp với chính cơ địa của bạn.
           </p>
         </Reveal>
@@ -37,14 +73,14 @@ export default function CTA() {
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               to="/profile"
-              className="group inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-8 py-4 text-sm font-bold text-slate-950 shadow-glow-lg transition-all hover:bg-cyan-300 hover:scale-[1.03]"
+              className="group inline-flex items-center gap-2 rounded-full bg-[#0f6552] px-8 py-3.5 text-xs sm:text-sm font-extrabold uppercase tracking-wider text-white shadow-teal-btn transition-all hover:bg-[#135c70] hover:scale-[1.03]"
             >
               Bắt đầu khai báo hồ sơ
               <ArrowLeftIcon className="h-4 w-4 rotate-180 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
               to="/scan"
-              className="inline-flex items-center gap-2 rounded-xl glass border border-cyan-400/25 px-8 py-4 text-sm font-semibold text-white transition-all hover:border-cyan-400/60 hover:shadow-glow"
+              className="inline-flex items-center gap-2 rounded-full glass border border-white px-8 py-3.5 text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#0F4C5C] transition-all hover:bg-white/80"
             >
               Thử quét sản phẩm
             </Link>
@@ -52,17 +88,17 @@ export default function CTA() {
         </Reveal>
 
         <Reveal delay={0.32}>
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs text-slate-400">
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-xs font-bold text-[#0F4C5C]/80">
             <span className="inline-flex items-center gap-2">
-              <ShieldIcon className="h-4 w-4 text-emerald-400" />
+              <ShieldIcon className="h-4 w-4 text-[#10B981]" />
               Minh bạch lý do phân loại
             </span>
             <span className="inline-flex items-center gap-2">
-              <ShieldIcon className="h-4 w-4 text-emerald-400" />
+              <ShieldIcon className="h-4 w-4 text-[#10B981]" />
               Lưu trữ hồ sơ cá nhân bảo mật
             </span>
           </div>
-          <p className="mt-6 text-xs text-slate-400/80 max-w-2xl mx-auto">
+          <p className="mt-6 text-xs text-[#0F4C5C]/70 max-w-2xl mx-auto font-medium">
             Gợi ý theo hồ sơ dựa trên quy tắc (rule-based), minh bạch lý do. Quét ảnh thật (AI) là tính năng bổ sung dành cho tài khoản đã đăng nhập.
           </p>
         </Reveal>
@@ -70,3 +106,4 @@ export default function CTA() {
     </section>
   )
 }
+

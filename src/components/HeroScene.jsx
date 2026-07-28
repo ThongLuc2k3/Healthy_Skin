@@ -14,7 +14,7 @@ function ScanSphere() {
     }
     if (inner.current) {
       inner.current.rotation.y -= delta * 0.1
-      const s = 1 + Math.sin(state.clock.elapsedTime * 1.2) * 0.018
+      const s = 1 + Math.sin(state.clock.elapsedTime * 1.2) * 0.02
       inner.current.scale.setScalar(s)
     }
     if (wire.current) {
@@ -25,41 +25,41 @@ function ScanSphere() {
 
   return (
     <group ref={group}>
-      {/* Translucent Solid Core */}
+      {/* Vibrant Solid Core with Emissive Teal Glow */}
       <mesh ref={inner} scale={1.25}>
         <sphereGeometry args={[1.5, 64, 64]} />
         <meshStandardMaterial
-          color="#0a1a2e"
+          color="#0F4C5C"
           transparent
-          opacity={0.24}
-          roughness={0.2}
-          metalness={0.85}
-          emissive="#0b3b4a"
-          emissiveIntensity={0.45}
+          opacity={0.35}
+          roughness={0.15}
+          metalness={0.9}
+          emissive="#00b4d8"
+          emissiveIntensity={0.6}
         />
       </mesh>
 
-      {/* Wireframe Topology Mesh */}
+      {/* Primary Vibrant Wireframe Topology Mesh */}
       <mesh ref={wire} scale={1.75}>
         <icosahedronGeometry args={[1, 6]} />
         <meshBasicMaterial
-          color="#22d3ee"
+          color="#00b4d8"
           wireframe
           transparent
-          opacity={0.3}
+          opacity={0.65}
         />
       </mesh>
 
-      {/* Outer Wireframe Mesh */}
+      {/* Outer Cyan Wireframe Mesh */}
       <mesh scale={2.05}>
         <icosahedronGeometry args={[1, 3]} />
-        <meshBasicMaterial color="#3b82f6" wireframe transparent opacity={0.14} />
+        <meshBasicMaterial color="#0F4C5C" wireframe transparent opacity={0.35} />
       </mesh>
 
-      {/* Outer Glow Shell */}
+      {/* Outer Glowing Shell */}
       <mesh scale={1.85}>
         <sphereGeometry args={[1, 32, 32]} />
-        <meshBasicMaterial color="#22d3ee" transparent opacity={0.05} side={THREE.BackSide} />
+        <meshBasicMaterial color="#00b4d8" transparent opacity={0.12} side={THREE.BackSide} />
       </mesh>
     </group>
   )
@@ -91,12 +91,11 @@ function ParticleHalo({ count = 1600 }) {
     <Points ref={ref} positions={positions} stride={3} frustumCulled={false}>
       <PointMaterial
         transparent
-        color="#67e8f9"
-        size={0.038}
+        color="#00b4d8"
+        size={0.045}
         sizeAttenuation
         depthWrite={false}
-        opacity={0.82}
-        blending={THREE.AdditiveBlending}
+        opacity={0.9}
       />
     </Points>
   )
@@ -110,10 +109,10 @@ export default function HeroScene() {
       gl={{ antialias: true, alpha: true }}
       style={{ width: '100%', height: '100%' }}
     >
-      <ambientLight intensity={0.4} />
-      <pointLight position={[3.5, 3.5, 4.5]} intensity={2.5} color="#22d3ee" />
-      <pointLight position={[-4.5, -2.5, 2.5]} intensity={1.6} color="#3b82f6" />
-      <pointLight position={[0, 0, -3.5]} intensity={1.2} color="#67e8f9" />
+      <ambientLight intensity={1.2} />
+      <pointLight position={[3.5, 3.5, 4.5]} intensity={2.5} color="#00b4d8" />
+      <pointLight position={[-4.5, -2.5, 2.5]} intensity={1.8} color="#0F4C5C" />
+      <pointLight position={[0, 0, -3.5]} intensity={1.5} color="#38bdf8" />
 
       <group position={[0, 0, 0]}>
         <ScanSphere />
@@ -122,3 +121,5 @@ export default function HeroScene() {
     </Canvas>
   )
 }
+
+

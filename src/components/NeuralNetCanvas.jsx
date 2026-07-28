@@ -55,7 +55,7 @@ export default function NeuralNetCanvas() {
         for (let j = i + 1; j < nodes.length; j++) {
           if (nodes[j].layer === nodes[i].layer + 1) {
             ctx.lineWidth = 0.8
-            ctx.strokeStyle = 'rgba(34, 211, 238, 0.15)'
+            ctx.strokeStyle = 'rgba(0, 180, 216, 0.20)'
             ctx.beginPath()
             ctx.moveTo(nodes[i].x, nodes[i].y)
             ctx.lineTo(nodes[j].x, nodes[j].y)
@@ -82,13 +82,10 @@ export default function NeuralNetCanvas() {
           const px = src.x + (tgt.x - src.x) * p.progress
           const py = src.y + (tgt.y - src.y) * p.progress
 
-          ctx.fillStyle = '#67e8f9'
-          ctx.shadowBlur = 10
-          ctx.shadowColor = '#22d3ee'
+          ctx.fillStyle = '#0F4C5C'
           ctx.beginPath()
           ctx.arc(px, py, 3.5, 0, Math.PI * 2)
           ctx.fill()
-          ctx.shadowBlur = 0
         }
       }
 
@@ -97,13 +94,10 @@ export default function NeuralNetCanvas() {
         n.pulse += 0.03
         const glow = 0.5 + Math.sin(n.pulse) * 0.5
 
-        ctx.fillStyle = `rgba(34, 211, 238, ${0.4 + glow * 0.5})`
-        ctx.shadowBlur = 12 * glow
-        ctx.shadowColor = '#22d3ee'
+        ctx.fillStyle = `rgba(0, 180, 216, ${0.4 + glow * 0.5})`
         ctx.beginPath()
         ctx.arc(n.x, n.y, 4.5 + glow * 1.5, 0, Math.PI * 2)
         ctx.fill()
-        ctx.shadowBlur = 0
       }
 
       animationFrameId = requestAnimationFrame(render)
@@ -124,3 +118,4 @@ export default function NeuralNetCanvas() {
     />
   )
 }
+

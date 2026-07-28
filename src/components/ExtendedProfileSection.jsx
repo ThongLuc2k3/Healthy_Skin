@@ -14,28 +14,28 @@ function ConsentGate({ onConsent, submitting }) {
   const [checked, setChecked] = useState(false)
 
   return (
-    <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-6 glass">
-      <div className="flex items-start gap-3.5">
-        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40">
-          <ShieldIcon className="h-4.5 w-4.5" />
+    <div className="rounded-3xl border border-[#D8B27A]/30 bg-gradient-to-br from-[#D8B27A]/10 via-[#FDFDFB] to-[#BFD8CF]/20 p-7 shadow-[0_6px_24px_rgba(216,178,122,0.08)]">
+      <div className="flex items-start gap-4">
+        <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#D8B27A]/20 text-[#A87A45] border border-[#D8B27A]/40 shadow-xs">
+          <ShieldIcon className="h-5 w-5" />
         </span>
-        <div>
-          <h3 className="text-sm font-semibold text-amber-200">Trước khi tiếp tục — dữ liệu nhạy cảm</h3>
-          <p className="mt-1.5 text-sm leading-relaxed text-amber-300/80">
+        <div className="space-y-2">
+          <h3 className="text-base font-bold text-[#17353D]">Trước khi tiếp tục — dữ liệu nhạy cảm</h3>
+          <p className="text-sm leading-relaxed text-[#5F7480]">
             Mục này cho phép bạn lưu ảnh khuôn mặt, bệnh lý da liễu đã được chẩn đoán, và file kết quả
             khám để cá nhân hoá gợi ý tốt hơn. Đây là dữ liệu sinh trắc học/sức khoẻ:
           </p>
-          <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-amber-300/80">
+          <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-[#5F7480]">
             <li>Chỉ dùng để cá nhân hoá gợi ý trên tài khoản của bạn, không chia sẻ cho bên thứ ba.</li>
             <li>Bạn có thể xoá vĩnh viễn ảnh/bệnh lý/báo cáo bất kỳ lúc nào.</li>
             <li>{DISCLAIMER}</li>
           </ul>
-          <label className="mt-4 flex cursor-pointer items-start gap-2.5 text-sm font-medium text-amber-200">
+          <label className="mt-4 flex cursor-pointer items-start gap-3 text-sm font-semibold text-[#17353D]">
             <input
               type="checkbox"
               checked={checked}
               onChange={(e) => setChecked(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-amber-500/40 bg-slate-900 text-amber-500 focus:ring-amber-500"
+              className="mt-0.5 h-4.5 w-4.5 rounded-md border-[#BFD8CF] bg-white text-[#2C8E92] focus:ring-[#2C8E92]"
             />
             Tôi đã đọc và đồng ý lưu các thông tin trên.
           </label>
@@ -43,7 +43,7 @@ function ConsentGate({ onConsent, submitting }) {
             type="button"
             disabled={!checked || submitting}
             onClick={onConsent}
-            className="mt-4 rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-glow transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-4 rounded-full bg-gradient-to-r from-[#2C8E92] via-[#67D6E8] to-[#6F9D8D] px-6 py-2.5 text-sm font-bold text-white shadow-[0_4px_16px_rgba(44,142,146,0.25)] transition-all hover:shadow-[0_8px_24px_rgba(103,214,232,0.35)] hover:scale-[1.02] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? 'Đang lưu...' : 'Tôi đồng ý, tiếp tục'}
           </button>
@@ -55,18 +55,18 @@ function ConsentGate({ onConsent, submitting }) {
 
 function FacePhotoBlock({ facePhotoUrl, onUpload, onDelete, busy }) {
   return (
-    <div className="rounded-2xl glass border border-cyan-400/20 p-5 shadow-glow">
-      <p className="text-xs font-mono font-semibold tracking-wider text-cyan-300 uppercase">Ảnh khuôn mặt (tuỳ chọn)</p>
-      <div className="mt-3 flex items-center gap-4">
+    <div className="rounded-3xl border border-[#E9EEF1] bg-[#FDFDFB] p-6 shadow-[0_6px_20px_rgba(23,53,61,0.03)]">
+      <p className="text-xs font-bold tracking-wider text-[#2C8E92] uppercase">Ảnh khuôn mặt (tuỳ chọn)</p>
+      <div className="mt-4 flex items-center gap-5">
         {facePhotoUrl ? (
-          <AuthedImage src={facePhotoUrl} alt="Ảnh khuôn mặt" className="h-20 w-20 rounded-xl object-cover border border-cyan-400/30" />
+          <AuthedImage src={facePhotoUrl} alt="Ảnh khuôn mặt" className="h-20 w-20 rounded-2xl object-cover border border-[#2C8E92]/30 shadow-xs" />
         ) : (
-          <span className="flex h-20 w-20 items-center justify-center rounded-xl bg-slate-900 text-slate-500 border border-cyan-400/20">
+          <span className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#F5FAFC] text-[#5F7480] border border-[#E9EEF1]">
             <CameraIcon className="h-6 w-6" />
           </span>
         )}
-        <div className="flex flex-col gap-2">
-          <label className="cursor-pointer rounded-xl glass border border-cyan-400/30 px-4 py-2 text-sm font-semibold text-cyan-200 hover:border-cyan-400">
+        <div className="flex flex-col gap-2.5">
+          <label className="cursor-pointer rounded-full border border-[#2C8E92]/40 bg-[#F5FAFC] px-5 py-2 text-sm font-bold text-[#2C8E92] shadow-xs transition-all hover:bg-[#67D6E8]/10 hover:border-[#2C8E92]">
             <input
               type="file"
               accept="image/*"
@@ -82,7 +82,7 @@ function FacePhotoBlock({ facePhotoUrl, onUpload, onDelete, busy }) {
               type="button"
               disabled={busy}
               onClick={onDelete}
-              className="flex items-center gap-1.5 text-sm font-semibold text-rose-400 hover:text-rose-300 disabled:opacity-50"
+              className="flex items-center gap-1.5 text-sm font-semibold text-rose-500 hover:text-rose-600 disabled:opacity-50"
             >
               <TrashIcon className="h-3.5 w-3.5" />
               Xoá ảnh
@@ -119,39 +119,39 @@ function DiagnosedConditionsBlock({ conditions, onSave, saving }) {
   }
 
   return (
-    <div className="rounded-2xl glass border border-cyan-400/20 p-5 shadow-glow">
-      <p className="text-xs font-mono font-semibold tracking-wider text-cyan-300 uppercase">
+    <div className="rounded-3xl border border-[#E9EEF1] bg-[#FDFDFB] p-6 shadow-[0_6px_20px_rgba(23,53,61,0.03)]">
+      <p className="text-xs font-bold tracking-wider text-[#2C8E92] uppercase">
         Bệnh lý da liễu đã được chẩn đoán (tuỳ chọn)
       </p>
 
-      <div className="mt-3 space-y-3">
+      <div className="mt-4 space-y-3">
         {rows.map((row, index) => (
-          <div key={index} className="grid grid-cols-1 gap-2.5 rounded-xl bg-slate-900/80 border border-cyan-400/20 p-3 sm:grid-cols-[1fr_120px_1fr_auto]">
+          <div key={index} className="grid grid-cols-1 gap-3 rounded-2xl bg-[#F5FAFC] border border-[#E9EEF1] p-3.5 sm:grid-cols-[1fr_130px_1fr_auto]">
             <input
               type="text"
               placeholder="Tên bệnh (vd: Viêm da cơ địa)"
               value={row.name_vi}
               onChange={(e) => updateRow(index, 'name_vi', e.target.value)}
-              className="rounded-lg bg-slate-950 border border-cyan-400/20 px-3 py-1.5 text-sm text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
+              className="rounded-xl bg-white border border-[#E9EEF1] px-3.5 py-2 text-sm text-[#17353D] placeholder-[#5F7480]/60 focus:border-[#2C8E92] focus:ring-1 focus:ring-[#2C8E92] focus:outline-none"
             />
             <input
               type="text"
               placeholder="2025-03"
               value={row.diagnosed_date}
               onChange={(e) => updateRow(index, 'diagnosed_date', e.target.value)}
-              className="rounded-lg bg-slate-950 border border-cyan-400/20 px-3 py-1.5 text-sm text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
+              className="rounded-xl bg-white border border-[#E9EEF1] px-3.5 py-2 text-sm text-[#17353D] placeholder-[#5F7480]/60 focus:border-[#2C8E92] focus:ring-1 focus:ring-[#2C8E92] focus:outline-none"
             />
             <input
               type="text"
               placeholder="Ghi chú (vd: BS BV Da liễu chẩn đoán)"
               value={row.note}
               onChange={(e) => updateRow(index, 'note', e.target.value)}
-              className="rounded-lg bg-slate-950 border border-cyan-400/20 px-3 py-1.5 text-sm text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
+              className="rounded-xl bg-white border border-[#E9EEF1] px-3.5 py-2 text-sm text-[#17353D] placeholder-[#5F7480]/60 focus:border-[#2C8E92] focus:ring-1 focus:ring-[#2C8E92] focus:outline-none"
             />
             <button
               type="button"
               onClick={() => removeRow(index)}
-              className="flex items-center justify-center rounded-lg px-2 text-rose-400 hover:bg-rose-500/20"
+              className="flex items-center justify-center rounded-xl px-2 text-rose-500 hover:bg-rose-50"
               aria-label="Xoá dòng"
             >
               <TrashIcon className="h-4 w-4" />
@@ -160,11 +160,11 @@ function DiagnosedConditionsBlock({ conditions, onSave, saving }) {
         ))}
       </div>
 
-      <div className="mt-4 flex items-center gap-3">
+      <div className="mt-5 flex items-center gap-3">
         <button
           type="button"
           onClick={addRow}
-          className="rounded-lg border border-dashed border-cyan-400/30 px-3 py-1.5 text-sm font-medium text-cyan-300 hover:border-cyan-400 hover:bg-cyan-500/10"
+          className="rounded-full border border-dashed border-[#2C8E92]/40 bg-[#F5FAFC] px-4 py-2 text-sm font-bold text-[#2C8E92] hover:border-[#2C8E92] hover:bg-[#67D6E8]/10"
         >
           + Thêm bệnh lý
         </button>
@@ -173,7 +173,7 @@ function DiagnosedConditionsBlock({ conditions, onSave, saving }) {
             type="button"
             disabled={saving}
             onClick={() => onSave(rows)}
-            className="rounded-lg bg-cyan-400 px-4 py-1.5 text-sm font-semibold text-slate-950 disabled:opacity-60 shadow-glow"
+            className="rounded-full bg-[#2C8E92] px-5 py-2 text-sm font-bold text-white shadow-xs disabled:opacity-60 hover:bg-[#17353D]"
           >
             {saving ? 'Đang lưu...' : 'Lưu bệnh lý'}
           </button>
@@ -185,40 +185,40 @@ function DiagnosedConditionsBlock({ conditions, onSave, saving }) {
 
 function ExpertReportsBlock({ reports, onUpload, onDelete, busy }) {
   return (
-    <div className="rounded-2xl glass border border-cyan-400/20 p-5 shadow-glow">
-      <p className="text-xs font-mono font-semibold tracking-wider text-cyan-300 uppercase">
+    <div className="rounded-3xl border border-[#E9EEF1] bg-[#FDFDFB] p-6 shadow-[0_6px_20px_rgba(23,53,61,0.03)]">
+      <p className="text-xs font-bold tracking-wider text-[#2C8E92] uppercase">
         Báo cáo/kết quả khám (tuỳ chọn)
       </p>
 
-      <ul className="mt-3 space-y-2">
+      <ul className="mt-4 space-y-2.5">
         {reports.map((report) => (
           <li
             key={report.id}
-            className="flex items-center justify-between gap-2 rounded-xl bg-slate-900/80 border border-cyan-400/20 px-3.5 py-2.5"
+            className="flex items-center justify-between gap-3 rounded-2xl bg-[#F5FAFC] border border-[#E9EEF1] px-4 py-3"
           >
             <button
               type="button"
               onClick={() => openAuthedFile(report.fileUrl)}
-              className="flex items-center gap-2 text-sm font-medium text-slate-200 hover:text-cyan-300"
+              className="flex items-center gap-2.5 text-sm font-bold text-[#17353D] hover:text-[#2C8E92]"
             >
-              <DocumentIcon className="h-4 w-4 text-cyan-400" />
+              <DocumentIcon className="h-4.5 w-4.5 text-[#2C8E92]" />
               {report.originalName || `Báo cáo #${report.id}`}
             </button>
             <button
               type="button"
               disabled={busy}
               onClick={() => onDelete(report.id)}
-              className="text-rose-400 hover:text-rose-300 disabled:opacity-50"
+              className="text-rose-500 hover:text-rose-600 disabled:opacity-50"
               aria-label="Xoá báo cáo"
             >
               <TrashIcon className="h-4 w-4" />
             </button>
           </li>
         ))}
-        {reports.length === 0 && <li className="text-sm text-slate-400">Chưa có báo cáo nào.</li>}
+        {reports.length === 0 && <li className="text-sm text-[#5F7480]">Chưa có báo cáo nào.</li>}
       </ul>
 
-      <label className="mt-4 inline-block cursor-pointer rounded-xl glass border border-cyan-400/30 px-4 py-2 text-sm font-semibold text-cyan-200 hover:border-cyan-400">
+      <label className="mt-5 inline-block cursor-pointer rounded-full border border-[#2C8E92]/40 bg-[#F5FAFC] px-5 py-2 text-sm font-bold text-[#2C8E92] shadow-xs transition-all hover:bg-[#67D6E8]/10 hover:border-[#2C8E92]">
         <input
           type="file"
           accept="image/*,application/pdf"
@@ -340,18 +340,20 @@ function ExtendedProfileSection() {
   }
 
   if (status === 'loading') {
-    return <p className="text-center text-sm text-cyan-300/70">Đang tải hồ sơ mở rộng...</p>
+    return <p className="text-center text-sm font-semibold text-[#2C8E92]">Đang tải hồ sơ mở rộng...</p>
   }
   if (status === 'error') {
-    return <p className="rounded-xl bg-rose-500/20 border border-rose-500/30 px-4 py-2.5 text-sm font-medium text-rose-300">{errorMessage}</p>
+    return <p className="rounded-2xl bg-rose-50 border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700">{errorMessage}</p>
   }
 
   return (
-    <section>
-      <h2 className="text-base font-semibold text-gradient-cyan">Hồ sơ mở rộng (tuỳ chọn)</h2>
-      <p className="mt-1 text-sm text-slate-400">{DISCLAIMER}</p>
+    <section className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-bold text-[#17353D]">Hồ sơ mở rộng (tuỳ chọn)</h2>
+        <p className="mt-1.5 text-sm text-[#5F7480] leading-relaxed">{DISCLAIMER}</p>
+      </div>
 
-      <div className="mt-4 space-y-4">
+      <div className="mt-6 space-y-5">
         {!profileData.consentGivenAt ? (
           <ConsentGate onConsent={handleConsent} submitting={busy} />
         ) : (
@@ -377,7 +379,7 @@ function ExtendedProfileSection() {
         )}
 
         {errorMessage && (
-          <p className="rounded-xl bg-rose-500/20 border border-rose-500/30 px-4 py-2.5 text-sm font-medium text-rose-300">{errorMessage}</p>
+          <p className="rounded-2xl bg-rose-50 border border-rose-200 px-5 py-3 text-sm font-medium text-rose-700">{errorMessage}</p>
         )}
       </div>
     </section>

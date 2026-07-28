@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 
 /* Sparkling glowing ambient particle field filling 100% of hero */
 export default function ParticleField({
-  density = 180,
+  density = 200,
   className = '',
 }) {
   const canvasRef = useRef(null)
@@ -31,13 +31,14 @@ export default function ParticleField({
       parts = Array.from({ length: density }, () => ({
         x: Math.random() * w,
         y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.22,
-        vy: (Math.random() - 0.5) * 0.22,
-        r: Math.random() * 2.2 + 0.4,
-        a: Math.random() * 0.6 + 0.15,
+        vx: (Math.random() - 0.5) * 0.35,
+        vy: (Math.random() - 0.5) * 0.35,
+        r: Math.random() * 2.8 + 0.8,
+        a: Math.random() * 0.7 + 0.3,
         tw: Math.random() * Math.PI * 2,
-        twSpeed: Math.random() * 0.03 + 0.01,
-        color: Math.random() > 0.3 ? '103, 232, 249' : '96, 165, 250',
+        twSpeed: Math.random() * 0.04 + 0.015,
+        // High contrast sparkling palette: Vibrant Cyan, Dark Teal, Bright Azure, Soft White
+        color: Math.random() > 0.5 ? '0, 180, 216' : Math.random() > 0.3 ? '15, 76, 92' : '255, 255, 255',
       }))
     }
 
@@ -52,14 +53,14 @@ export default function ParticleField({
         if (p.y < -10) p.y = h + 10
         if (p.y > h + 10) p.y = -10
 
-        const flicker = 0.5 + Math.sin(p.tw) * 0.5
+        const flicker = 0.4 + Math.sin(p.tw) * 0.6
         const alpha = p.a * flicker
 
         ctx.beginPath()
-        ctx.arc(p.x, p.y, p.r * (0.8 + flicker * 0.4), 0, Math.PI * 2)
+        ctx.arc(p.x, p.y, p.r * (0.8 + flicker * 0.5), 0, Math.PI * 2)
         ctx.fillStyle = `rgba(${p.color}, ${alpha})`
-        ctx.shadowBlur = p.r * 6
-        ctx.shadowColor = `rgba(${p.color}, ${alpha * 0.9})`
+        ctx.shadowBlur = p.r * 8
+        ctx.shadowColor = `rgba(${p.color}, ${alpha})`
         ctx.fill()
       }
       ctx.shadowBlur = 0
@@ -84,3 +85,4 @@ export default function ParticleField({
     />
   )
 }
+

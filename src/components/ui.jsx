@@ -19,9 +19,9 @@ export function Reveal({ children, delay = 0, y = 40, className = '', once = tru
 
 export function Eyebrow({ children }) {
   return (
-    <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full glass border border-cyan-400/20 shadow-glow">
-      <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulseGlow shadow-glow" />
-      <span className="font-mono text-[11px] uppercase tracking-[0.28em] text-cyan-200">
+    <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full glass border border-white/90 shadow-md bg-white/70">
+      <span className="h-2 w-2 rounded-full bg-[#00b4d8] animate-pulse" />
+      <span className="font-mono text-[11px] font-black uppercase tracking-[0.24em] text-[#082531]">
         {children}
       </span>
     </div>
@@ -37,17 +37,15 @@ export function SectionTitle({ eyebrow, title, description, align = 'center' }) 
           : 'flex flex-col items-start text-left max-w-2xl'
       }
     >
-      <Reveal>
-        <Eyebrow>{eyebrow}</Eyebrow>
-      </Reveal>
+      
       <Reveal delay={0.08}>
-        <h2 className="mt-6 font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight text-gradient-cyan text-shadow-glow">
+        <h2 className="mt-6 font-display text-3xl sm:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight">
           {title}
         </h2>
       </Reveal>
       {description && (
         <Reveal delay={0.16}>
-          <p className="mt-5 text-base sm:text-lg text-slate-300 leading-relaxed max-w-xl">
+          <p className="mt-5 text-base sm:text-lg text-[#133844] leading-relaxed max-w-xl font-semibold">
             {description}
           </p>
         </Reveal>
@@ -64,14 +62,16 @@ export function GlassPanel({ children, className = '', strong = false }) {
   )
 }
 
-export function Corners({ color = '#22d3ee' }) {
+export function Corners({ color = '#00b4d8' }) {
   const base = 'absolute h-3 w-3'
   return (
     <>
-      <span className={`${base} top-0 left-0 border-l border-t`} style={{ borderColor: color }} />
-      <span className={`${base} top-0 right-0 border-r border-t`} style={{ borderColor: color }} />
-      <span className={`${base} bottom-0 left-0 border-l border-b`} style={{ borderColor: color }} />
-      <span className={`${base} bottom-0 right-0 border-r border-b`} style={{ borderColor: color }} />
+      <span className={`${base} top-0 left-0 border-l-2 border-t-2`} style={{ borderColor: color }} />
+      <span className={`${base} top-0 right-0 border-r-2 border-t-2`} style={{ borderColor: color }} />
+      <span className={`${base} bottom-0 left-0 border-l-2 border-b-2`} style={{ borderColor: color }} />
+      <span className={`${base} bottom-0 right-0 border-r-2 border-b-2`} style={{ borderColor: color }} />
     </>
   )
 }
+
+

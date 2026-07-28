@@ -6,15 +6,15 @@ function ResultAccordionItem({ item, result }) {
   const [open, setOpen] = useState(false)
 
   return (
-    <li className="border-b border-black/5 last:border-b-0">
+    <li className="border-b border-black/5 last:border-b-0 text-[#183B3B]">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-3 py-2.5 text-left transition-opacity hover:opacity-70"
+        className="flex w-full items-center justify-between gap-3 py-2.5 text-left transition-opacity hover:opacity-70 text-[#183B3B]"
       >
-        <span className="text-sm font-medium">{item.name_vi}</span>
+        <span className="text-sm font-medium text-[#183B3B]">{item.name_vi}</span>
         <ChevronDownIcon
-          className={`h-4 w-4 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 shrink-0 transition-transform duration-200 text-[#183B3B] ${open ? 'rotate-180' : ''}`}
         />
       </button>
       <div
@@ -23,7 +23,7 @@ function ResultAccordionItem({ item, result }) {
         }`}
       >
         <div className="overflow-hidden">
-          <p className="text-sm leading-relaxed opacity-80">{item.reason}</p>
+          <p className="text-sm leading-relaxed text-[#183B3B] opacity-90">{item.reason}</p>
           {open && (
             <ExplainButton
               nameVi={item.name_vi}

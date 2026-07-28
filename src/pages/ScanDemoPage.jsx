@@ -84,7 +84,7 @@ function ScanDemoPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-12">
+    <div className="mx-auto max-w-3xl px-4 py-12 pt-25">
       <div className="text-center">
         <h1 className="text-3xl font-extrabold tracking-tight text-gradient-cyan text-shadow-glow sm:text-4xl">Quét sản phẩm</h1>
         <p className="mt-3 text-base text-slate-300/90 max-w-xl mx-auto">

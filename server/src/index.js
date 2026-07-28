@@ -6,6 +6,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import config from './config/env.js'
+import { initDatabase } from './db/connection.js'
 import { seed, seedExperts } from './db/seed.js'
 import { listSkincareItems } from './services/itemService.js'
 import { listExperts } from './services/expertService.js'
@@ -27,13 +28,15 @@ const clientDistPath = path.resolve(__dirname, '../../dist')
 const clientIndexPath = path.join(clientDistPath, 'index.html')
 const hasClientBuild = fs.existsSync(clientIndexPath)
 
-if (listSkincareItems().length === 0) {
-  const { skincareCount, foodCount } = seed()
+await initDatabase()
+
+if ((await listSkincareItems()).length === 0) {
+  const { skincareCount, foodCount } = await seed()
   console.log(`[db] Đã tự động seed dữ liệu ban đầu: ${skincareCount} skincare, ${foodCount} food.`)
 }
 
-if (listExperts().length === 0) {
-  const { expertsCount } = seedExperts()
+if ((await listExperts()).length === 0) {
+  const { expertsCount } = await seedExperts()
   console.log(`[db] Đã tự động seed dữ liệu chuyên gia mẫu (demo): ${expertsCount} chuyên gia.`)
 }
 

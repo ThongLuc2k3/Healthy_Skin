@@ -56,7 +56,7 @@ Sau bước này, xem tiếp **Bước 2** bên dưới để chạy thử. Lưu
   npm -v
   ```
 - Nếu muốn chạy backend (Bước 4): máy cần có `gcc`, `g++`, `make`, `python3` để biên dịch
-  `better-sqlite3` (thường có sẵn trên Linux/macOS/WSL2; trên Windows cần cài "Desktop development
+  driver PostgreSQL `pg`
   with C++" hoặc dùng WSL2).
 
 ## Bước 1 — Cài dependencies
@@ -167,7 +167,7 @@ lỗi rõ ràng, và người dùng vẫn có thể dùng ô tìm kiếm thủ c
 | `npm run preview` | Chạy thử bản đã build (sau khi `npm run build`) |
 | `npm run dev:server` | Chỉ chạy backend (không chạy frontend) |
 | `npm run dev:all` | Chạy song song frontend + backend |
-| `npm --prefix server run seed` | Nạp lại dữ liệu từ `src/data/*.json` vào database SQLite |
+| `npm --prefix server run seed` | Nạp lại dữ liệu từ `src/data/*.json` vào PostgreSQL qua `DATABASE_URL` |
 | `npm --prefix server run seed:demo` | Tạo lại tài khoản demo + profile + lịch sử scan + roadmap + streak + lịch hẹn mẫu |
 
 ### Seed dữ liệu demo để quay video
@@ -224,4 +224,4 @@ Vì frontend và backend chạy chung một service nên không cần chỉnh `V
 - **Lỗi quét ảnh: "Không thể phân tích ảnh lúc này" (mã 502)**: key sai/hết hạn, hoặc vượt giới hạn free tier của Gemini (mặc định 1.500 request/ngày) — kiểm tra log server để xem lỗi chi tiết từ Gemini API.
 - **Lỗi "Quá nhiều lần thử..." / "Bạn đã quét quá nhiều lần..." (mã 429)**: đang bị rate limit do gọi API quá nhanh/nhiều lần liên tiếp — đợi khoảng 15 phút rồi thử lại (xem mục "Bảo mật API").
 - **Trang Kết quả/Quét thử không đăng nhập được / không lưu hồ sơ lên server**: kiểm tra backend có đang chạy không (`npm run dev:server` hoặc `npm run dev:all`). Nếu đang dev local, ưu tiên bỏ trống `VITE_API_BASE_URL` để frontend dùng Vite proxy; chỉ đặt biến này khi thật sự cần gọi sang domain/port khác.
-- **`npm install` trong `server/` báo lỗi biên dịch `better-sqlite3`**: cần có `gcc`, `g++`, `make`, `python3` trên máy (xem mục "Yêu cầu trước khi chạy").
+- **Backend báo `Thiếu DATABASE_URL`**: thêm chuỗi kết nối PostgreSQL vào `.env` ở thư mục đang chạy server (hoặc biến môi trường của nền tảng deploy).

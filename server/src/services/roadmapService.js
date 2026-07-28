@@ -1,4 +1,4 @@
-import db from '../db/connection.js'
+import { query, transaction } from '../db/connection.js'
 import { listFoodItems } from './itemService.js'
 import { getRecommendations, RESULT } from '../../../src/logic/matchEngine.js'
 
@@ -204,8 +204,8 @@ function buildSkincareTasks(profile, dayIndex, durationDays) {
 
 // Sinh lộ trình hoàn toàn rule-based (KHÔNG gọi Gemini), tái sử dụng đúng matchEngine.js
 // đã dùng cho trang Kết quả — đảm bảo lộ trình nhất quán với logic đối chiếu hiện có.
-function buildMealGuidanceBase(profile) {
-  const foodResults = getRecommendations(profile, listFoodItems())
+function buildMealGuidanceBase(profile, foodItems) {
+  const foodResults = getRecommendations(profile, foodItems)
   const avoidMessages = foodResults[RESULT.AVOID].map((item) => `Tránh ${item.name_vi} — ${item.reason}`)
   const cautionMessages = foodResults[RESULT.CAUTION].map(
     (item) => `Cân nhắc kỹ ${item.name_vi} — ${item.reason}`,
@@ -217,9 +217,9 @@ function buildMealGuidanceBase(profile) {
     : ['Chưa phát hiện thực phẩm nào cần đặc biệt lưu ý — duy trì chế độ ăn cân bằng.']
 }
 
-function buildPhaseMealGuidance(profile, phase, dayIndex) {
+function buildPhaseMealGuidance(profile, phase, dayIndex, foodItems) {
   const guidance = []
-  const base = buildMealGuidanceBase(profile)
+  const base = buildMealGuidanceBase(profile, foodItems)
 
   if (phase.key === 'reset') {
     guidance.push('Ưu tiên bữa ăn đơn giản, ít chế biến để dễ quan sát phản ứng da và cơ thể trong vài ngày đầu.')
@@ -251,7 +251,7 @@ function buildPhaseMealGuidance(profile, phase, dayIndex) {
   return uniqueTexts([...guidance, ...base]).slice(0, MAX_MEAL_GUIDANCE)
 }
 
-function buildDailyPlan(profile, durationDays) {
+function buildDailyPlan(profile, durationDays, foodItems) {
   const today = new Date()
   const dailyPlan = []
 
@@ -268,7 +268,7 @@ function buildDailyPlan(profile, durationDays) {
       phase_title_vi: phase.title_vi,
       coach_note: phase.coach_note,
       skincare_tasks: buildSkincareTasks(profile, dayIndex, durationDays),
-      meal_guidance: buildPhaseMealGuidance(profile, phase, dayIndex),
+      meal_guidance: buildPhaseMealGuidance(profile, phase, dayIndex, foodItems),
     })
   }
 
@@ -302,17 +302,6 @@ function buildCustomDailyPlan(durationDays, goal, tasks) {
   return dailyPlan
 }
 
-const insertStmt = db.prepare(`
-  INSERT INTO roadmaps (user_id, duration_days, source, status, daily_plan)
-  VALUES (@user_id, @duration_days, @source, 'active', @daily_plan)
-`)
-const archiveActiveStmt = db.prepare(`UPDATE roadmaps SET status = 'archived' WHERE user_id = ? AND status = 'active'`)
-const getActiveStmt = db.prepare(
-  `SELECT * FROM roadmaps WHERE user_id = ? AND status = 'active' ORDER BY created_at DESC LIMIT 1`,
-)
-const getByIdStmt = db.prepare('SELECT * FROM roadmaps WHERE id = ?')
-const updatePlanStmt = db.prepare('UPDATE roadmaps SET daily_plan = ? WHERE id = ?')
-
 function toRoadmapShape(row) {
   if (!row) return null
   return {
@@ -325,46 +314,57 @@ function toRoadmapShape(row) {
   }
 }
 
-function saveNewRoadmap(userId, durationDays, source, dailyPlan) {
-  const id = db.transaction(() => {
-    archiveActiveStmt.run(userId)
-    const { lastInsertRowid } = insertStmt.run({
-      user_id: userId,
-      duration_days: durationDays,
-      source,
-      daily_plan: JSON.stringify(dailyPlan),
-    })
-    return lastInsertRowid
-  })()
-
-  return toRoadmapShape(getByIdStmt.get(id))
+async function saveNewRoadmap(userId, durationDays, source, dailyPlan) {
+  const row = await transaction(async (client) => {
+    await client.query(
+      `UPDATE roadmaps SET status='archived' WHERE user_id=$1 AND status='active'`,
+      [userId],
+    )
+    const { rows } = await client.query(
+      `INSERT INTO roadmaps (user_id,duration_days,source,status,daily_plan)
+       VALUES ($1,$2,$3,'active',$4) RETURNING *`,
+      [userId, durationDays, source, JSON.stringify(dailyPlan)],
+    )
+    return rows[0]
+  })
+  return toRoadmapShape(row)
 }
 
-export function createRoadmap(userId, profile, durationDays = DEFAULT_DURATION_DAYS) {
-  const dailyPlan = buildDailyPlan(profile, durationDays)
+export async function createRoadmap(userId, profile, durationDays = DEFAULT_DURATION_DAYS) {
+  const foodItems = await listFoodItems()
+  const dailyPlan = buildDailyPlan(profile, durationDays, foodItems)
   return saveNewRoadmap(userId, durationDays, 'auto_generated', dailyPlan)
 }
 
-export function createCustomRoadmap(userId, { goal, durationDays = DEFAULT_DURATION_DAYS, tasks }) {
+export async function createCustomRoadmap(userId, { goal, durationDays = DEFAULT_DURATION_DAYS, tasks }) {
   const dailyPlan = buildCustomDailyPlan(durationDays, goal, tasks)
   return saveNewRoadmap(userId, durationDays, 'user_custom', dailyPlan)
 }
 
-export function getCurrentRoadmap(userId) {
-  return toRoadmapShape(getActiveStmt.get(userId))
+export async function getCurrentRoadmap(userId) {
+  const { rows } = await query(
+    `SELECT * FROM roadmaps WHERE user_id=$1 AND status='active'
+     ORDER BY created_at DESC LIMIT 1`,
+    [userId],
+  )
+  return toRoadmapShape(rows[0])
 }
 
-export function setTaskDone(userId, roadmapId, taskId, done) {
-  const row = getByIdStmt.get(roadmapId)
-  if (!row || row.user_id !== userId) return null
+export async function setTaskDone(userId, roadmapId, taskId, done) {
+  const { rows } = await query('SELECT * FROM roadmaps WHERE id=$1', [roadmapId])
+  const row = rows[0]
+  if (!row || Number(row.user_id) !== Number(userId)) return null
 
   const dailyPlan = JSON.parse(row.daily_plan)
   const task = dailyPlan.flatMap((day) => day.skincare_tasks).find((t) => t.id === taskId)
   if (!task) return null
 
   task.done = Boolean(done)
-  updatePlanStmt.run(JSON.stringify(dailyPlan), roadmapId)
-  return toRoadmapShape(getByIdStmt.get(roadmapId))
+  const { rows: updated } = await query(
+    'UPDATE roadmaps SET daily_plan=$1 WHERE id=$2 RETURNING *',
+    [JSON.stringify(dailyPlan), roadmapId],
+  )
+  return toRoadmapShape(updated[0])
 }
 
 function buildFeedbackSentence(todayPlan, completedTaskIds, mealDescription) {
@@ -447,9 +447,10 @@ function upsertAdaptiveTask(nextDay, adaptiveTask, sourceDate) {
   nextDay.skincare_tasks = nextDay.skincare_tasks.slice(0, 8)
 }
 
-export function applyCheckinFeedback(userId, roadmapId, date, skincareTasksCompleted, mealDescription) {
-  const row = getByIdStmt.get(roadmapId)
-  if (!row || row.user_id !== userId) return null
+export async function applyCheckinFeedback(userId, roadmapId, date, skincareTasksCompleted, mealDescription) {
+  const { rows } = await query('SELECT * FROM roadmaps WHERE id=$1', [roadmapId])
+  const row = rows[0]
+  if (!row || Number(row.user_id) !== Number(userId)) return null
 
   const dailyPlan = JSON.parse(row.daily_plan)
   const todayIndex = dailyPlan.findIndex((day) => day.date === date)
@@ -479,9 +480,12 @@ export function applyCheckinFeedback(userId, roadmapId, date, skincareTasksCompl
 
   upsertAdaptiveTask(nextDay, adaptiveTask, date)
 
-  updatePlanStmt.run(JSON.stringify(dailyPlan), roadmapId)
+  const { rows: updated } = await query(
+    'UPDATE roadmaps SET daily_plan=$1 WHERE id=$2 RETURNING *',
+    [JSON.stringify(dailyPlan), roadmapId],
+  )
   return {
-    roadmap: toRoadmapShape(getByIdStmt.get(roadmapId)),
+    roadmap: toRoadmapShape(updated[0]),
     preview: {
       nextDate: nextDay.date,
       phaseKey: nextDay.phase_key ?? null,

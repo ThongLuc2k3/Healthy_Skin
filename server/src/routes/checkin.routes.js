@@ -43,7 +43,7 @@ router.post(
       }
     }
 
-    const result = upsertCheckin(req.userId, {
+    const result = await upsertCheckin(req.userId, {
       date: todayStr(),
       roadmapId: req.body.roadmapId ? Number(req.body.roadmapId) : null,
       skincareTasksCompleted,
@@ -55,7 +55,7 @@ router.post(
 
     let feedbackPreview = null
     if (result?.roadmapId) {
-      const feedback = applyCheckinFeedback(
+      const feedback = await applyCheckinFeedback(
         req.userId,
         result.roadmapId,
         result.date,
@@ -69,26 +69,26 @@ router.post(
   }),
 )
 
-router.get('/today', requireAuth, (req, res) => {
-  res.json(getCheckinByDate(req.userId, todayStr()))
-})
+router.get('/today', requireAuth, asyncHandler(async (req, res) => {
+  res.json(await getCheckinByDate(req.userId, todayStr()))
+}))
 
-router.get('/calendar', requireAuth, (req, res) => {
+router.get('/calendar', requireAuth, asyncHandler(async (req, res) => {
   const days = Math.min(Math.max(Number(req.query.days) || 30, 1), 90)
-  res.json(getCalendar(req.userId, days))
-})
+  res.json(await getCalendar(req.userId, days))
+}))
 
 // Ảnh điểm danh chỉ phục vụ qua route có xác thực + kiểm tra quyền sở hữu —
 // KHÔNG dùng express.static công khai vì đây có thể là ảnh khuôn mặt/bữa ăn riêng tư.
-router.get('/photo/:id/:field', requireAuth, (req, res) => {
+router.get('/photo/:id/:field', requireAuth, asyncHandler(async (req, res) => {
   const { field } = req.params
   const id = Number(req.params.id)
   if (!['skincare', 'meal'].includes(field) || !Number.isInteger(id)) {
     return res.status(400).json({ error: 'Yêu cầu ảnh không hợp lệ.' })
   }
 
-  const checkin = getCheckinRawById(id)
-  if (!checkin || checkin.user_id !== req.userId) {
+  const checkin = await getCheckinRawById(id)
+  if (!checkin || Number(checkin.user_id) !== Number(req.userId)) {
     return res.status(404).json({ error: 'Không tìm thấy ảnh.' })
   }
 
@@ -100,6 +100,6 @@ router.get('/photo/:id/:field', requireAuth, (req, res) => {
 
   res.setHeader('Content-Type', mime || 'image/jpeg')
   res.sendFile(filePath)
-})
+}))
 
 export default router

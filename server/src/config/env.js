@@ -1,4 +1,17 @@
-import 'dotenv/config'
+import dotenv from 'dotenv'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const configDir = dirname(fileURLToPath(import.meta.url))
+const projectRootEnv = resolve(configDir, '../../../.env')
+const serverEnv = resolve(configDir, '../../.env')
+
+// `npm --prefix server ...` đổi cwd sang `server/`, vì vậy không dựa vào cwd để
+// tìm .env. server/.env (nếu có) được ưu tiên, sau đó mới lấy các biến còn
+// thiếu từ .env gốc. Biến môi trường do hệ điều hành/nền tảng deploy cấp luôn
+// có độ ưu tiên cao nhất vì dotenv không ghi đè giá trị đã tồn tại.
+dotenv.config({ path: serverEnv })
+dotenv.config({ path: projectRootEnv })
 
 const defaultCorsOrigins = ['http://localhost:5173', 'http://localhost:5174']
 const corsOrigins = (process.env.CORS_ORIGIN || defaultCorsOrigins.join(','))
@@ -12,7 +25,8 @@ const config = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   geminiApiKey: process.env.GEMINI_API_KEY || '',
   geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
-  dbPath: process.env.DB_PATH || './data/da_duong.sqlite',
+  databaseUrl: process.env.DATABASE_URL || '',
+  dbPoolMax: Math.max(Number(process.env.DB_POOL_MAX) || 10, 1),
   corsOrigins,
 }
 
@@ -24,7 +38,7 @@ if (!process.env.JWT_SECRET) {
 
 if (!config.geminiApiKey) {
   console.warn(
-    '[AI] GEMINI_API_KEY chưa được cấu hình — endpoint /api/scan sẽ trả lỗi 503 cho đến khi thiết lập trong server/.env.',
+    '[AI] GEMINI_API_KEY chưa được cấu hình — endpoint /api/scan sẽ trả lỗi 503 cho đến khi thiết lập trong .env.',
   )
 }
 

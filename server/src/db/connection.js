@@ -1,39 +1,56 @@
-import Database from 'better-sqlite3'
-import { mkdirSync, readFileSync } from 'node:fs'
-import { dirname, join, resolve } from 'node:path'
+import pg from 'pg'
+import { readFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import config from '../config/env.js'
 
+const { Pool } = pg
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const dbPath = resolve(process.cwd(), config.dbPath)
-mkdirSync(dirname(dbPath), { recursive: true })
 
-const db = new Database(dbPath)
-db.pragma('journal_mode = WAL')
-db.pragma('foreign_keys = ON')
+if (!config.databaseUrl) {
+  throw new Error(
+    'Thiếu DATABASE_URL. Hãy thêm chuỗi kết nối PostgreSQL vào file .env ở thư mục gốc.',
+  )
+}
 
-const schema = readFileSync(join(__dirname, 'schema.sql'), 'utf-8')
-db.exec(schema)
+const pool = new Pool({
+  connectionString: config.databaseUrl,
+  max: config.dbPoolMax,
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 10_000,
+})
 
-// Bù cột còn thiếu cho DB đã tồn tại từ trước khi schema.sql có thêm cột mới
-// (CREATE TABLE IF NOT EXISTS không tự thêm cột vào bảng đã có sẵn).
-function ensureColumn(table, column, definition) {
-  const columns = db.prepare(`PRAGMA table_info(${table})`).all()
-  if (!columns.some((col) => col.name === column)) {
-    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`)
+pool.on('error', (error) => {
+  console.error('[db] PostgreSQL pool error:', error)
+})
+
+export function query(text, params = []) {
+  return pool.query(text, params)
+}
+
+export async function transaction(callback) {
+  const client = await pool.connect()
+  try {
+    await client.query('BEGIN')
+    const result = await callback(client)
+    await client.query('COMMIT')
+    return result
+  } catch (error) {
+    await client.query('ROLLBACK')
+    throw error
+  } finally {
+    client.release()
   }
 }
 
-ensureColumn('scan_history', 'product_name', 'TEXT')
-ensureColumn('profiles', 'skin_type_note', "TEXT NOT NULL DEFAULT ''")
-ensureColumn('profiles', 'allergies_note', "TEXT NOT NULL DEFAULT ''")
-ensureColumn('profiles', 'conditions_note', "TEXT NOT NULL DEFAULT ''")
-ensureColumn('profiles', 'goals_note', "TEXT NOT NULL DEFAULT ''")
-ensureColumn('profiles', 'consent_given_at', 'TEXT')
-ensureColumn('profiles', 'face_photo_path', 'TEXT')
-ensureColumn('profiles', 'face_photo_mime', 'TEXT')
-ensureColumn('profiles', 'diagnosed_conditions', "TEXT NOT NULL DEFAULT '[]'")
-ensureColumn('website_reviews', 'image_path', 'TEXT')
-ensureColumn('website_reviews', 'image_mime', 'TEXT')
+export async function initDatabase() {
+  const schema = await readFile(join(__dirname, 'schema.sql'), 'utf8')
+  await pool.query(schema)
+  await pool.query('SELECT 1')
+}
 
-export default db
+export async function closeDatabase() {
+  await pool.end()
+}
+
+export default pool

@@ -1,41 +1,37 @@
-import db from '../db/connection.js'
+import { query } from '../db/connection.js'
 
-const allSkincareStmt = db.prepare('SELECT * FROM skincare_ingredients')
-const allFoodStmt = db.prepare('SELECT * FROM food_items')
+function parseJson(value) {
+  return typeof value === 'string' ? JSON.parse(value) : value
+}
 
 function parseSkincareRow(row) {
   return {
-    id: row.id,
-    name_vi: row.name_vi,
-    category: row.category,
-    flags: JSON.parse(row.flags),
-    conflicts_with_skin_type: JSON.parse(row.conflicts_with_skin_type),
-    explanation_vi: row.explanation_vi,
-    source: row.source,
+    id: row.id, name_vi: row.name_vi, category: row.category,
+    flags: parseJson(row.flags), conflicts_with_skin_type: parseJson(row.conflicts_with_skin_type),
+    explanation_vi: row.explanation_vi, source: row.source,
   }
 }
 
 function parseFoodRow(row) {
   return {
-    id: row.id,
-    name_vi: row.name_vi,
-    category: row.category,
-    flags: JSON.parse(row.flags),
-    conflicts_with_allergy: JSON.parse(row.conflicts_with_allergy),
-    conflicts_with_condition: JSON.parse(row.conflicts_with_condition),
-    explanation_vi: row.explanation_vi,
-    source: row.source,
+    id: row.id, name_vi: row.name_vi, category: row.category,
+    flags: parseJson(row.flags), conflicts_with_allergy: parseJson(row.conflicts_with_allergy),
+    conflicts_with_condition: parseJson(row.conflicts_with_condition),
+    explanation_vi: row.explanation_vi, source: row.source,
   }
 }
 
-export function listSkincareItems() {
-  return allSkincareStmt.all().map(parseSkincareRow)
+export async function listSkincareItems() {
+  const { rows } = await query('SELECT * FROM skincare_ingredients')
+  return rows.map(parseSkincareRow)
 }
 
-export function listFoodItems() {
-  return allFoodStmt.all().map(parseFoodRow)
+export async function listFoodItems() {
+  const { rows } = await query('SELECT * FROM food_items')
+  return rows.map(parseFoodRow)
 }
 
-export function listAllItems() {
-  return [...listSkincareItems(), ...listFoodItems()]
+export async function listAllItems() {
+  const [skincare, food] = await Promise.all([listSkincareItems(), listFoodItems()])
+  return [...skincare, ...food]
 }

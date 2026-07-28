@@ -1,35 +1,32 @@
-import db from '../db/connection.js'
+import { query } from '../db/connection.js'
 
-const allStmt = db.prepare('SELECT * FROM experts')
-const getByIdStmt = db.prepare('SELECT * FROM experts WHERE id = ?')
+function parsed(value) {
+  return typeof value === 'string' ? JSON.parse(value) : value
+}
 
 function toShape(row) {
   if (!row) return null
   return {
-    id: row.id,
-    name: row.name,
-    specialty: row.specialty,
-    clinic_name: row.clinic_name,
-    area_vi: row.area_vi,
-    bio_vi: row.bio_vi,
-    certifications: JSON.parse(row.certifications),
-    rating_avg: row.rating_avg,
-    reviews: JSON.parse(row.reviews),
-    available_slots: JSON.parse(row.available_slots),
+    id: row.id, name: row.name, specialty: row.specialty, clinic_name: row.clinic_name,
+    area_vi: row.area_vi, bio_vi: row.bio_vi, certifications: parsed(row.certifications),
+    rating_avg: row.rating_avg, reviews: parsed(row.reviews), available_slots: parsed(row.available_slots),
   }
 }
 
-export function listExperts(area) {
-  const experts = allStmt.all().map(toShape)
-  if (!area) return experts
-  return experts.filter((e) => e.area_vi === area)
+export async function listExperts(area) {
+  const { rows } = await query(
+    `SELECT * FROM experts ${area ? 'WHERE area_vi = $1' : ''}`,
+    area ? [area] : [],
+  )
+  return rows.map(toShape)
 }
 
-export function listAreas() {
-  const experts = allStmt.all().map(toShape)
-  return [...new Set(experts.map((e) => e.area_vi))]
+export async function listAreas() {
+  const { rows } = await query('SELECT DISTINCT area_vi FROM experts ORDER BY area_vi')
+  return rows.map((row) => row.area_vi)
 }
 
-export function getExpertById(id) {
-  return toShape(getByIdStmt.get(id))
+export async function getExpertById(id) {
+  const { rows } = await query('SELECT * FROM experts WHERE id = $1', [id])
+  return toShape(rows[0])
 }

@@ -19,7 +19,7 @@ router.post(
       return res.status(400).json({ error: 'Vui lòng chọn một ảnh để quét.' })
     }
 
-    const profile = getProfile(req.userId)
+    const profile = await getProfile(req.userId)
 
     let analysis
     try {
@@ -42,7 +42,7 @@ router.post(
       })
     }
 
-    recordScan(req.userId, {
+    await recordScan(req.userId, {
       productName: analysis.productName,
       result: analysis.result,
       reason: analysis.reason,
@@ -56,8 +56,8 @@ router.post(
   }),
 )
 
-router.get('/history', requireAuth, (req, res) => {
-  res.json(listScanHistory(req.userId))
-})
+router.get('/history', requireAuth, asyncHandler(async (req, res) => {
+  res.json(await listScanHistory(req.userId))
+}))
 
 export default router

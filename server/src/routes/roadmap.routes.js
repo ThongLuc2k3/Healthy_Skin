@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { requireAuth } from '../middleware/auth.js'
 import { getProfile } from '../services/profileService.js'
 import { createRoadmap, createCustomRoadmap, getCurrentRoadmap, setTaskDone } from '../services/roadmapService.js'
+import { asyncHandler } from '../middleware/asyncHandler.js'
 
 const router = Router()
 
@@ -13,24 +14,24 @@ function sanitizeDurationDays(value) {
   return Math.min(Math.round(n), MAX_DURATION_DAYS)
 }
 
-router.post('/generate', requireAuth, (req, res) => {
-  const profile = getProfile(req.userId)
+router.post('/generate', requireAuth, asyncHandler(async (req, res) => {
+  const profile = await getProfile(req.userId)
   if (!profile.skinType) {
     return res.status(400).json({ error: 'Vui lòng khai báo hồ sơ cơ địa trước khi tạo lộ trình.' })
   }
 
   const durationDays = sanitizeDurationDays(req.body?.durationDays)
-  const roadmap = createRoadmap(req.userId, profile, durationDays)
+  const roadmap = await createRoadmap(req.userId, profile, durationDays)
   res.status(201).json(roadmap)
-})
+}))
 
-router.get('/current', requireAuth, (req, res) => {
-  const roadmap = getCurrentRoadmap(req.userId)
+router.get('/current', requireAuth, asyncHandler(async (req, res) => {
+  const roadmap = await getCurrentRoadmap(req.userId)
   if (!roadmap) {
     return res.status(404).json({ error: 'Chưa có lộ trình nào đang hoạt động.' })
   }
   res.json(roadmap)
-})
+}))
 
 const MAX_CUSTOM_TASKS = 20
 const MAX_TASK_LENGTH = 200
@@ -39,7 +40,7 @@ const MAX_GOAL_LENGTH = 200
 // 9E: người dùng bỏ qua lộ trình tự sinh (9A), tự nhập việc muốn làm mỗi ngày —
 // KHÔNG validate chặn cứng với matchEngine, việc cảnh báo mềm được xử lý ở frontend
 // (dùng chính matchEngine.js để không lặp logic đối chiếu ở 2 nơi).
-router.post('/custom', requireAuth, (req, res) => {
+router.post('/custom', requireAuth, asyncHandler(async (req, res) => {
   const { goal, tasks } = req.body ?? {}
   const durationDays = sanitizeDurationDays(req.body?.durationDays) ?? 14
 
@@ -56,23 +57,23 @@ router.post('/custom', requireAuth, (req, res) => {
     return res.status(400).json({ error: 'Vui lòng nhập ít nhất một việc muốn làm mỗi ngày.' })
   }
 
-  const roadmap = createCustomRoadmap(req.userId, {
+  const roadmap = await createCustomRoadmap(req.userId, {
     goal: typeof goal === 'string' ? goal.trim().slice(0, MAX_GOAL_LENGTH) : '',
     durationDays,
     tasks: cleanTasks,
   })
   res.status(201).json(roadmap)
-})
+}))
 
-router.patch('/:id/task/:taskId', requireAuth, (req, res) => {
+router.patch('/:id/task/:taskId', requireAuth, asyncHandler(async (req, res) => {
   const roadmapId = Number(req.params.id)
   const done = req.body?.done !== false
 
-  const roadmap = setTaskDone(req.userId, roadmapId, req.params.taskId, done)
+  const roadmap = await setTaskDone(req.userId, roadmapId, req.params.taskId, done)
   if (!roadmap) {
     return res.status(404).json({ error: 'Không tìm thấy lộ trình hoặc công việc tương ứng.' })
   }
   res.json(roadmap)
-})
+}))
 
 export default router

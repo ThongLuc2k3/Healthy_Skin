@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
-import db from '../db/connection.js'
+import { query } from '../db/connection.js'
 
 const UPLOAD_DIR = path.resolve('uploads/checkins')
 fs.mkdirSync(UPLOAD_DIR, { recursive: true })
@@ -27,37 +27,6 @@ function deleteFileSafe(filePath) {
   if (filePath) fs.unlink(filePath, () => {})
 }
 
-const getByUserDateStmt = db.prepare('SELECT * FROM checkins WHERE user_id = ? AND date = ?')
-const getByIdStmt = db.prepare('SELECT * FROM checkins WHERE id = ?')
-const listRecentStmt = db.prepare(
-  'SELECT date, skincare_done, meal_logged FROM checkins WHERE user_id = ? AND date >= ? ORDER BY date ASC',
-)
-
-const upsertStmt = db.prepare(`
-  INSERT INTO checkins (
-    user_id, roadmap_id, date, skincare_done, skincare_tasks_completed,
-    skincare_photo_path, skincare_photo_mime, meal_logged, meal_description,
-    meal_photo_path, meal_photo_mime, note, updated_at
-  )
-  VALUES (
-    @user_id, @roadmap_id, @date, @skincare_done, @skincare_tasks_completed,
-    @skincare_photo_path, @skincare_photo_mime, @meal_logged, @meal_description,
-    @meal_photo_path, @meal_photo_mime, @note, datetime('now')
-  )
-  ON CONFLICT(user_id, date) DO UPDATE SET
-    roadmap_id = excluded.roadmap_id,
-    skincare_done = excluded.skincare_done,
-    skincare_tasks_completed = excluded.skincare_tasks_completed,
-    skincare_photo_path = excluded.skincare_photo_path,
-    skincare_photo_mime = excluded.skincare_photo_mime,
-    meal_logged = excluded.meal_logged,
-    meal_description = excluded.meal_description,
-    meal_photo_path = excluded.meal_photo_path,
-    meal_photo_mime = excluded.meal_photo_mime,
-    note = excluded.note,
-    updated_at = datetime('now')
-`)
-
 function toShape(row) {
   if (!row) return null
   return {
@@ -76,11 +45,15 @@ function toShape(row) {
   }
 }
 
-export function upsertCheckin(
+export async function upsertCheckin(
   userId,
   { date, roadmapId, skincareTasksCompleted, mealDescription, note, skincareFile, mealFile },
 ) {
-  const existing = getByUserDateStmt.get(userId, date)
+  const { rows: existingRows } = await query(
+    'SELECT * FROM checkins WHERE user_id=$1 AND date=$2',
+    [userId, date],
+  )
+  const existing = existingRows[0]
 
   let skincarePhoto = existing
     ? { path: existing.skincare_photo_path, mime: existing.skincare_photo_mime }
@@ -98,32 +71,38 @@ export function upsertCheckin(
     mealPhoto = saveFile(mealFile)
   }
 
-  upsertStmt.run({
-    user_id: userId,
-    roadmap_id: roadmapId || null,
-    date,
-    skincare_done: skincareTasksCompleted.length > 0 ? 1 : 0,
-    skincare_tasks_completed: JSON.stringify(skincareTasksCompleted),
-    skincare_photo_path: skincarePhoto.path,
-    skincare_photo_mime: skincarePhoto.mime,
-    meal_logged: mealDescription.trim().length > 0 ? 1 : 0,
-    meal_description: mealDescription,
-    meal_photo_path: mealPhoto.path,
-    meal_photo_mime: mealPhoto.mime,
-    note,
-  })
-
-  return toShape(getByUserDateStmt.get(userId, date))
+  const { rows } = await query(
+    `INSERT INTO checkins
+      (user_id,roadmap_id,date,skincare_done,skincare_tasks_completed,
+       skincare_photo_path,skincare_photo_mime,meal_logged,meal_description,
+       meal_photo_path,meal_photo_mime,note,updated_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,NOW())
+     ON CONFLICT(user_id,date) DO UPDATE SET
+       roadmap_id=EXCLUDED.roadmap_id, skincare_done=EXCLUDED.skincare_done,
+       skincare_tasks_completed=EXCLUDED.skincare_tasks_completed,
+       skincare_photo_path=EXCLUDED.skincare_photo_path,
+       skincare_photo_mime=EXCLUDED.skincare_photo_mime,
+       meal_logged=EXCLUDED.meal_logged, meal_description=EXCLUDED.meal_description,
+       meal_photo_path=EXCLUDED.meal_photo_path, meal_photo_mime=EXCLUDED.meal_photo_mime,
+       note=EXCLUDED.note, updated_at=NOW()
+     RETURNING *`,
+    [userId, roadmapId || null, date, skincareTasksCompleted.length > 0,
+      JSON.stringify(skincareTasksCompleted), skincarePhoto.path, skincarePhoto.mime,
+      mealDescription.trim().length > 0, mealDescription, mealPhoto.path, mealPhoto.mime, note],
+  )
+  return toShape(rows[0])
 }
 
-export function getCheckinByDate(userId, date) {
-  return toShape(getByUserDateStmt.get(userId, date))
+export async function getCheckinByDate(userId, date) {
+  const { rows } = await query('SELECT * FROM checkins WHERE user_id=$1 AND date=$2', [userId, date])
+  return toShape(rows[0])
 }
 
 // Trả về row thô (không qua toShape) — dùng nội bộ ở route ảnh để kiểm tra
 // user_id sở hữu + lấy đường dẫn file thật trên đĩa.
-export function getCheckinRawById(id) {
-  return getByIdStmt.get(id)
+export async function getCheckinRawById(id) {
+  const { rows } = await query('SELECT * FROM checkins WHERE id=$1', [id])
+  return rows[0]
 }
 
 function isoDaysAgo(n) {
@@ -153,9 +132,13 @@ function computeStreak(rowsByDate) {
   return streak
 }
 
-export function getCalendar(userId, days = 30) {
+export async function getCalendar(userId, days = 30) {
   const since = isoDaysAgo(days - 1)
-  const rows = listRecentStmt.all(userId, since)
+  const { rows } = await query(
+    `SELECT date::text, skincare_done, meal_logged FROM checkins
+     WHERE user_id=$1 AND date >= $2 ORDER BY date ASC`,
+    [userId, since],
+  )
   const rowsByDate = new Map(rows.map((r) => [r.date, r]))
 
   const calendarDays = []

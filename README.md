@@ -48,7 +48,7 @@ cần thẻ thanh toán, tại [Google AI Studio](https://aistudio.google.com/ap
 - `src/context/AuthContext.jsx` — trạng thái đăng nhập, JWT
 - `src/pages` — Trang chủ, Hồ sơ, Kết quả gợi ý, Quét thử, Lịch sử quét, Đăng nhập/Đăng ký
 - `src/components` — component UI dùng chung
-- `server/` — backend Express + SQLite: xác thực JWT, lưu hồ sơ/lịch sử quét, quét ảnh thật qua Gemini API (`server/src/services/geminiService.js`), rate limit + helmet bảo vệ API. Xem cấu trúc chi tiết trong `server/` và mục "Bảo mật API" ở `HUONG_DAN_CHAY.md`.
+- `server/` — backend Express + PostgreSQL: xác thực JWT, lưu hồ sơ/lịch sử quét, quét ảnh thật qua Gemini API (`server/src/services/geminiService.js`), rate limit + helmet bảo vệ API. Chuỗi kết nối được đọc từ `DATABASE_URL`.
 
 ## Deploy
 

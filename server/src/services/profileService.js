@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
-import db from '../db/connection.js'
+import { query } from '../db/connection.js'
 
 const FACE_PHOTO_DIR = path.resolve('uploads/face_photos')
 fs.mkdirSync(FACE_PHOTO_DIR, { recursive: true })
@@ -12,52 +12,6 @@ const EXT_BY_MIME = {
   'image/webp': '.webp',
   'image/gif': '.gif',
 }
-
-const getStmt = db.prepare('SELECT * FROM profiles WHERE user_id = ?')
-const upsertStmt = db.prepare(`
-  INSERT INTO profiles (
-    user_id, skin_type, allergies, conditions, goals,
-    skin_type_note, allergies_note, conditions_note, goals_note, updated_at
-  )
-  VALUES (
-    @user_id, @skin_type, @allergies, @conditions, @goals,
-    @skin_type_note, @allergies_note, @conditions_note, @goals_note, datetime('now')
-  )
-  ON CONFLICT(user_id) DO UPDATE SET
-    skin_type = excluded.skin_type,
-    allergies = excluded.allergies,
-    conditions = excluded.conditions,
-    goals = excluded.goals,
-    skin_type_note = excluded.skin_type_note,
-    allergies_note = excluded.allergies_note,
-    conditions_note = excluded.conditions_note,
-    goals_note = excluded.goals_note,
-    updated_at = excluded.updated_at
-`)
-
-const setConsentStmt = db.prepare(`
-  INSERT INTO profiles (user_id, consent_given_at)
-  VALUES (?, datetime('now'))
-  ON CONFLICT(user_id) DO UPDATE SET consent_given_at = datetime('now')
-`)
-
-const setFacePhotoStmt = db.prepare(`
-  INSERT INTO profiles (user_id, face_photo_path, face_photo_mime)
-  VALUES (@user_id, @face_photo_path, @face_photo_mime)
-  ON CONFLICT(user_id) DO UPDATE SET
-    face_photo_path = excluded.face_photo_path,
-    face_photo_mime = excluded.face_photo_mime
-`)
-
-const clearFacePhotoStmt = db.prepare(
-  'UPDATE profiles SET face_photo_path = NULL, face_photo_mime = NULL WHERE user_id = ?',
-)
-
-const setDiagnosedConditionsStmt = db.prepare(`
-  INSERT INTO profiles (user_id, diagnosed_conditions)
-  VALUES (@user_id, @diagnosed_conditions)
-  ON CONFLICT(user_id) DO UPDATE SET diagnosed_conditions = excluded.diagnosed_conditions
-`)
 
 function toProfileShape(row) {
   if (!row) {
@@ -91,37 +45,48 @@ function toProfileShape(row) {
   }
 }
 
-export function getProfile(userId) {
-  return toProfileShape(getStmt.get(userId))
+export async function getProfile(userId) {
+  const { rows } = await query('SELECT * FROM profiles WHERE user_id = $1', [userId])
+  return toProfileShape(rows[0])
 }
 
-export function saveProfile(userId, profile) {
-  upsertStmt.run({
-    user_id: userId,
-    skin_type: profile.skinType ?? '',
-    allergies: JSON.stringify(profile.allergies ?? []),
-    conditions: JSON.stringify(profile.conditions ?? []),
-    goals: JSON.stringify(profile.goals ?? []),
-    skin_type_note: profile.skinTypeNote ?? '',
-    allergies_note: profile.allergiesNote ?? '',
-    conditions_note: profile.conditionsNote ?? '',
-    goals_note: profile.goalsNote ?? '',
-  })
+export async function saveProfile(userId, profile) {
+  await query(
+    `INSERT INTO profiles
+      (user_id, skin_type, allergies, conditions, goals, skin_type_note,
+       allergies_note, conditions_note, goals_note, updated_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NOW())
+     ON CONFLICT(user_id) DO UPDATE SET
+       skin_type=EXCLUDED.skin_type, allergies=EXCLUDED.allergies,
+       conditions=EXCLUDED.conditions, goals=EXCLUDED.goals,
+       skin_type_note=EXCLUDED.skin_type_note, allergies_note=EXCLUDED.allergies_note,
+       conditions_note=EXCLUDED.conditions_note, goals_note=EXCLUDED.goals_note,
+       updated_at=NOW()`,
+    [userId, profile.skinType ?? '', JSON.stringify(profile.allergies ?? []),
+      JSON.stringify(profile.conditions ?? []), JSON.stringify(profile.goals ?? []),
+      profile.skinTypeNote ?? '', profile.allergiesNote ?? '', profile.conditionsNote ?? '',
+      profile.goalsNote ?? ''],
+  )
   return getProfile(userId)
 }
 
-export function hasGivenConsent(userId) {
-  const row = getStmt.get(userId)
-  return Boolean(row?.consent_given_at)
+export async function hasGivenConsent(userId) {
+  const { rows } = await query('SELECT consent_given_at FROM profiles WHERE user_id = $1', [userId])
+  return Boolean(rows[0]?.consent_given_at)
 }
 
-export function giveConsent(userId) {
-  setConsentStmt.run(userId)
+export async function giveConsent(userId) {
+  await query(
+    `INSERT INTO profiles (user_id, consent_given_at) VALUES ($1, NOW())
+     ON CONFLICT(user_id) DO UPDATE SET consent_given_at=NOW()`,
+    [userId],
+  )
   return getProfile(userId)
 }
 
-export function setFacePhoto(userId, file) {
-  const row = getStmt.get(userId)
+export async function setFacePhoto(userId, file) {
+  const { rows } = await query('SELECT face_photo_path FROM profiles WHERE user_id = $1', [userId])
+  const row = rows[0]
   const ext = EXT_BY_MIME[file.mimetype] || ''
   const filename = `${crypto.randomUUID()}${ext}`
   const filePath = path.join(FACE_PHOTO_DIR, filename)
@@ -131,38 +96,49 @@ export function setFacePhoto(userId, file) {
     fs.unlink(row.face_photo_path, () => {})
   }
 
-  setFacePhotoStmt.run({ user_id: userId, face_photo_path: filePath, face_photo_mime: file.mimetype })
+  await query(
+    `INSERT INTO profiles (user_id, face_photo_path, face_photo_mime) VALUES ($1,$2,$3)
+     ON CONFLICT(user_id) DO UPDATE SET
+       face_photo_path=EXCLUDED.face_photo_path, face_photo_mime=EXCLUDED.face_photo_mime`,
+    [userId, filePath, file.mimetype],
+  )
   return getProfile(userId)
 }
 
-export function deleteFacePhoto(userId) {
-  const row = getStmt.get(userId)
+export async function deleteFacePhoto(userId) {
+  const { rows } = await query('SELECT face_photo_path FROM profiles WHERE user_id = $1', [userId])
+  const row = rows[0]
   if (row?.face_photo_path) {
     fs.unlink(row.face_photo_path, () => {})
   }
-  clearFacePhotoStmt.run(userId)
+  await query('UPDATE profiles SET face_photo_path=NULL, face_photo_mime=NULL WHERE user_id=$1', [userId])
   return getProfile(userId)
 }
 
 // Trả về đường dẫn + mime thô trên đĩa — dùng nội bộ ở route ảnh, không qua toProfileShape.
-export function getFacePhotoFile(userId) {
-  const row = getStmt.get(userId)
+export async function getFacePhotoFile(userId) {
+  const { rows } = await query(
+    'SELECT face_photo_path, face_photo_mime FROM profiles WHERE user_id=$1',
+    [userId],
+  )
+  const row = rows[0]
   if (!row?.face_photo_path) return null
   return { path: row.face_photo_path, mime: row.face_photo_mime }
 }
 
 const MAX_DIAGNOSED_CONDITIONS = 20
 
-export function setDiagnosedConditions(userId, diagnosedConditions) {
+export async function setDiagnosedConditions(userId, diagnosedConditions) {
   const sanitized = diagnosedConditions.slice(0, MAX_DIAGNOSED_CONDITIONS).map((entry) => ({
     name_vi: typeof entry.name_vi === 'string' ? entry.name_vi.slice(0, 200) : '',
     diagnosed_date: typeof entry.diagnosed_date === 'string' ? entry.diagnosed_date.slice(0, 20) : '',
     note: typeof entry.note === 'string' ? entry.note.slice(0, 500) : '',
   }))
 
-  setDiagnosedConditionsStmt.run({
-    user_id: userId,
-    diagnosed_conditions: JSON.stringify(sanitized),
-  })
+  await query(
+    `INSERT INTO profiles (user_id, diagnosed_conditions) VALUES ($1,$2)
+     ON CONFLICT(user_id) DO UPDATE SET diagnosed_conditions=EXCLUDED.diagnosed_conditions`,
+    [userId, JSON.stringify(sanitized)],
+  )
   return getProfile(userId)
 }

@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
-import db from '../db/connection.js'
+import { query } from '../db/connection.js'
 
 const UPLOAD_DIR = path.resolve('uploads/expert_reports')
 fs.mkdirSync(UPLOAD_DIR, { recursive: true })
@@ -14,14 +14,6 @@ const EXT_BY_MIME = {
   'application/pdf': '.pdf',
 }
 
-const insertStmt = db.prepare(`
-  INSERT INTO expert_reports (user_id, file_path, file_mime, original_name, source)
-  VALUES (@user_id, @file_path, @file_mime, @original_name, 'user_upload')
-`)
-const listStmt = db.prepare('SELECT * FROM expert_reports WHERE user_id = ? ORDER BY uploaded_at DESC')
-const getByIdStmt = db.prepare('SELECT * FROM expert_reports WHERE id = ?')
-const deleteStmt = db.prepare('DELETE FROM expert_reports WHERE id = ?')
-
 function toShape(row) {
   return {
     id: row.id,
@@ -33,34 +25,38 @@ function toShape(row) {
   }
 }
 
-export function addExpertReport(userId, file) {
+export async function addExpertReport(userId, file) {
   const ext = EXT_BY_MIME[file.mimetype] || ''
   const filename = `${crypto.randomUUID()}${ext}`
   const filePath = path.join(UPLOAD_DIR, filename)
   fs.writeFileSync(filePath, file.buffer)
 
-  const { lastInsertRowid } = insertStmt.run({
-    user_id: userId,
-    file_path: filePath,
-    file_mime: file.mimetype,
-    original_name: file.originalname?.slice(0, 200) || null,
-  })
-  return toShape(getByIdStmt.get(lastInsertRowid))
+  const { rows } = await query(
+    `INSERT INTO expert_reports (user_id,file_path,file_mime,original_name,source)
+     VALUES ($1,$2,$3,$4,'user_upload') RETURNING *`,
+    [userId, filePath, file.mimetype, file.originalname?.slice(0, 200) || null],
+  )
+  return toShape(rows[0])
 }
 
-export function listExpertReports(userId) {
-  return listStmt.all(userId).map(toShape)
+export async function listExpertReports(userId) {
+  const { rows } = await query(
+    'SELECT * FROM expert_reports WHERE user_id=$1 ORDER BY uploaded_at DESC',
+    [userId],
+  )
+  return rows.map(toShape)
 }
 
 // Trả về row thô — dùng nội bộ ở route file để kiểm tra ownership + lấy path thật.
-export function getExpertReportRawById(id) {
-  return getByIdStmt.get(id)
+export async function getExpertReportRawById(id) {
+  const { rows } = await query('SELECT * FROM expert_reports WHERE id=$1', [id])
+  return rows[0]
 }
 
-export function deleteExpertReport(userId, id) {
-  const row = getByIdStmt.get(id)
+export async function deleteExpertReport(userId, id) {
+  const row = await getExpertReportRawById(id)
   if (!row || row.user_id !== userId) return false
   fs.unlink(row.file_path, () => {})
-  deleteStmt.run(id)
+  await query('DELETE FROM expert_reports WHERE id=$1', [id])
   return true
 }

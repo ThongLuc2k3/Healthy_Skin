@@ -21,7 +21,7 @@ router.post(
       return res.status(400).json({ error: 'Mật khẩu phải có ít nhất 6 ký tự.' })
     }
 
-    if (findUserByEmail(email)) {
+    if (await findUserByEmail(email)) {
       return res.status(400).json({ error: 'Email này đã được đăng ký.' })
     }
 
@@ -37,7 +37,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const { email, password } = req.body ?? {}
 
-    const user = findUserByEmail(email)
+    const user = await findUserByEmail(email)
     const passwordMatches = user && (await verifyPassword(password ?? '', user.password_hash))
     if (!passwordMatches) {
       return res.status(401).json({ error: 'Email hoặc mật khẩu không đúng.' })
@@ -48,12 +48,12 @@ router.post(
   }),
 )
 
-router.get('/me', requireAuth, (req, res) => {
-  const user = findUserById(req.userId)
+router.get('/me', requireAuth, asyncHandler(async (req, res) => {
+  const user = await findUserById(req.userId)
   if (!user) {
     return res.status(404).json({ error: 'Không tìm thấy người dùng.' })
   }
   res.json({ id: user.id, email: user.email })
-})
+}))
 
 export default router

@@ -18,6 +18,7 @@ import RegisterPage from './pages/RegisterPage'
 import ChatWidget from './components/ChatWidget'
 import PlanBuilderPage from './pages/PlanBuilderPage'
 import SkinPlaygroundPage from './pages/SkinPlaygroundPage'
+import AboutPage from './pages/AboutPage'
 
 // Nền cố định theo viewport — luôn hiển thị ở 4 góc màn hình dù cuộn tới đâu
 const FIXED_ACCENT_STYLE = {
@@ -53,6 +54,7 @@ function App() {
         <Route path="/roadmap/custom" element={<CustomRoadmapPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/about" element={<AboutPage />} />
       </Routes>
       <ChatWidget />
     </div>

@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   email TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
+  terms_accepted_at TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

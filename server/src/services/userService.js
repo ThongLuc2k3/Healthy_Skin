@@ -5,7 +5,9 @@ const SALT_ROUNDS = 10
 
 const findByEmailStmt = db.prepare('SELECT * FROM users WHERE email = ?')
 const findByIdStmt = db.prepare('SELECT id, email, created_at FROM users WHERE id = ?')
-const insertUserStmt = db.prepare('INSERT INTO users (email, password_hash) VALUES (?, ?)')
+const insertUserStmt = db.prepare(
+  'INSERT INTO users (email, password_hash, terms_accepted_at) VALUES (?, ?, ?)',
+)
 
 export function findUserByEmail(email) {
   return findByEmailStmt.get(email)
@@ -15,9 +17,9 @@ export function findUserById(id) {
   return findByIdStmt.get(id)
 }
 
-export async function createUser(email, password) {
+export async function createUser(email, password, termsAcceptedAt) {
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS)
-  const { lastInsertRowid } = insertUserStmt.run(email, passwordHash)
+  const { lastInsertRowid } = insertUserStmt.run(email, passwordHash, termsAcceptedAt)
   return findUserById(lastInsertRowid)
 }
 

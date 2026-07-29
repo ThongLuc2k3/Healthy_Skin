@@ -24,8 +24,8 @@ export function AuthProvider({ children }) {
       .finally(() => setReady(true))
   }, [])
 
-  async function register(email, password) {
-    const data = await apiClient.post('/auth/register', { email, password })
+  async function register(email, password, acceptedTerms) {
+    const data = await apiClient.post('/auth/register', { email, password, acceptedTerms })
     setToken(data.token)
     setUser(data.user)
     setSessionExpired(false)

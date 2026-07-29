@@ -12,7 +12,7 @@ router.post(
   '/register',
   authLimiter,
   asyncHandler(async (req, res) => {
-    const { email, password } = req.body ?? {}
+    const { email, password, acceptedTerms } = req.body ?? {}
 
     if (typeof email !== 'string' || !EMAIL_RE.test(email)) {
       return res.status(400).json({ error: 'Email không hợp lệ.' })
@@ -20,12 +20,15 @@ router.post(
     if (typeof password !== 'string' || password.length < 6) {
       return res.status(400).json({ error: 'Mật khẩu phải có ít nhất 6 ký tự.' })
     }
+    if (acceptedTerms !== true) {
+      return res.status(400).json({ error: 'Bạn cần đồng ý với Điều khoản sử dụng trước khi đăng ký.' })
+    }
 
     if (findUserByEmail(email)) {
       return res.status(400).json({ error: 'Email này đã được đăng ký.' })
     }
 
-    const user = await createUser(email, password)
+    const user = await createUser(email, password, new Date().toISOString())
     const token = signToken(user)
     res.status(201).json({ token, user: { id: user.id, email: user.email } })
   }),

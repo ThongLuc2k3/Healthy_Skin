@@ -24,6 +24,7 @@ function ensureColumn(table, column, definition) {
   }
 }
 
+ensureColumn('users', 'terms_accepted_at', 'TEXT')
 ensureColumn('scan_history', 'product_name', 'TEXT')
 ensureColumn('profiles', 'skin_type_note', "TEXT NOT NULL DEFAULT ''")
 ensureColumn('profiles', 'allergies_note', "TEXT NOT NULL DEFAULT ''")

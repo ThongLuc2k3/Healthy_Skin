@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import RadioGroup from '../components/RadioGroup'
 import CheckboxGroup from '../components/CheckboxGroup'
 import ExtendedProfileSection from '../components/ExtendedProfileSection'
@@ -9,19 +10,25 @@ import { SKIN_TYPES, ALLERGIES, CONDITIONS, GOALS, OTHER_OPTION_ID } from '../da
 
 function OtherNoteInput({ id, label, value, onChange }) {
   return (
-    <div className="mt-3">
-      <label htmlFor={id} className="text-xs font-medium text-slate-500">
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+      className="mt-4 overflow-hidden"
+    >
+      <label htmlFor={id} className="block text-sm font-semibold text-[#17353D]">
         {label}
       </label>
       <textarea
         id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        rows={2}
+        rows={3}
         placeholder="Mô tả bằng lời của bạn, AI sẽ dựa vào đây để hiểu rõ hơn..."
-        className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none"
+        className="mt-2 w-full rounded-2xl border border-[#E9EEF1] bg-[#F5FAFC] p-4 text-base text-[#17353D] placeholder-[#5F7480]/60 transition-all duration-200 focus:border-[#2C8E92] focus:bg-white focus:ring-2 focus:ring-[#2C8E92]/20 focus:outline-none"
       />
-    </div>
+    </motion.div>
   )
 }
 
@@ -64,26 +71,50 @@ function ProfileForm() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-          Hồ sơ cơ địa của bạn
-        </h1>
-        <p className="mt-2 text-sm text-slate-500">
-          Thông tin này chỉ dùng để cá nhân hóa gợi ý trên thiết bị của bạn. Không chắc chắn ở mục nào?
-          Chọn "Khác" và mô tả bằng lời của bạn — AI sẽ dựa vào đó để hiểu rõ hơn.
-        </p>
+    <div className="relative min-h-screen bg-gradient-to-b from-[#F5FAFC] via-[#FDFDFB] to-[#F5FAFC] py-16 px-4 sm:px-6 lg:px-8 mt-12">
+      {/* Background Soft Radial Glowing Orbs */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 h-[450px] w-[700px] rounded-full bg-gradient-to-tr from-[#67D6E8]/15 via-[#BFD8CF]/20 to-transparent blur-3xl opacity-60" />
+        <div className="absolute top-1/3 right-0 h-[400px] w-[400px] rounded-full bg-[#D8B27A]/10 blur-3xl opacity-40" />
+        <div className="absolute bottom-1/4 left-0 h-[450px] w-[450px] rounded-full bg-[#67D6E8]/12 blur-3xl opacity-50" />
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="mt-8 space-y-8 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8"
-      >
-        <section>
-          <h2 className="flex items-center gap-1.5 text-base font-semibold text-slate-900">
-            Loại da <span className="text-red-500">*</span>
-          </h2>
-          <div className="mt-3">
+      <div className="relative z-10 mx-auto max-w-[1100px]">
+        {/* Header Section */}
+        <motion.div
+          initial={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center space-y-4"
+        >
+        
+          <h1 className="font-display text-4xl sm:text-5xl font-black tracking-tight text-[#17353D]">
+            Hồ sơ cơ địa của bạn
+          </h1>
+
+          <p className="mx-auto max-w-2xl text-base sm:text-lg leading-relaxed text-[#5F7480] font-normal">
+            Thông tin này chỉ dùng để cá nhân hóa gợi ý trên thiết bị của bạn. Không chắc chắn ở mục nào?
+            Chọn "Khác" và mô tả bằng lời của bạn — AI sẽ dựa vào đó để hiểu rõ hơn.
+          </p>
+        </motion.div>
+
+        {/* Form Container */}
+        <form onSubmit={handleSubmit} className="mt-12 space-y-8">
+          {/* 1. Skin Type Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="rounded-[28px] border border-[#E9EEF1] bg-[#FDFDFB] p-7 sm:p-10 shadow-[0_10px_30px_rgba(44,142,146,0.04)]"
+          >
+            <div className="space-y-1 mb-6">
+              <h2 className="text-2xl font-bold text-[#17353D]">
+                Loại da <span className="text-rose-500">*</span>
+              </h2>
+              <p className="text-sm text-[#5F7480]">Chọn loại da chính xác nhất với bạn hiện tại</p>
+            </div>
+
             <RadioGroup
               name="skinType"
               options={SKIN_TYPES}
@@ -93,99 +124,156 @@ function ProfileForm() {
                 setError('')
               }}
             />
-          </div>
-          {skinType === OTHER_OPTION_ID && (
-            <OtherNoteInput
-              id="skinTypeNote"
-              label="Mô tả làn da của bạn"
-              value={skinTypeNote}
-              onChange={setSkinTypeNote}
-            />
-          )}
-        </section>
 
-        <hr className="border-slate-100" />
+            {skinType === OTHER_OPTION_ID && (
+              <OtherNoteInput
+                id="skinTypeNote"
+                label="Mô tả làn da của bạn"
+                value={skinTypeNote}
+                onChange={setSkinTypeNote}
+              />
+            )}
+          </motion.div>
 
-        <section>
-          <h2 className="text-base font-semibold text-slate-900">Dị ứng thực phẩm</h2>
-          <p className="text-sm text-slate-500">Chọn tất cả những gì phù hợp (không bắt buộc)</p>
-          <div className="mt-3">
+          {/* 2. Allergies Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="rounded-[28px] border border-[#E9EEF1] bg-[#FDFDFB] p-7 sm:p-10 shadow-[0_10px_30px_rgba(44,142,146,0.04)]"
+          >
+            <div className="space-y-1 mb-6">
+              <h2 className="text-2xl font-bold text-[#17353D]">Dị ứng thực phẩm</h2>
+              <p className="text-sm text-[#5F7480]">Chọn tất cả những gì phù hợp (không bắt buộc)</p>
+            </div>
+
             <CheckboxGroup
               name="allergies"
               options={ALLERGIES}
               values={allergies}
               onChange={setAllergies}
             />
-          </div>
-          {allergies.includes(OTHER_OPTION_ID) && (
-            <OtherNoteInput
-              id="allergiesNote"
-              label="Mô tả dị ứng của bạn"
-              value={allergiesNote}
-              onChange={setAllergiesNote}
-            />
-          )}
-        </section>
 
-        <hr className="border-slate-100" />
+            {allergies.includes(OTHER_OPTION_ID) && (
+              <OtherNoteInput
+                id="allergiesNote"
+                label="Mô tả dị ứng của bạn"
+                value={allergiesNote}
+                onChange={setAllergiesNote}
+              />
+            )}
+          </motion.div>
 
-        <section>
-          <h2 className="text-base font-semibold text-slate-900">Bệnh lý nền liên quan dinh dưỡng</h2>
-          <p className="text-sm text-slate-500">Chọn tất cả những gì phù hợp (không bắt buộc)</p>
-          <div className="mt-3">
+          {/* 3. Conditions Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="rounded-[28px] border border-[#E9EEF1] bg-[#FDFDFB] p-7 sm:p-10 shadow-[0_10px_30px_rgba(44,142,146,0.04)]"
+          >
+            <div className="space-y-1 mb-6">
+              <h2 className="text-2xl font-bold text-[#17353D]">Bệnh lý nền liên quan dinh dưỡng</h2>
+              <p className="text-sm text-[#5F7480]">Chọn tất cả những gì phù hợp (không bắt buộc)</p>
+            </div>
+
             <CheckboxGroup
               name="conditions"
               options={CONDITIONS}
               values={conditions}
               onChange={setConditions}
             />
-          </div>
-          {conditions.includes(OTHER_OPTION_ID) && (
-            <OtherNoteInput
-              id="conditionsNote"
-              label="Mô tả bệnh lý nền của bạn"
-              value={conditionsNote}
-              onChange={setConditionsNote}
-            />
-          )}
-        </section>
 
-        <hr className="border-slate-100" />
+            {conditions.includes(OTHER_OPTION_ID) && (
+              <OtherNoteInput
+                id="conditionsNote"
+                label="Mô tả bệnh lý nền của bạn"
+                value={conditionsNote}
+                onChange={setConditionsNote}
+              />
+            )}
+          </motion.div>
 
-        <section>
-          <h2 className="text-base font-semibold text-slate-900">Mục tiêu của bạn</h2>
-          <p className="text-sm text-slate-500">Chọn tất cả những gì phù hợp (không bắt buộc)</p>
-          <div className="mt-3">
+          {/* 4. Goals Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="rounded-[28px] border border-[#E9EEF1] bg-[#FDFDFB] p-7 sm:p-10 shadow-[0_10px_30px_rgba(44,142,146,0.04)]"
+          >
+            <div className="space-y-1 mb-6">
+              <h2 className="text-2xl font-bold text-[#17353D]">Mục tiêu của bạn</h2>
+              <p className="text-sm text-[#5F7480]">Chọn tất cả những gì phù hợp (không bắt buộc)</p>
+            </div>
+
             <CheckboxGroup name="goals" options={GOALS} values={goals} onChange={setGoals} />
-          </div>
-          {goals.includes(OTHER_OPTION_ID) && (
-            <OtherNoteInput
-              id="goalsNote"
-              label="Mô tả mục tiêu của bạn"
-              value={goalsNote}
-              onChange={setGoalsNote}
-            />
+
+            {goals.includes(OTHER_OPTION_ID) && (
+              <OtherNoteInput
+                id="goalsNote"
+                label="Mô tả mục tiêu của bạn"
+                value={goalsNote}
+                onChange={setGoalsNote}
+              />
+            )}
+          </motion.div>
+
+          {/* 5. Extended Profile Section for logged in users */}
+          {user && (
+            <motion.div
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="rounded-[28px] border border-[#E9EEF1] bg-[#FDFDFB] p-7 sm:p-10 shadow-[0_10px_30px_rgba(44,142,146,0.04)]"
+            >
+              <ExtendedProfileSection />
+            </motion.div>
           )}
-        </section>
 
-        {user && (
-          <>
-            <hr className="border-slate-100" />
-            <ExtendedProfileSection />
-          </>
-        )}
+          {/* Error Banner */}
+          {error && (
+            <motion.p
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="rounded-2xl border border-rose-200 bg-rose-50 px-6 py-4 text-sm font-semibold text-rose-700 shadow-xs"
+            >
+              {error}
+            </motion.p>
+          )}
 
-        {error && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600">{error}</p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-emerald-600/30"
-        >
-          Xem gợi ý cho tôi
-        </button>
-      </form>
+          {/* Action / Submit Button - Animated Glass Button */}
+          <div className="flex justify-center pt-4 pb-8">
+            <motion.button
+              type="submit"
+              whileHover={
+                {
+                  backgroundPosition: 'right center',
+                }
+              }
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="group relative inline-flex w-full sm:w-auto min-w-[300px] items-center justify-center gap-2 overflow-hidden rounded-full text-lg font-bold text-white transition-colors cursor-pointer"
+              style={{
+                padding: '16px 40px',
+                backgroundImage:
+                  'linear-gradient(to right, #2C8E92 0%, #67D6E8 51%, #2C8E92 100%)',
+                backgroundSize: '200% auto',
+                border: 'none',
+                outline: 'none',
+                boxShadow: '0 10px 30px rgba(44,142,146,0.3)',
+                transition: '0.5s',
+              }}
+            >
+              <span className="relative z-10 flex items-center justify-center gap-2 font-display tracking-wide drop-shadow-sm">
+                Xem gợi ý cho tôi
+              </span>
+            </motion.button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

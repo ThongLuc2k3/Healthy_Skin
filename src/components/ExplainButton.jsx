@@ -25,9 +25,9 @@ function ExplainButton({ nameVi, category, result, reason }) {
 
   if (status === 'done') {
     return (
-      <div className="mt-2 rounded-lg border border-violet-100 bg-violet-50 p-3 text-sm leading-relaxed whitespace-pre-line text-violet-900">
-        <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-violet-600">
-          <SparklesIcon className="h-3.5 w-3.5" />
+      <div className="mt-2.5 rounded-xl border border-cyan-400/30 bg-cyan-950/40 p-3.5 text-sm leading-relaxed whitespace-pre-line text-cyan-100 shadow-glow">
+        <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-cyan-300">
+          <SparklesIcon className="h-3.5 w-3.5 text-cyan-300" />
           Giải thích thêm từ AI
         </p>
         {explanation}
@@ -36,17 +36,17 @@ function ExplainButton({ nameVi, category, result, reason }) {
   }
 
   return (
-    <div className="mt-2">
+    <div className="mt-2.5">
       <button
         type="button"
         onClick={handleClick}
         disabled={status === 'loading'}
-        className="flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 transition hover:bg-violet-100 disabled:opacity-60"
+        className="flex items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-3.5 py-1.5 text-xs font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950 disabled:opacity-60 shadow-glow"
       >
         <SparklesIcon className="h-3.5 w-3.5" />
         {status === 'loading' ? 'Đang tạo giải thích...' : 'Giải thích thêm bằng AI'}
       </button>
-      {status === 'error' && <p className="mt-1.5 text-xs text-red-600">{errorMessage}</p>}
+      {status === 'error' && <p className="mt-1.5 text-xs text-rose-400">{errorMessage}</p>}
     </div>
   )
 }

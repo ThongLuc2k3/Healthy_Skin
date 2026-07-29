@@ -76,34 +76,36 @@ function SkinPlaygroundPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
-      <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-          <span className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-semibold text-cyan-700">
-            <GamepadIcon className="h-3.5 w-3.5" />
-            Mini game / Skin Lab
+    <div className="mx-auto max-w-5xl px-4 py-12">
+      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="rounded-3xl glass-strong border border-cyan-400/25 p-6 shadow-glow-lg sm:p-8">
+          <span className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 shadow-glow">
+            <GamepadIcon className="h-3.5 w-3.5 text-cyan-300" />
+            <span className="font-mono text-xs font-semibold text-cyan-200 uppercase tracking-wider">
+              Mini game / Skin Lab
+            </span>
           </span>
-          <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-900">Chơi nhanh để hiểu da mình hơn</h1>
-          <p className="mt-3 text-sm leading-6 text-slate-600">
+          <h1 className="mt-5 text-3xl font-extrabold tracking-tight text-gradient-cyan text-shadow-glow">Chơi nhanh để hiểu da mình hơn</h1>
+          <p className="mt-3 text-sm leading-relaxed text-slate-300/90">
             Một tab vui nhộn để giữ người dùng quay lại web. Không thay thế hồ sơ chính, nhưng rất hợp
             để kéo tương tác và tạo cảm giác hệ sinh thái sống động hơn.
           </p>
 
-          <div className="mt-6 space-y-5">
+          <div className="mt-8 space-y-6">
             {QUESTIONS.map((question, index) => (
-              <div key={question.id} className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Câu {index + 1}</p>
-                <h2 className="mt-2 text-lg font-bold text-slate-900">{question.question}</h2>
-                <div className="mt-4 grid gap-2">
+              <div key={question.id} className="rounded-2xl glass p-5 border border-cyan-400/20 shadow-glow">
+                <p className="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">Câu {index + 1}</p>
+                <h2 className="mt-2 text-base font-bold text-white">{question.question}</h2>
+                <div className="mt-4 grid gap-2.5">
                   {question.options.map((option) => (
                     <button
                       key={option.id}
                       type="button"
                       onClick={() => setAnswers((prev) => ({ ...prev, [question.id]: option.id }))}
-                      className={`rounded-2xl border px-4 py-3 text-left text-sm transition ${
+                      className={`rounded-xl border p-3.5 text-left text-sm font-medium transition-all ${
                         answers[question.id] === option.id
-                          ? 'border-cyan-300 bg-cyan-50 text-cyan-800'
-                          : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'
+                          ? 'border-cyan-400 bg-cyan-500/20 text-cyan-200 shadow-glow ring-1 ring-cyan-400'
+                          : 'border-cyan-400/20 glass text-slate-300 hover:border-cyan-400/50 hover:text-white'
                       }`}
                     >
                       {option.label}
@@ -115,36 +117,36 @@ function SkinPlaygroundPage() {
           </div>
         </section>
 
-        <aside className="space-y-4">
-          <div className="rounded-[2rem] border border-cyan-100 bg-[radial-gradient(circle_at_top_left,_rgba(34,211,238,0.22),_transparent_36%),linear-gradient(135deg,_rgba(255,255,255,0.98),_rgba(236,254,255,0.96))] p-6 shadow-sm">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-600">
-              <SparklesIcon className="h-4 w-4" />
+        <aside className="space-y-5">
+          <div className="rounded-3xl glass-strong border border-cyan-400/25 p-6 shadow-glow-lg">
+            <p className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
+              <SparklesIcon className="h-4 w-4 text-cyan-300" />
               Kết quả mini quiz
             </p>
             {result ? (
               <>
-                <h2 className="mt-4 text-2xl font-black tracking-tight text-slate-900">{result.title}</h2>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{result.tip}</p>
+                <h2 className="mt-4 text-2xl font-bold text-gradient-cyan">{result.title}</h2>
+                <p className="mt-3 text-sm leading-relaxed text-slate-300">{result.tip}</p>
               </>
             ) : (
-              <p className="mt-4 text-sm leading-6 text-slate-600">
+              <p className="mt-4 text-sm leading-relaxed text-slate-300">
                 Trả lời đủ 3 câu để mở ra một gợi ý vui, nhanh và dễ nhớ về xu hướng làn da của bạn.
               </p>
             )}
           </div>
 
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-              <TrophyIcon className="h-4 w-4 text-emerald-600" />
+          <div className="rounded-3xl glass-strong border border-cyan-400/25 p-6 shadow-glow-lg">
+            <p className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400">
+              <TrophyIcon className="h-4 w-4 text-cyan-300" />
               Thử thách hôm nay
             </p>
-            <p className="mt-4 rounded-[1.5rem] bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-700">
+            <p className="mt-4 rounded-2xl glass border border-cyan-400/20 p-4 text-sm leading-relaxed text-slate-200">
               {pickedChallenge}
             </p>
             <button
               type="button"
               onClick={shuffleChallenge}
-              className="mt-4 rounded-2xl bg-gradient-to-r from-cyan-600 to-teal-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-600/20 transition hover:-translate-y-0.5"
+              className="mt-4 rounded-xl bg-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-glow transition hover:bg-cyan-300"
             >
               Đổi thử thách khác
             </button>

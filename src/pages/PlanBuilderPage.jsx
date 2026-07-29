@@ -77,14 +77,14 @@ function PlanBuilderPage() {
 
   if (ready && !user) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <h1 className="text-xl font-semibold text-slate-900">Cần đăng nhập</h1>
-        <p className="mt-2 text-sm text-slate-500">
+      <div className="mx-auto max-w-lg px-4 py-20 text-center">
+        <h1 className="text-2xl font-bold text-gradient-cyan">Cần đăng nhập</h1>
+        <p className="mt-3 text-sm text-slate-300">
           Đăng nhập để lưu kế hoạch cải thiện và để hệ thống theo dõi lộ trình riêng của bạn.
         </p>
         <Link
           to="/login"
-          className="mt-6 inline-block rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20"
+          className="mt-6 inline-block rounded-xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 shadow-glow transition hover:bg-cyan-300"
         >
           Đăng nhập
         </Link>
@@ -94,14 +94,14 @@ function PlanBuilderPage() {
 
   if (!isProfileComplete(profile)) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <h1 className="text-xl font-semibold text-slate-900">Chưa có hồ sơ cơ địa</h1>
-        <p className="mt-2 text-sm text-slate-500">
+      <div className="mx-auto max-w-lg px-4 py-20 text-center">
+        <h1 className="text-2xl font-bold text-gradient-cyan">Chưa có hồ sơ cơ địa</h1>
+        <p className="mt-3 text-sm text-slate-300">
           Hãy hoàn thành hồ sơ và xem kết quả kiểm tra trước khi lập kế hoạch cải thiện.
         </p>
         <Link
           to="/profile"
-          className="mt-6 inline-block rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20"
+          className="mt-6 inline-block rounded-xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 shadow-glow transition hover:bg-cyan-300"
         >
           Điền hồ sơ ngay
         </Link>
@@ -111,33 +111,35 @@ function PlanBuilderPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
-      <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="overflow-hidden rounded-[2rem] border border-emerald-100 bg-white shadow-[0_20px_70px_-40px_rgba(16,185,129,0.45)]">
-          <div className="bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.18),_transparent_42%),linear-gradient(135deg,_rgba(255,255,255,0.98),_rgba(240,253,250,0.96))] px-6 py-7 sm:px-8">
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-xs font-semibold text-emerald-700">
-              <SparklesIcon className="h-3.5 w-3.5" />
-              Bước sau kết quả kiểm tra
+      <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <section className="rounded-3xl glass-strong border border-cyan-400/25 shadow-glow-lg overflow-hidden">
+          <div className="p-6 sm:p-8 border-b border-cyan-400/20 bg-slate-950/40">
+            <span className="inline-flex items-center gap-2 rounded-full glass px-4 py-1.5 shadow-glow">
+              <SparklesIcon className="h-3.5 w-3.5 text-cyan-300" />
+              <span className="font-mono text-xs font-semibold text-cyan-200 uppercase tracking-wider">
+                Bước sau kết quả kiểm tra
+              </span>
             </span>
-            <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+            <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-gradient-cyan text-shadow-glow sm:text-4xl">
               Lập kế hoạch cải thiện riêng cho bạn
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-300/90">
               Không chỉ dừng ở việc biết cái gì phù hợp hay nên tránh. Hãy cho hệ thống thêm một ít bối
               cảnh thực tế để tạo ra lộ trình có thể làm ngay trong đời sống hằng ngày của bạn.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6 px-6 py-7 sm:px-8">
+          <form onSubmit={handleSubmit} className="space-y-6 p-6 sm:p-8">
             <div className="grid gap-4 md:grid-cols-3">
-              <label className="rounded-2xl border border-slate-200 p-4">
-                <span className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                  <TargetIcon className="h-4 w-4 text-emerald-600" />
+              <label className="rounded-2xl glass border border-cyan-400/20 p-4">
+                <span className="flex items-center gap-2 text-sm font-semibold text-white">
+                  <TargetIcon className="h-4 w-4 text-cyan-300" />
                   Mục tiêu ưu tiên
                 </span>
                 <select
                   value={form.focusArea}
                   onChange={(e) => updateField('focusArea', e.target.value)}
-                  className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  className="mt-3 w-full rounded-xl bg-slate-900 border border-cyan-400/20 px-3 py-2.5 text-sm text-white focus:border-cyan-400 focus:outline-none"
                 >
                   <option value="calm_skin">Làm dịu da, giảm kích ứng</option>
                   <option value="acne_control">Kiểm soát dầu và giảm mụn</option>
@@ -146,15 +148,15 @@ function PlanBuilderPage() {
                 </select>
               </label>
 
-              <label className="rounded-2xl border border-slate-200 p-4">
-                <span className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                  <WalletIcon className="h-4 w-4 text-emerald-600" />
+              <label className="rounded-2xl glass border border-cyan-400/20 p-4">
+                <span className="flex items-center gap-2 text-sm font-semibold text-white">
+                  <WalletIcon className="h-4 w-4 text-cyan-300" />
                   Ngân sách/tháng
                 </span>
                 <select
                   value={form.monthlyBudget}
                   onChange={(e) => updateField('monthlyBudget', e.target.value)}
-                  className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  className="mt-3 w-full rounded-xl bg-slate-900 border border-cyan-400/20 px-3 py-2.5 text-sm text-white focus:border-cyan-400 focus:outline-none"
                 >
                   <option value="lean">Dưới 500k</option>
                   <option value="balanced">500k - 1.5 triệu</option>
@@ -162,15 +164,15 @@ function PlanBuilderPage() {
                 </select>
               </label>
 
-              <label className="rounded-2xl border border-slate-200 p-4">
-                <span className="flex items-center gap-2 text-sm font-semibold text-slate-800">
-                  <TrophyIcon className="h-4 w-4 text-emerald-600" />
+              <label className="rounded-2xl glass border border-cyan-400/20 p-4">
+                <span className="flex items-center gap-2 text-sm font-semibold text-white">
+                  <TrophyIcon className="h-4 w-4 text-cyan-300" />
                   Mức cam kết
                 </span>
                 <select
                   value={form.commitment}
                   onChange={(e) => updateField('commitment', e.target.value)}
-                  className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  className="mt-3 w-full rounded-xl bg-slate-900 border border-cyan-400/20 px-3 py-2.5 text-sm text-white focus:border-cyan-400 focus:outline-none"
                 >
                   <option value="quick">Nhanh gọn 10 phút/ngày</option>
                   <option value="steady">Vừa phải 20 phút/ngày</option>
@@ -181,35 +183,35 @@ function PlanBuilderPage() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <label className="block">
-                <span className="text-sm font-semibold text-slate-800">Bạn đang dùng sản phẩm gì?</span>
+                <span className="text-sm font-semibold text-slate-200">Bạn đang dùng sản phẩm gì?</span>
                 <textarea
                   rows={4}
                   value={form.currentProducts}
                   onChange={(e) => updateField('currentProducts', e.target.value)}
                   placeholder="Ví dụ: sữa rửa mặt có BHA, serum vitamin C, kem chống nắng..."
-                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  className="mt-2 w-full rounded-2xl bg-slate-900/90 border border-cyan-400/20 px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
                 />
               </label>
 
               <label className="block">
-                <span className="text-sm font-semibold text-slate-800">Thói quen ăn uống hiện tại</span>
+                <span className="text-sm font-semibold text-slate-200">Thói quen ăn uống hiện tại</span>
                 <textarea
                   rows={4}
                   value={form.currentFoods}
                   onChange={(e) => updateField('currentFoods', e.target.value)}
                   placeholder="Ví dụ: hay uống cà phê, ăn cay, ít rau, hay ăn ngoài..."
-                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  className="mt-2 w-full rounded-2xl bg-slate-900/90 border border-cyan-400/20 px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
                 />
               </label>
             </div>
 
             <div className="grid gap-4 md:grid-cols-[0.6fr_1.4fr]">
               <label className="block">
-                <span className="text-sm font-semibold text-slate-800">Số ngày muốn tập trung</span>
+                <span className="text-sm font-semibold text-slate-200">Số ngày muốn tập trung</span>
                 <select
                   value={form.durationDays}
                   onChange={(e) => updateField('durationDays', Number(e.target.value))}
-                  className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  className="mt-2 w-full rounded-2xl bg-slate-900 border border-cyan-400/20 px-4 py-3 text-sm text-white focus:border-cyan-400 focus:outline-none"
                 >
                   <option value={7}>7 ngày tăng tốc</option>
                   <option value={14}>14 ngày ổn định</option>
@@ -218,19 +220,19 @@ function PlanBuilderPage() {
               </label>
 
               <label className="block">
-                <span className="text-sm font-semibold text-slate-800">Điều bạn muốn AI lưu ý thêm</span>
+                <span className="text-sm font-semibold text-slate-200">Điều bạn muốn AI lưu ý thêm</span>
                 <textarea
                   rows={3}
                   value={form.notes}
                   onChange={(e) => updateField('notes', e.target.value)}
                   placeholder="Ví dụ: sắp đi thực tập, ngủ muộn, dễ quên chống nắng, muốn routine tối giản..."
-                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                  className="mt-2 w-full rounded-2xl bg-slate-900/90 border border-cyan-400/20 px-4 py-3 text-sm text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
                 />
               </label>
             </div>
 
             {errorMessage && (
-              <p className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+              <p className="rounded-xl bg-rose-500/10 border border-rose-500/30 px-4 py-3 text-sm font-medium text-rose-300">
                 {errorMessage}
               </p>
             )}
@@ -239,13 +241,13 @@ function PlanBuilderPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex-1 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5 disabled:opacity-60"
+                className="flex-1 rounded-xl bg-cyan-400 px-6 py-3.5 text-sm font-semibold text-slate-950 shadow-glow transition hover:bg-cyan-300 disabled:opacity-60"
               >
                 {submitting ? 'Đang tạo kế hoạch...' : 'Tạo kế hoạch cải thiện cho tôi'}
               </button>
               <Link
                 to="/roadmap/custom"
-                className="rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-center text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:shadow-sm"
+                className="rounded-xl glass border border-cyan-400/30 px-6 py-3.5 text-center text-sm font-semibold text-cyan-200 transition hover:border-cyan-400"
               >
                 Tự nhập việc thủ công
               </Link>
@@ -253,10 +255,10 @@ function PlanBuilderPage() {
           </form>
         </section>
 
-        <aside className="space-y-4">
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-900">Kế hoạch này sẽ làm gì?</h2>
-            <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-600">
+        <aside className="space-y-5">
+          <div className="rounded-3xl glass-strong border border-cyan-400/25 p-6 shadow-glow-lg">
+            <h2 className="text-lg font-bold text-gradient-cyan">Kế hoạch này sẽ làm gì?</h2>
+            <ul className="mt-4 space-y-3 text-sm leading-relaxed text-slate-300">
               <li>Biến kết quả kiểm tra thành việc cần làm ngay trong ngày.</li>
               <li>Ưu tiên mục tiêu bạn đang cần nhất thay vì đẩy cả tá lời khuyên cùng lúc.</li>
               <li>Tự cân theo ngân sách và mức cam kết thực tế của bạn.</li>
@@ -264,13 +266,13 @@ function PlanBuilderPage() {
             </ul>
           </div>
 
-          <div className="rounded-[2rem] border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-cyan-50 p-6 shadow-sm">
-            <h2 className="text-lg font-bold text-slate-900">Sau khi tạo xong</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+          <div className="rounded-3xl glass-strong border border-cyan-400/25 p-6 shadow-glow-lg">
+            <h2 className="text-lg font-bold text-gradient-cyan">Sau khi tạo xong</h2>
+            <p className="mt-3 text-sm leading-relaxed text-slate-300">
               Tab <strong>Lộ trình</strong> sẽ chuyển sang giao diện kiểu dashboard: hôm nay cần làm gì,
               đang tiến triển tới đâu, streak bao nhiêu ngày, và mục tiêu hiện tại ra sao.
             </p>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-3 text-sm leading-relaxed text-slate-300">
               Bạn vẫn có thể chỉnh lại kế hoạch hoặc tự thiết kế một bản khác bất cứ lúc nào.
             </p>
           </div>

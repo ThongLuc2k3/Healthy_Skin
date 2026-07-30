@@ -3,7 +3,7 @@ import { LeafIcon, SparklesIcon } from '../components/Icons'
 
 function AboutPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
+    <div className="mx-auto max-w-3xl px-4 py-10 pt-28">
       <div className="text-center">
         <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-xs font-semibold text-emerald-700 shadow-sm">
           <SparklesIcon className="h-3.5 w-3.5" />

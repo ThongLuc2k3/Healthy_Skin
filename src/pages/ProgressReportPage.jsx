@@ -104,14 +104,14 @@ export default function ProgressReportPage() {
 
   if (!user) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 text-center">
+      <div className="max-w-3xl mx-auto px-4 py-16 pt-28 text-center">
         <p className="text-slate-500">Vui lòng đăng nhập để xem báo cáo tiến độ.</p>
       </div>
     )
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-8">
+    <div className="max-w-6xl mx-auto px-6 py-8 pt-28">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Báo cáo tiến độ</h1>

@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import crypto from 'node:crypto'
 import db from '../db/connection.js'
+import { uploadBuffer, deleteFile, extractPublicId } from './cloudinaryService.js'
 
 const FACE_PHOTO_DIR = path.resolve('uploads/face_photos')
 fs.mkdirSync(FACE_PHOTO_DIR, { recursive: true })
@@ -41,6 +42,7 @@ const setConsentStmt = db.prepare(`
   ON CONFLICT(user_id) DO UPDATE SET consent_given_at = datetime('now')
 `)
 
+// Cloudinary URL lưu vào face_photo_path, face_photo_mime giữ mime gốc
 const setFacePhotoStmt = db.prepare(`
   INSERT INTO profiles (user_id, face_photo_path, face_photo_mime)
   VALUES (@user_id, @face_photo_path, @face_photo_mime)
@@ -85,8 +87,8 @@ function toProfileShape(row) {
     conditionsNote: row.conditions_note ?? '',
     goalsNote: row.goals_note ?? '',
     consentGivenAt: row.consent_given_at ?? null,
-    // Đường dẫn tương đối theo quy ước apiClient (không có tiền tố /api)
-    facePhotoUrl: row.face_photo_path ? '/profile/face-photo' : null,
+    // face_photo_path lưu Cloudinary URL (do setFacePhoto upload lên Cloudinary)
+    facePhotoUrl: row.face_photo_path || null,
     diagnosedConditions: JSON.parse(row.diagnosed_conditions || '[]'),
   }
 }
@@ -120,35 +122,30 @@ export function giveConsent(userId) {
   return getProfile(userId)
 }
 
-export function setFacePhoto(userId, file) {
+export async function setFacePhoto(userId, file) {
   const row = getStmt.get(userId)
-  const ext = EXT_BY_MIME[file.mimetype] || ''
-  const filename = `${crypto.randomUUID()}${ext}`
-  const filePath = path.join(FACE_PHOTO_DIR, filename)
-  fs.writeFileSync(filePath, file.buffer)
 
+  // Xoá ảnh cũ trên Cloudinary nếu có
   if (row?.face_photo_path) {
-    fs.unlink(row.face_photo_path, () => {})
+    const publicId = extractPublicId(row.face_photo_path)
+    if (publicId) await deleteFile(publicId)
   }
 
-  setFacePhotoStmt.run({ user_id: userId, face_photo_path: filePath, face_photo_mime: file.mimetype })
+  // Upload ảnh mới lên Cloudinary
+  const { url } = await uploadBuffer(file.buffer, file.mimetype, { folder: 'da-duong/face-photos' })
+
+  setFacePhotoStmt.run({ user_id: userId, face_photo_path: url, face_photo_mime: file.mimetype })
   return getProfile(userId)
 }
 
-export function deleteFacePhoto(userId) {
+export async function deleteFacePhoto(userId) {
   const row = getStmt.get(userId)
   if (row?.face_photo_path) {
-    fs.unlink(row.face_photo_path, () => {})
+    const publicId = extractPublicId(row.face_photo_path)
+    if (publicId) await deleteFile(publicId)
   }
   clearFacePhotoStmt.run(userId)
   return getProfile(userId)
-}
-
-// Trả về đường dẫn + mime thô trên đĩa — dùng nội bộ ở route ảnh, không qua toProfileShape.
-export function getFacePhotoFile(userId) {
-  const row = getStmt.get(userId)
-  if (!row?.face_photo_path) return null
-  return { path: row.face_photo_path, mime: row.face_photo_mime }
 }
 
 const MAX_DIAGNOSED_CONDITIONS = 20

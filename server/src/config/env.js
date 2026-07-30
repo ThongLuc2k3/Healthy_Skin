@@ -13,7 +13,16 @@ const config = {
   geminiApiKey: process.env.GEMINI_API_KEY || '',
   geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
   dbPath: process.env.DB_PATH || './data/da_duong.sqlite',
+  cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
+  cloudinaryApiKey: process.env.CLOUDINARY_API_KEY || '',
+  cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET || '',
   corsOrigins,
+}
+
+if (!config.cloudinaryCloudName || !config.cloudinaryApiKey || !config.cloudinaryApiSecret) {
+  console.warn(
+    '[config] Cloudinary chưa được cấu hình — tính năng upload ảnh face photo sẽ không hoạt động.',
+  )
 }
 
 if (!process.env.JWT_SECRET) {

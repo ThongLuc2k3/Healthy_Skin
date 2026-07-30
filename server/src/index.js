@@ -21,6 +21,7 @@ import roadmapRoutes from './routes/roadmap.routes.js'
 import checkinRoutes from './routes/checkin.routes.js'
 import expertsRoutes from './routes/experts.routes.js'
 import reviewRoutes from './routes/review.routes.js'
+import milestoneRoutes from './routes/milestone.routes.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const clientDistPath = path.resolve(__dirname, '../../dist')
@@ -90,6 +91,7 @@ app.use('/api/roadmap', roadmapRoutes)
 app.use('/api/checkin', checkinRoutes)
 app.use('/api/experts', expertsRoutes)
 app.use('/api/reviews', reviewRoutes)
+app.use('/api/milestones', milestoneRoutes)
 app.use(express.static(path.join(process.cwd(), 'public')))
 app.use('/uploads', express.static(path.join(process.cwd(), 'public/uploads')))
 app.use(cors())

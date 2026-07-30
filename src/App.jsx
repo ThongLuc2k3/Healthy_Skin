@@ -19,6 +19,7 @@ import ChatWidget from './components/ChatWidget'
 import PlanBuilderPage from './pages/PlanBuilderPage'
 import SkinPlaygroundPage from './pages/SkinPlaygroundPage'
 import WebsiteReviews from './pages/WebsiteReviews'
+import ProgressReportPage from './pages/ProgressReportPage'
 // Nền cố định theo viewport — luôn hiển thị ở 4 góc màn hình dù cuộn tới đâu
 const FIXED_ACCENT_STYLE = {
   backgroundImage: [
@@ -54,6 +55,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/reviews" element={<WebsiteReviews />} />
+        <Route path="/progress-report" element={<ProgressReportPage />} />
       </Routes>
       <ChatWidget />
     </div>

@@ -14,6 +14,7 @@ const LINKS = [
   { to: '/skin-lab', label: 'Skin Lab' },
   { to: '/experts', label: 'Chuyên gia' },
   { to: '/reviews', label: 'Diễn đàn' },
+  { to: '/progress-report', label: 'Tiến độ' },
 ]
 
 function NavBar() {

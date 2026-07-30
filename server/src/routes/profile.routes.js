@@ -11,7 +11,6 @@ import {
   giveConsent,
   setFacePhoto,
   deleteFacePhoto,
-  getFacePhotoFile,
   setDiagnosedConditions,
 } from '../services/profileService.js'
 import {
@@ -124,22 +123,15 @@ router.post(
     if (!req.file) {
       return res.status(400).json({ error: 'Vui lòng chọn một ảnh.' })
     }
-    res.json(setFacePhoto(req.userId, req.file))
+    const result = await setFacePhoto(req.userId, req.file)
+    res.json(result)
   }),
 )
 
-router.delete('/face-photo', requireAuth, (req, res) => {
-  res.json(deleteFacePhoto(req.userId))
-})
-
-router.get('/face-photo', requireAuth, (req, res) => {
-  const file = getFacePhotoFile(req.userId)
-  if (!file || !fs.existsSync(file.path)) {
-    return res.status(404).json({ error: 'Chưa có ảnh khuôn mặt.' })
-  }
-  res.setHeader('Content-Type', file.mime || 'image/jpeg')
-  res.sendFile(file.path)
-})
+router.delete('/face-photo', requireAuth, asyncHandler(async (req, res) => {
+  const result = await deleteFacePhoto(req.userId)
+  res.json(result)
+}))
 
 router.get('/expert-reports', requireAuth, (req, res) => {
   res.json(listExpertReports(req.userId))

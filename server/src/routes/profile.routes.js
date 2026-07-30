@@ -11,7 +11,6 @@ import {
   giveConsent,
   setFacePhoto,
   deleteFacePhoto,
-  getFacePhotoFile,
   setDiagnosedConditions,
 } from '../services/profileService.js'
 import {

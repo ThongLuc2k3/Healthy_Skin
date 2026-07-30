@@ -125,7 +125,6 @@ export async function getFacePhotoFile(userId) {
   if (!row?.face_photo_path) return null
   return { path: row.face_photo_path, mime: row.face_photo_mime }
 }
-
 const MAX_DIAGNOSED_CONDITIONS = 20
 
 export async function setDiagnosedConditions(userId, diagnosedConditions) {

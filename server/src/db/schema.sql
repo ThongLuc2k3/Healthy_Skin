@@ -102,3 +102,13 @@ CREATE TABLE IF NOT EXISTS website_reviews (
   title TEXT NOT NULL, content TEXT NOT NULL, image_path TEXT, image_mime TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS progress_milestones (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  snapshot TEXT NOT NULL,
+  summary TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_milestones_user ON progress_milestones(user_id);

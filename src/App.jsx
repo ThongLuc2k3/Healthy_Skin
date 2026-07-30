@@ -20,6 +20,7 @@ import PlanBuilderPage from './pages/PlanBuilderPage'
 import SkinPlaygroundPage from './pages/SkinPlaygroundPage'
 import WebsiteReviews from './pages/WebsiteReviews'
 import AboutPage from './pages/AboutPage'
+import ProgressReportPage from './pages/ProgressReportPage'
 
 function App() {
   return (
@@ -50,6 +51,7 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/reviews" element={<WebsiteReviews />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/progress-report" element={<ProgressReportPage />} />
         </Routes>
       </main>
       <ChatWidget />

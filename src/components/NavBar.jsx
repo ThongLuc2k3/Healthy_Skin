@@ -17,6 +17,7 @@ import {
   StethoscopeIcon,
   ChatBubbleIcon,
   ShieldIcon,
+  TrophyIcon,
 } from './Icons'
 import { useAuth } from '../context/AuthContext'
 
@@ -32,6 +33,7 @@ const LINKS = [
   { to: '/roadmap', label: 'Lộ trình', icon: MapIcon },
   { to: '/skin-lab', label: 'Skin Lab', icon: SparklesIcon },
   { to: '/reviews', label: 'Diễn đàn', icon: ChatBubbleIcon },
+  { to: '/progress-report', label: 'Tiến độ', icon: TrophyIcon },
   { to: '/about', label: 'Về chúng tôi', icon: ShieldIcon },
 ]
 

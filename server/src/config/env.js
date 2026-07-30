@@ -27,7 +27,16 @@ const config = {
   geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
   databaseUrl: process.env.DATABASE_URL || '',
   dbPoolMax: Math.max(Number(process.env.DB_POOL_MAX) || 10, 1),
+  cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
+  cloudinaryApiKey: process.env.CLOUDINARY_API_KEY || '',
+  cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET || '',
   corsOrigins,
+}
+
+if (!config.cloudinaryCloudName || !config.cloudinaryApiKey || !config.cloudinaryApiSecret) {
+  console.warn(
+    '[config] Cloudinary chưa được cấu hình — tính năng upload ảnh milestone sẽ không hoạt động.',
+  )
 }
 
 if (!process.env.JWT_SECRET) {

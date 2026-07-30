@@ -1,15 +1,24 @@
-# DA DƯỠNG
+# Healthy Skin
 
-MVP demo cho cuộc thi đổi mới sáng tạo CTP 2026 — nền tảng cá nhân hóa chăm sóc da và dinh dưỡng
-dựa trên một hồ sơ cơ địa dùng chung.
+Nền tảng cá nhân hóa chăm sóc da và dinh dưỡng, ứng dụng AI để phân tích tình trạng da và đồng hành
+cùng người dùng suốt lộ trình cải thiện, dựa trên một hồ sơ cơ địa dùng chung cho toàn bộ trải nghiệm.
 
-Bản demo gốc (Phase 1-6) chạy hoàn toàn client-side: đối chiếu rule-based (không dùng AI/ML thật),
-database là file JSON tĩnh, phần "scan" mô phỏng bằng tìm kiếm/chọn từ danh sách có sẵn. Kể từ
-Phase 7, dự án có thêm một backend thật (`server/`) với tài khoản người dùng và quét ảnh thật bằng
-Gemini API (đọc ảnh + suy luận phù hợp/cần cân nhắc/nên tránh trực tiếp, không giới hạn trong database
-— khác với tìm kiếm thủ công vẫn dùng `matchEngine.js` rule-based như cũ) — frontend vẫn tự chạy độc
-lập, không bắt buộc backend, và tự chuyển về chế độ demo (localStorage + JSON tĩnh) nếu backend
-không chạy.
+## Tính năng
+
+- **Hồ sơ cơ địa** — khai báo loại da, dị ứng, bệnh lý, mục tiêu chăm sóc; lưu vĩnh viễn khi có tài khoản.
+- **Quét mỹ phẩm/thực phẩm** — đối chiếu rule-based dựa trên hồ sơ (`matchEngine.js`), hoặc quét ảnh
+  thật qua Gemini API để đọc và suy luận trực tiếp (không giới hạn trong database sẵn có).
+- **Gợi ý & lộ trình chăm sóc** — sinh lộ trình theo ngày, có thể tuỳ biến; điểm danh hằng ngày,
+  theo dõi streak.
+- **Theo dõi tiến độ** — chụp lại "milestone" theo mốc thời gian, so sánh trước/sau (ảnh, tỉ lệ hoàn
+  thành điểm danh, số lượt quét, nhiệm vụ đã làm).
+- **Chuyên gia** — xem danh sách, đặt lịch tư vấn với chuyên gia da liễu.
+- **Diễn đàn đánh giá** — người dùng chia sẻ trải nghiệm, đánh giá kèm ảnh.
+- **Về chúng tôi** — chính sách bảo vệ thông tin cá nhân, điều khoản sử dụng, cam kết về sức khỏe và
+  giới hạn trách nhiệm khi dùng AI.
+
+Frontend luôn chạy độc lập, không bắt buộc backend — tự chuyển về chế độ demo (localStorage + JSON
+tĩnh) nếu backend không chạy.
 
 ## Chạy chỉ frontend (chế độ demo, không cần backend)
 
@@ -29,16 +38,17 @@ cp .env.example .env               # thường có thể giữ nguyên khi dev l
 
 cd server
 npm install
-cp .env.example .env               # điền JWT_SECRET, GEMINI_API_KEY nếu có
+cp .env.example .env               # điền DATABASE_URL, JWT_SECRET, GEMINI_API_KEY
 cd ..
 
 npm run dev:all   # tự chọn cổng trống cho frontend/backend và nối 2 tiến trình với nhau
 ```
 
-Không có `GEMINI_API_KEY` vẫn chạy được bình thường — chỉ riêng tính năng quét ảnh thật ở trang Quét
-thử sẽ báo "chưa sẵn sàng" cho tới khi bạn thêm key vào `server/.env`. Key này lấy miễn phí, không
-cần thẻ thanh toán, tại [Google AI Studio](https://aistudio.google.com/apikey) — xem
-`HUONG_DAN_CHAY.md` để biết chi tiết.
+Backend cần `DATABASE_URL` trỏ tới một database PostgreSQL (khuyến nghị [Neon](https://neon.tech),
+free, không cần thẻ). Không có `GEMINI_API_KEY` vẫn chạy được bình thường — chỉ riêng tính năng quét
+ảnh thật ở trang Quét thử sẽ báo "chưa sẵn sàng" cho tới khi bạn thêm key vào `server/.env`. Key này
+lấy miễn phí tại [Google AI Studio](https://aistudio.google.com/apikey) — xem `HUONG_DAN_CHAY.md` để
+biết chi tiết.
 
 ## Cấu trúc
 
@@ -46,9 +56,9 @@ cần thẻ thanh toán, tại [Google AI Studio](https://aistudio.google.com/ap
 - `src/logic/matchEngine.js` — logic đối chiếu rule-based (`matchProfile`, `getRecommendations`), dùng chung cho cả frontend lẫn backend
 - `src/context/ProfileContext.jsx` — state hồ sơ cơ địa, lưu localStorage, đồng bộ lên backend khi đã đăng nhập
 - `src/context/AuthContext.jsx` — trạng thái đăng nhập, JWT
-- `src/pages` — Trang chủ, Hồ sơ, Kết quả gợi ý, Quét thử, Lịch sử quét, Đăng nhập/Đăng ký
+- `src/pages` — Trang chủ, Hồ sơ, Kết quả gợi ý, Quét thử, Lịch sử quét, Lộ trình, Điểm danh, Tiến độ, Chuyên gia, Diễn đàn, Về chúng tôi, Đăng nhập/Đăng ký
 - `src/components` — component UI dùng chung
-- `server/` — backend Express + PostgreSQL: xác thực JWT, lưu hồ sơ/lịch sử quét, quét ảnh thật qua Gemini API (`server/src/services/geminiService.js`), rate limit + helmet bảo vệ API. Chuỗi kết nối được đọc từ `DATABASE_URL`.
+- `server/` — backend Express + PostgreSQL: xác thực JWT, lưu hồ sơ/lịch sử quét/milestone, quét ảnh thật qua Gemini API (`server/src/services/geminiService.js`), rate limit + helmet bảo vệ API. Chuỗi kết nối được đọc từ `DATABASE_URL`.
 
 ## Deploy
 
@@ -63,7 +73,8 @@ Nếu muốn deploy thủ công thay vì dùng blueprint, cấu hình tương đ
 - Root directory: thư mục gốc của repo
 
 Khi tạo service trên Render, nhớ đặt các biến môi trường cần thiết trong dashboard, tối thiểu là
-`JWT_SECRET`. Nếu dùng quét ảnh thật thì thêm `GEMINI_API_KEY`.
+`DATABASE_URL` và `JWT_SECRET`. Nếu dùng quét ảnh thật thì thêm `GEMINI_API_KEY`, dùng tính năng
+upload ảnh milestone thì thêm `CLOUDINARY_CLOUD_NAME`/`CLOUDINARY_API_KEY`/`CLOUDINARY_API_SECRET`.
 
 ## Ghi chú dev mode
 

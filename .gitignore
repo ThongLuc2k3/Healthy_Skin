@@ -39,3 +39,10 @@ server/uploads/
 *.njsproj
 *.sln
 *.sw?
+
+# Tài liệu / ghi chú cá nhân — không phải code, không đưa vào git
+Mentor_AP_2026/
+notes/
+docs/
+ctp2026/
+Yêu cầu/

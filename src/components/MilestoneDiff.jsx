@@ -80,29 +80,11 @@ export default function MilestoneDiff({ diff, previous, current }) {
             {current?.facePhotoUrl && (
               <div className="flex flex-col items-center gap-3">
                 <p className="text-xs font-semibold text-slate-400 uppercase">Ảnh hồ sơ</p>
-                <div className="flex items-center gap-4">
-                  {previous?.facePhotoUrl && (
-                    <>
-                      <div className="text-center">
-                        <p className="text-xs text-slate-400 mb-1">Trước</p>
-                        <img
-                          src={previous.facePhotoUrl}
-                          alt="Trước"
-                          className="w-80 h-80 rounded-2xl object-cover border-2 border-slate-200 shadow-sm"
-                        />
-                      </div>
-                      <span className="text-slate-300 text-2xl">→</span>
-                    </>
-                  )}
-                  <div className="text-center">
-                    {previous?.facePhotoUrl && <p className="text-xs text-slate-400 mb-1">Sau</p>}
-                    <img
-                      src={current.facePhotoUrl}
-                      alt="Hồ sơ"
-                      className="w-80 h-80 rounded-2xl object-cover border-2 border-emerald-200 shadow-sm"
-                    />
-                  </div>
-                </div>
+                <img
+                  src={current.facePhotoUrl}
+                  alt="Hồ sơ"
+                  className="w-80 h-80 rounded-2xl object-cover border-2 border-slate-200 shadow-sm"
+                />
               </div>
             )}
             {current?.milestonePhotoUrl && (

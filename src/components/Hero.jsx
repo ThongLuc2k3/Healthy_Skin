@@ -31,17 +31,7 @@ export default function Hero() {
       {/* Centered Hero Content */}
       <div className="relative z-30 mx-auto flex min-h-[100svh] max-w-5xl flex-col items-center justify-end px-6 pb-[10vh] text-center">
         {/* Eyebrow Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="inline-flex items-center gap-2.5 rounded-full bg-[#061222]/85 backdrop-blur-md px-4 py-1.5 shadow-[0_0_20px_rgba(0,180,216,0.35)] border border-cyan-400/40"
-        >
-          <SparklesIcon className="h-3.5 w-3.5 text-cyan-300 animate-pulse" />
-          <span className="font-mono text-[11px] uppercase tracking-[0.28em] text-cyan-200 font-extrabold">
-            DA DƯỠNG · NỀN TẢNG CÁ NHÂN HÓA
-          </span>
-        </motion.div>
+        
 
         {/* Centered Title */}
         <motion.h1

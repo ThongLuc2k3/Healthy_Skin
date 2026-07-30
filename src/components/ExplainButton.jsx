@@ -41,7 +41,7 @@ function ExplainButton({ nameVi, category, result, reason }) {
         type="button"
         onClick={handleClick}
         disabled={status === 'loading'}
-        className="flex items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-3.5 py-1.5 text-xs font-semibold text-cyan-300 transition hover:bg-cyan-400 hover:text-slate-950 disabled:opacity-60 shadow-glow"
+        className="flex items-center gap-1.5 rounded-xl border border-cyan-400/30 bg-blue-900 px-3.5 py-1.5 text-xs font-semibold text-white transition hover:bg-cyan-400 hover:text-slate-950 disabled:opacity-60 shadow-glow"
       >
         <SparklesIcon className="h-3.5 w-3.5" />
         {status === 'loading' ? 'Đang tạo giải thích...' : 'Giải thích thêm bằng AI'}

@@ -33,8 +33,13 @@ const tech = [
 
 export default function Technology() {
   return (
-    <section id="technology" className="relative py-20 sm:py-28 bg-gradient-to-br from-[#e4eff3] via-[#d8e5ec] to-[#eaf2f5] overflow-hidden">
-      {/* Animated Floating Cosmetic Decorations to fill empty space */}
+    <section id="technology" className="relative py-24 sm:py-32 bg-gradient-to-b from-[#F7FBFC] via-[#F0F6F8] to-[#F7FBFC] overflow-hidden">
+      {/* Soft Ambient Radial Orbs */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/3 right-10 h-96 w-96 rounded-full bg-[#67D6E8]/10 blur-3xl opacity-50" />
+      </div>
+
+      {/* Floating Cosmetic Decorations */}
       <FloatingCosmeticDecoration
         Icon={SkinAnalysisIcon}
         size="w-48 h-48 sm:w-64 sm:h-64 lg:w-72 lg:h-72"
@@ -42,7 +47,7 @@ export default function Technology() {
         yRange={[-28, 28, -28]}
         duration={5.2}
         delay={0.2}
-        accent="#3b82f6"
+        accent="#2C8E92"
         parallaxOffset={65}
       />
       <FloatingCosmeticDecoration
@@ -52,7 +57,7 @@ export default function Technology() {
         yRange={[0, -30, 0]}
         duration={4.8}
         delay={0.5}
-        accent="#6366f1"
+        accent="#67D6E8"
         parallaxOffset={-55}
       />
       <FloatingCosmeticDecoration
@@ -62,11 +67,11 @@ export default function Technology() {
         yRange={[0, 32, 0]}
         duration={6.0}
         delay={0.8}
-        accent="#3b82f6"
+        accent="#6F9D8D"
         parallaxOffset={70}
       />
 
-      <div className="relative mx-auto max-w-7xl px-6 text-[#0f826b]">
+      <div className="relative mx-auto max-w-[1200px] px-6 text-center">
         <SectionTitle
           eyebrow="CÔNG NGHỆ & QUY TẮC"
           title={
@@ -79,41 +84,54 @@ export default function Technology() {
           description="Sự kết hợp giữa quy tắc kiểm tra minh bạch theo hồ sơ cơ địa và mô hình trí tuệ nhân tạo đọc ảnh sản phẩm thực tế."
         />
 
-        <div className="mt-14 grid gap-6 lg:grid-cols-2">
-          <Reveal className="lg:row-span-2">
-            <div className="relative h-full min-h-[340px] overflow-hidden rounded-3xl glass p-2 border border-white/90 shadow-md">
-              <NeuralNetCanvas />
-              <div className="pointer-events-none absolute left-5 top-5 font-mono text-[11px] font-black uppercase tracking-[0.25em] text-[#082531]">
-                match_engine.active
+        <div className="mt-16 grid gap-8 lg:grid-cols-2 items-center">
+          <Reveal className="lg:row-span-2 h-full">
+            <div className="relative h-full min-h-[400px] overflow-hidden rounded-[28px] bg-[#FCFDFC] p-3 border border-[#E7ECEE] shadow-[0_16px_45px_rgba(44,142,146,0.06)]">
+              {/* SaaS Window Top Control Bar */}
+              <div className="flex items-center justify-between border-b border-[#E7ECEE] bg-[#F7FBFC] px-5 py-3 rounded-t-[22px]">
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-full bg-rose-400/80" />
+                  <span className="h-3 w-3 rounded-full bg-amber-400/80" />
+                  <span className="h-3 w-3 rounded-full bg-emerald-400/80" />
+                </div>
+                <div className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-[#2C8E92]">
+                  match_engine.active
+                </div>
               </div>
-              <div className="pointer-events-none absolute right-5 bottom-5 flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-[#10B981] animate-pulse" />
-                <span className="font-mono text-[11px] font-black uppercase tracking-[0.2em] text-[#082531]">
-                  rule-based + AI · online
-                </span>
+
+              <div className="relative h-[340px] lg:h-[calc(100%-48px)] overflow-hidden rounded-b-[22px] bg-slate-950">
+                <NeuralNetCanvas />
+                <div className="pointer-events-none absolute right-4 bottom-4 flex items-center gap-2 rounded-full bg-[#17353D]/80 backdrop-blur-md px-3.5 py-1.5 border border-[#67D6E8]/30">
+                  <span className="h-2 w-2 rounded-full bg-[#67D6E8] animate-pulse" />
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-white">
+                    rule-based + AI · online
+                  </span>
+                </div>
               </div>
             </div>
           </Reveal>
 
-          {tech.map((t, i) => (
-            <Reveal key={t.name} delay={i * 0.08}>
-              <div className="group relative h-full overflow-hidden rounded-3xl glass p-6 transition-all border border-white/90 shadow-md hover:shadow-xl hover:border-[#00b4d8] hover:-translate-y-0.5">
-                <div className="flex items-start gap-4">
-                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#0F4C5C]/10 text-[#0F4C5C] border border-[#0F4C5C]/20 shadow-sm">
-                    {t.icon}
-                  </span>
-                  <div>
-                    <h3 className="font-display text-lg font-black text-[#082531]">
-                      {t.name}
-                    </h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-[#133844] font-semibold">
-                      {t.desc}
-                    </p>
+          <div className="grid gap-5">
+            {tech.map((t, i) => (
+              <Reveal key={t.name} delay={i * 0.08}>
+                <div className="group relative overflow-hidden rounded-[28px] bg-[#FCFDFC] p-7 transition-all duration-300 border border-[#E7ECEE] shadow-[0_8px_25px_rgba(44,142,146,0.04)] hover:shadow-[0_12px_35px_rgba(103,214,232,0.15)] hover:border-[#2C8E92] hover:-translate-y-1 text-left">
+                  <div className="flex items-start gap-4">
+                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#2C8E92]/10 text-[#2C8E92] border border-[#2C8E92]/20 shadow-xs transition-colors group-hover:bg-[#2C8E92] group-hover:text-white">
+                      {t.icon}
+                    </span>
+                    <div>
+                      <h3 className="font-display text-lg font-extrabold text-[#17353D] group-hover:text-[#2C8E92] transition-colors">
+                        {t.name}
+                      </h3>
+                      <p className="mt-1.5 text-sm leading-relaxed text-[#64748B] font-normal">
+                        {t.desc}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Reveal>
-          ))}
+              </Reveal>
+            ))}
+          </div>
         </div>
       </div>
     </section>

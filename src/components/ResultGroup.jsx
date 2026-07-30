@@ -1,45 +1,63 @@
+import { motion } from 'framer-motion'
 import ResultAccordionItem from './ResultAccordionItem'
 
 const THEME = {
   green: {
-    wrap: 'border-emerald-500/30 glass text-[#183B3B] shadow-glow',
-    badge: 'bg-emerald-500/20 text-emerald-800 border border-emerald-500/40',
+    wrap: 'border-[#E8EEF0] bg-[#FCFDFC]',
+    badge: 'bg-[#6F9D8D]/15 text-[#2C8E92] border border-[#6F9D8D]/30',
+    accent: '#6F9D8D',
   },
   yellow: {
-    wrap: 'border-amber-500/30 glass text-[#183B3B] shadow-glow',
-    badge: 'bg-amber-500/20 text-amber-800 border border-amber-500/40',
+    wrap: 'border-[#E8EEF0] bg-[#FCFDFC]',
+    badge: 'bg-[#D8B27A]/15 text-[#A87A45] border border-[#D8B27A]/30',
+    accent: '#D8B27A',
   },
   red: {
-    wrap: 'border-rose-500/30 glass text-[#183B3B] shadow-glow',
-    badge: 'bg-rose-500/20 text-rose-800 border border-rose-500/40',
+    wrap: 'border-[#E8EEF0] bg-[#FCFDFC]',
+    badge: 'bg-rose-500/15 text-rose-700 border border-rose-400/30',
+    accent: '#EF4444',
   },
 }
 
 function ResultGroup({ title, resultValue, color, icon, items }) {
-  const theme = THEME[color]
+  const theme = THEME[color] || THEME.green
 
   return (
-    <div className={`rounded-2xl border p-4 shadow-sm sm:p-5 ${theme.wrap}`}>
-      <div className="flex items-center gap-2.5">
-        <span className={`flex h-7 w-7 items-center justify-center rounded-full ${theme.badge}`}>
-          {icon}
-        </span>
-        <h3 className="text-sm font-semibold text-[#183B3B]">{title}</h3>
-        <span className={`ml-auto rounded-full px-2.5 py-0.5 text-xs font-semibold ${theme.badge}`}>
-          {items.length}
+    <motion.div
+      initial={{ opacity: 0, y: 25 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ duration: 0.6 }}
+      className={`rounded-[28px] border p-6 sm:p-8 shadow-[0_10px_35px_rgba(44,142,146,0.04)] ${theme.wrap}`}
+    >
+      <div className="flex items-center justify-between pb-5 mb-6 border-b border-[#E8EEF0]">
+        <div className="flex items-center gap-3">
+          <span className={`flex h-10 w-10 items-center justify-center rounded-2xl ${theme.badge}`}>
+            {icon}
+          </span>
+          <div>
+            <h3 className="font-display text-lg font-extrabold text-[#17353D]">{title}</h3>
+            <p className="text-xs text-[#64748B]">Phân tích dựa trên thuật toán match_engine AI</p>
+          </div>
+        </div>
+
+        <span className={`rounded-full px-3.5 py-1 text-xs font-extrabold ${theme.badge}`}>
+          {items.length} mục
         </span>
       </div>
 
       {items.length === 0 ? (
-        <p className="mt-3 text-sm text-[#183B3B]/70">Không có mục nào trong nhóm này.</p>
+        <div className="rounded-2xl border border-dashed border-[#BFD8CF] bg-[#F7FBFC] p-8 text-center">
+          <p className="text-sm font-medium text-[#64748B]">Không có thành phần hoặc thực phẩm nào thuộc nhóm này.</p>
+        </div>
       ) : (
-        <ul className="mt-3 divide-y divide-cyan-400/10 text-[#183B3B]">
+        <ul className="space-y-3.5 p-0 m-0">
           {items.map((item) => (
             <ResultAccordionItem key={item.id} item={item} result={resultValue} />
           ))}
         </ul>
       )}
-    </div>
+    </motion.div>
   )
 }
 

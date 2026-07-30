@@ -27,7 +27,8 @@ const FEATURES = [
     desc: 'Khai báo loại da, dị ứng thực phẩm, bệnh lý nền và mục tiêu một lần — dùng chung cho cả chăm sóc da lẫn dinh dưỡng. Không chắc thì chọn "Khác" và mô tả để AI hiểu rõ hơn.',
     to: '/profile',
     tag: 'Core Profile',
-    accent: 'from-[#00b4d8]/25 to-[#0F4C5C]/15',
+    accent: 'from-[#2C8E92]/20 to-[#67D6E8]/10',
+    featured: true,
   },
   {
     icon: SparklesIcon,
@@ -35,7 +36,7 @@ const FEATURES = [
     desc: 'Mỗi sản phẩm/thực phẩm được phân vào Phù hợp, Cần cân nhắc hoặc Nên tránh, bấm vào từng mục để AI giải thích sâu hơn.',
     to: '/results',
     tag: 'Transparent AI',
-    accent: 'from-[#10B981]/25 to-[#0F4C5C]/15',
+    accent: 'from-[#6F9D8D]/20 to-[#BFD8CF]/15',
   },
   {
     icon: SearchIcon,
@@ -43,7 +44,7 @@ const FEATURES = [
     desc: 'Tìm thủ công hoặc quét ảnh thật bằng AI để kiểm tra ngay mức độ phù hợp với cơ địa của bạn.',
     to: '/scan',
     tag: 'AI Scan',
-    accent: 'from-[#00b4d8]/25 to-[#38bdf8]/15',
+    accent: 'from-[#67D6E8]/20 to-[#2C8E92]/10',
   },
   {
     icon: CalendarIcon,
@@ -51,7 +52,7 @@ const FEATURES = [
     desc: 'Sau khi có kết quả, bạn có thể tạo kế hoạch theo mục tiêu, ngân sách, nhịp sống và sản phẩm đang dùng thay vì chỉ xem danh sách gợi ý tĩnh.',
     to: '/roadmap',
     tag: 'Roadmap',
-    accent: 'from-[#F59E0B]/25 to-[#0F4C5C]/15',
+    accent: 'from-[#D8B27A]/20 to-[#A87A45]/10',
   },
   {
     icon: PlayIcon,
@@ -59,7 +60,7 @@ const FEATURES = [
     desc: 'Video & nội dung ngắn về skincare, dinh dưỡng, giảm cân lành mạnh — giữ động lực trên hành trình của bạn.',
     to: '/motivation',
     tag: 'Motivation',
-    accent: 'from-[#EC4899]/25 to-[#0F4C5C]/15',
+    accent: 'from-[#BFD8CF]/25 to-[#6F9D8D]/15',
   },
   {
     icon: GamepadIcon,
@@ -67,7 +68,7 @@ const FEATURES = [
     desc: 'Mini quiz và thử thách nho nhỏ để người dùng quay lại mỗi ngày, giúp app giống một hệ sinh thái sống động hơn.',
     to: '/skin-lab',
     tag: 'Mini Games',
-    accent: 'from-[#8B5CF6]/25 to-[#0F4C5C]/15',
+    accent: 'from-[#67D6E8]/20 to-[#BFD8CF]/15',
   },
   {
     icon: ChatBubbleIcon,
@@ -75,7 +76,7 @@ const FEATURES = [
     desc: 'Nút chat nổi ở mọi trang — hỏi bất cứ điều gì về thành phần, dinh dưỡng hoặc cách dùng app.',
     to: '#chat',
     tag: '24/7 Assistant',
-    accent: 'from-[#00b4d8]/25 to-[#0F4C5C]/15',
+    accent: 'from-[#2C8E92]/20 to-[#67D6E8]/10',
   },
 ]
 
@@ -88,7 +89,7 @@ function FeatureTiltCard({ feature, index }) {
     const rect = cardRef.current.getBoundingClientRect()
     const px = (e.clientX - rect.left) / rect.width - 0.5
     const py = (e.clientY - rect.top) / rect.height - 0.5
-    setTilt({ rx: -py * 14, ry: px * 16 })
+    setTilt({ rx: -py * 10, ry: px * 12 })
   }
 
   function handleMouseLeave() {
@@ -96,14 +97,15 @@ function FeatureTiltCard({ feature, index }) {
   }
 
   const IconComp = feature.icon
+  const isFeatured = feature.featured
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50 }}
+      initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-60px' }}
       transition={{ duration: 0.7, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
-      className="perspective-1000"
+      className={`perspective-1000 ${isFeatured ? 'md:col-span-2 md:row-span-2' : ''}`}
     >
       <Link
         to={feature.to}
@@ -114,33 +116,47 @@ function FeatureTiltCard({ feature, index }) {
           transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
           transition: 'transform 0.15s ease-out',
         }}
-        className="group preserve-3d relative block h-full overflow-hidden rounded-3xl glass p-7 text-left border border-white/90 shadow-md transition-all duration-300 hover:border-[#00b4d8] hover:shadow-2xl hover:-translate-y-1.5"
+        className={`group preserve-3d relative flex flex-col justify-between h-full overflow-hidden rounded-[28px] bg-[#FCFDFC] p-8 text-left border border-[#E7ECEE] shadow-[0_10px_35px_rgba(44,142,146,0.04)] transition-all duration-300 hover:border-[#2C8E92] hover:shadow-[0_16px_45px_rgba(103,214,232,0.18)] hover:-translate-y-1.5 ${
+          isFeatured ? 'p-10 bg-gradient-to-br from-[#FCFDFC] via-white to-[#67D6E8]/10' : ''
+        }`}
       >
         {/* Animated Gradient Spotlight Underlay */}
         <div
-          className={`pointer-events-none absolute -inset-px rounded-3xl bg-gradient-to-br ${feature.accent} opacity-0 transition-opacity duration-500 group-hover:opacity-100`}
+          className={`pointer-events-none absolute -inset-px rounded-[28px] bg-gradient-to-br ${feature.accent} opacity-0 transition-opacity duration-500 group-hover:opacity-100`}
         />
 
-        <div className="relative preserve-3d z-10" style={{ transform: 'translateZ(40px)' }}>
+        <div className="relative preserve-3d z-10" style={{ transform: 'translateZ(30px)' }}>
           <div className="flex items-center justify-between">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0F4C5C]/10 text-[#0F4C5C] border border-[#0F4C5C]/20 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:bg-[#0F4C5C] group-hover:text-white group-hover:shadow-lg">
-              <IconComp className="h-6 w-6" />
+            <span
+              className={`flex items-center justify-center rounded-2xl bg-[#2C8E92]/10 text-[#2C8E92] border border-[#2C8E92]/20 shadow-xs transition-all duration-300 group-hover:scale-110 group-hover:bg-[#2C8E92] group-hover:text-white group-hover:shadow-md ${
+                isFeatured ? 'h-14 w-14' : 'h-12 w-12'
+              }`}
+            >
+              <IconComp className={isFeatured ? 'h-7 w-7' : 'h-6 w-6'} />
             </span>
-            <span className="font-mono text-[11px] font-black text-[#0F4C5C] uppercase tracking-wider bg-white/60 px-3 py-1 rounded-full border border-white">
+            <span className="font-mono text-[11px] font-bold text-[#2C8E92] uppercase tracking-wider bg-[#F7FBFC] px-3.5 py-1.5 rounded-full border border-[#E7ECEE]">
               {feature.tag}
             </span>
           </div>
 
-          <h3 className="mt-5 font-display text-xl font-black text-[#082531] group-hover:text-[#00b4d8] transition-colors">
+          <h3
+            className={`mt-6 font-display font-extrabold text-[#17353D] group-hover:text-[#2C8E92] transition-colors ${
+              isFeatured ? 'text-2xl sm:text-3xl' : 'text-xl'
+            }`}
+          >
             {feature.title}
           </h3>
-          <p className="mt-2.5 text-sm leading-relaxed text-[#133844] font-semibold">
+          <p
+            className={`mt-3 leading-relaxed text-[#64748B] font-normal ${
+              isFeatured ? 'text-base sm:text-lg max-w-xl' : 'text-sm'
+            }`}
+          >
             {feature.desc}
           </p>
+        </div>
 
-          <div className="mt-6 flex items-center gap-1.5 text-xs font-black text-[#00b4d8] group-hover:text-[#0F4C5C] transition-colors">
-            Khám phá ngay <ArrowLeftIcon className="h-4 w-4 rotate-180 transition-transform duration-300 group-hover:translate-x-1.5" />
-          </div>
+        <div className="relative preserve-3d z-10 mt-8 flex items-center gap-2 text-xs font-bold text-[#2C8E92] group-hover:text-[#17353D] transition-colors">
+          Khám phá ngay <ArrowLeftIcon className="h-4 w-4 rotate-180 transition-transform duration-300 group-hover:translate-x-1.5" />
         </div>
       </Link>
     </motion.div>
@@ -149,8 +165,14 @@ function FeatureTiltCard({ feature, index }) {
 
 export default function Analysis() {
   return (
-    <section id="analysis" className="relative py-20 sm:py-28 bg-gradient-to-br from-[#e4eff3] via-[#d8e5ec] to-[#eaf2f5] overflow-hidden">
-      {/* Animated Floating Cosmetic Decorations to fill empty space */}
+    <section id="analysis" className="relative py-24 sm:py-32 bg-gradient-to-b from-[#F7FBFC] via-[#FCFDFC] to-[#F7FBFC] overflow-hidden">
+      {/* Soft Ambient Radial Orbs */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-[#67D6E8]/10 blur-3xl opacity-60" />
+        <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-[#BFD8CF]/15 blur-3xl opacity-50" />
+      </div>
+
+      {/* Animated Floating Cosmetic Decorations */}
       <FloatingCosmeticDecoration
         Icon={SerumDropper}
         size="w-48 h-48 sm:w-64 sm:h-64 lg:w-72 lg:h-72"
@@ -158,7 +180,7 @@ export default function Analysis() {
         yRange={[0, -32, 0]}
         duration={5.5}
         delay={0.2}
-        accent="#14b8a6"
+        accent="#2C8E92"
         parallaxOffset={70}
       />
       <FloatingCosmeticDecoration
@@ -168,7 +190,7 @@ export default function Analysis() {
         yRange={[-28, 28, -28]}
         duration={5.0}
         delay={0.4}
-        accent="#38bdf8"
+        accent="#67D6E8"
         parallaxOffset={-65}
       />
       <FloatingCosmeticDecoration
@@ -178,7 +200,7 @@ export default function Analysis() {
         yRange={[0, -35, 0]}
         duration={6.0}
         delay={0.6}
-        accent="#f59e0b"
+        accent="#D8B27A"
         parallaxOffset={60}
       />
       <FloatingCosmeticDecoration
@@ -188,13 +210,13 @@ export default function Analysis() {
         yRange={[-25, 25, -25]}
         duration={6.5}
         delay={0.8}
-        accent="#34d399"
+        accent="#6F9D8D"
         parallaxOffset={-55}
       />
 
-      <div className="relative mx-auto max-w-7xl px-6 text-[#0f826b]">
+      <div className="relative mx-auto max-w-[1200px] px-6 text-center">
         <SectionTitle
-          eyebrow="TÍNH NĂNG NỔI BẬT"
+          eyebrow="HỆ SINH THÁI CÁ NHÂN HÓA"
           title={
             <>
               Hệ sinh thái DA DƯỠNG
@@ -205,7 +227,7 @@ export default function Analysis() {
           description="Được thiết kế dựa trên một hồ sơ cơ địa dùng chung cho cả chăm sóc da và dinh dưỡng, giúp bạn biết rõ sản phẩm hay thực phẩm nào phù hợp với chính mình."
         />
 
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
           {FEATURES.map((f, i) => (
             <FeatureTiltCard key={f.title} feature={f} index={i} />
           ))}

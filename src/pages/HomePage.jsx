@@ -12,7 +12,7 @@ function HomePage() {
   useGsapScroll()
 
   return (
-    <div className="relative min-h-screen bg-[#02040b] text-slate-100 antialiased overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#F7FBFC] text-[#17353D] antialiased overflow-x-hidden">
       <main>
         <Hero />
         <SectionSeam />

@@ -78,13 +78,16 @@ function NavBar() {
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           !isHome || scrolled
-            ? 'bg-[#02040b]/85 backdrop-blur-xl border-b border-cyan-400/20 shadow-glow-lg py-3.5'
-            : 'bg-transparent py-3.5'
+            ? 'bg-[#02040b]/85 backdrop-blur-xl border-b border-cyan-400/20 shadow-glow-lg'
+            : 'bg-transparent'
         }`}
       >
 
         {/* Full-width wide container */}
-        <div className="w-full flex items-center justify-between px-6 lg:py-2 sm:py-1 sm:px-5 lg:px-14">
+          <div className={`w-full flex items-center justify-between px-6 lg:py-2 sm:py-1 sm:px-5 
+                ${ user ? 'lg:py-5' : 'lg:py-4'
+          }`}
+          >
           {/* Brand Logo */}
           <NavLink to="/" className="flex items-center group shrink-0">
             <div className="flex items-center cursor-pointer h-10">
@@ -130,9 +133,9 @@ function NavBar() {
           <div className="flex items-center gap-3 shrink-0">
             {user ? (
               <div className="flex items-center gap-2.5">
-                <span className="hidden sm:flex items-center gap-2 rounded-xl glass border border-cyan-400/20 px-3.5 py-2 text-xs font-semibold text-cyan-200">
+                <span className="hidden sm:flex items-center gap-2 rounded-xl bg-sky-900 border border-cyan-700/60 px-3.5 py-2 text-xs text-white font-semibold shadow-md">
                   <UserIcon className="h-4 w-4 text-cyan-300" />
-                  <span className="truncate max-w-[150px]">{user.email}</span>
+                  <span className="truncate max-w-[150px] text-white">{user.email}</span>
                 </span>
                 <button
                   type="button"
@@ -209,7 +212,7 @@ function NavBar() {
 
             {user && (
               <div className="mt-4 pt-4 border-t border-cyan-400/20 flex items-center justify-between text-xs">
-                <span className="truncate max-w-[200px] text-cyan-300 font-semibold">{user.email}</span>
+                <span className="truncate max-w-[200px] rounded-xl bg-sky-900 border border-cyan-700/60 px-3 py-1.5 text-white font-semibold">{user.email}</span>
                 <button
                   type="button"
                   onClick={handleLogout}

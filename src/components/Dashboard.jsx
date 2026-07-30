@@ -49,7 +49,7 @@ function RingMetric({ label, value, icon, color, delay }) {
     >
       <div className="relative h-32 w-32">
         <svg className="h-full w-full -rotate-90" viewBox="0 0 120 120">
-          <circle cx="60" cy="60" r={R} fill="none" stroke="rgba(15, 76, 92, 0.12)" strokeWidth="6" />
+          <circle cx="60" cy="60" r={R} fill="none" stroke="rgba(44, 142, 146, 0.12)" strokeWidth="6" />
           <motion.circle
             cx="60"
             cy="60"
@@ -65,31 +65,36 @@ function RingMetric({ label, value, icon, color, delay }) {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-display text-2xl font-black text-[#082531]">
+          <span className="font-display text-2xl font-black text-[#17353D]">
             <CountUp to={value} />
           </span>
-          <span className="text-[10px] font-black text-[#082531]">/ 100</span>
+          <span className="text-[10px] font-bold text-[#64748B]">/ 100</span>
         </div>
       </div>
-      <div className="mt-3 flex items-center gap-1.5 text-[#082531]">
+      <div className="mt-3 flex items-center gap-1.5 text-[#17353D]">
         {icon}
-        <span className="text-xs font-black uppercase tracking-wider text-[#082531]">{label}</span>
+        <span className="text-xs font-extrabold uppercase tracking-wider text-[#17353D]">{label}</span>
       </div>
     </motion.div>
   )
 }
 
 const metrics = [
-  { label: 'Skin Score', value: 87, icon: <ShieldIcon className="h-4 w-4 text-[#0F4C5C]" />, color: '#0F4C5C', delay: 0 },
-  { label: 'Hydration', value: 82, icon: <SparklesIcon className="h-4 w-4 text-[#00b4d8]" />, color: '#00b4d8', delay: 0.12 },
-  { label: 'Clarity', value: 90, icon: <SearchIcon className="h-4 w-4 text-[#10B981]" />, color: '#10B981', delay: 0.24 },
-  { label: 'Texture', value: 91, icon: <CameraIcon className="h-4 w-4 text-[#0F4C5C]" />, color: '#0F4C5C', delay: 0.36 },
+  { label: 'Skin Score', value: 87, icon: <ShieldIcon className="h-4 w-4 text-[#2C8E92]" />, color: '#2C8E92', delay: 0 },
+  { label: 'Hydration', value: 82, icon: <SparklesIcon className="h-4 w-4 text-[#67D6E8]" />, color: '#67D6E8', delay: 0.12 },
+  { label: 'Clarity', value: 90, icon: <SearchIcon className="h-4 w-4 text-[#6F9D8D]" />, color: '#6F9D8D', delay: 0.24 },
+  { label: 'Texture', value: 91, icon: <CameraIcon className="h-4 w-4 text-[#2C8E92]" />, color: '#2C8E92', delay: 0.36 },
 ]
 
 export default function Dashboard() {
   return (
-    <section id="dashboard" className="relative py-20 sm:py-28 bg-gradient-to-br from-[#e4eff3] via-[#d8e5ec] to-[#eaf2f5] overflow-hidden">
-      {/* Animated Floating Cosmetic Decorations to fill empty space */}
+    <section id="dashboard" className="relative py-24 sm:py-32 bg-gradient-to-b from-[#F7FBFC] via-[#FCFDFC] to-[#F7FBFC] overflow-hidden">
+      {/* Soft Ambient Light Orbs */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute bottom-10 left-1/3 h-96 w-96 rounded-full bg-[#67D6E8]/10 blur-3xl opacity-50" />
+      </div>
+
+      {/* Animated Floating Cosmetic Decorations */}
       <FloatingCosmeticDecoration
         Icon={LotionPumpBottle}
         size="w-52 h-52 sm:w-68 sm:h-68 lg:w-80 lg:h-80"
@@ -97,7 +102,7 @@ export default function Dashboard() {
         yRange={[-30, 25, -30]}
         duration={5.5}
         delay={0.2}
-        accent="#0ea5e9"
+        accent="#2C8E92"
         parallaxOffset={75}
       />
       <FloatingCosmeticDecoration
@@ -107,7 +112,7 @@ export default function Dashboard() {
         yRange={[25, -30, 25]}
         duration={5.2}
         delay={0.4}
-        accent="#fb7185"
+        accent="#67D6E8"
         parallaxOffset={-70}
       />
       <FloatingCosmeticDecoration
@@ -117,10 +122,11 @@ export default function Dashboard() {
         yRange={[0, -28, 0]}
         duration={4.8}
         delay={0.6}
-        accent="#facc15"
+        accent="#D8B27A"
         parallaxOffset={50}
       />
-      <div className="relative mx-auto max-w-7xl px-6 text-[#0f826b]">
+
+      <div className="relative mx-auto max-w-[1200px] px-6 text-center">
         <SectionTitle
           eyebrow="HOLOGRAPHIC DASHBOARD"
           title={
@@ -138,26 +144,26 @@ export default function Dashboard() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-14"
+          className="mt-16"
         >
-          <div className="relative overflow-hidden rounded-3xl glass p-8 sm:p-10 border border-white/90 shadow-md">
-            <span className="absolute left-3 top-3 h-4 w-4 border-l-2 border-t-2 border-[#00b4d8]" />
-            <span className="absolute right-3 top-3 h-4 w-4 border-r-2 border-t-2 border-[#00b4d8]" />
-            <span className="absolute left-3 bottom-3 h-4 w-4 border-l-2 border-b-2 border-[#00b4d8]" />
-            <span className="absolute right-3 bottom-3 h-4 w-4 border-r-2 border-b-2 border-[#00b4d8]" />
+          <div className="relative overflow-hidden rounded-[32px] bg-[#FCFDFC] p-8 sm:p-12 border border-[#E7ECEE] shadow-[0_16px_50px_rgba(44,142,146,0.06)]">
+            <span className="absolute left-4 top-4 h-4 w-4 border-l-2 border-t-2 border-[#2C8E92]" />
+            <span className="absolute right-4 top-4 h-4 w-4 border-r-2 border-t-2 border-[#2C8E92]" />
+            <span className="absolute left-4 bottom-4 h-4 w-4 border-l-2 border-b-2 border-[#2C8E92]" />
+            <span className="absolute right-4 bottom-4 h-4 w-4 border-r-2 border-b-2 border-[#2C8E92]" />
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <div className="font-mono text-[11px] font-black uppercase tracking-[0.25em] text-[#082531]">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#E7ECEE] pb-6">
+              <div className="text-left">
+                <div className="font-mono text-[11px] font-bold uppercase tracking-[0.25em] text-[#2C8E92]">
                   patient_id · #SKN-2026-04417
                 </div>
-                <h3 className="mt-1 font-display text-2xl font-black text-[#082531]">
+                <h3 className="mt-1 font-display text-2xl sm:text-3xl font-extrabold text-[#17353D]">
                   Skin Intelligence Report
                 </h3>
               </div>
-              <div className="flex items-center gap-2 self-start rounded-full bg-[#10B981]/15 px-3.5 py-1.5 text-xs text-[#10B981] font-mono border border-[#10B981]/30">
-                <span className="h-2 w-2 rounded-full bg-[#10B981] animate-pulse" />
-                <span className="font-mono text-[11px] font-black uppercase tracking-wider text-[#10B981]">
+              <div className="flex items-center gap-2 self-start rounded-full bg-[#6F9D8D]/15 px-4 py-2 text-xs font-bold text-[#2C8E92] border border-[#6F9D8D]/30">
+                <span className="h-2 w-2 rounded-full bg-[#6F9D8D] animate-pulse" />
+                <span className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#2C8E92]">
                   scan complete
                 </span>
               </div>
@@ -169,16 +175,16 @@ export default function Dashboard() {
               ))}
             </div>
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-2">
+            <div className="mt-10 grid gap-6 sm:grid-cols-2">
               {[
-                { label: 'Hydration trend · 30d', bars: [60, 64, 58, 70, 66, 74, 78, 82], color: '#00b4d8' },
-                { label: 'Clarity trend · 30d', bars: [72, 75, 71, 80, 84, 82, 88, 90], color: '#10b981' },
+                { label: 'Hydration trend · 30d', bars: [60, 64, 58, 70, 66, 74, 78, 82], color: '#67D6E8' },
+                { label: 'Clarity trend · 30d', bars: [72, 75, 71, 80, 84, 82, 88, 90], color: '#6F9D8D' },
               ].map((row) => (
-                <div key={row.label} className="rounded-2xl bg-white/80 p-4 border border-white shadow-sm">
-                  <div className="font-mono text-[10px] font-black uppercase tracking-wider text-[#082531]">
+                <div key={row.label} className="rounded-2xl bg-[#F7FBFC] p-5 border border-[#E7ECEE] shadow-xs text-left">
+                  <div className="font-mono text-[11px] font-bold uppercase tracking-wider text-[#17353D]">
                     {row.label}
                   </div>
-                  <div className="mt-3 flex h-20 items-end gap-1.5">
+                  <div className="mt-4 flex h-24 items-end gap-2">
                     {row.bars.map((b, i) => (
                       <motion.div
                         key={i}
@@ -186,7 +192,7 @@ export default function Dashboard() {
                         whileInView={{ height: `${b}%` }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.7, delay: i * 0.05, ease: 'easeOut' }}
-                        className="flex-1 rounded-t-sm"
+                        className="flex-1 rounded-t-md"
                         style={{ background: `linear-gradient(to top, ${row.color}33, ${row.color})` }}
                       />
                     ))}

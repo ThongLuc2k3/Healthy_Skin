@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../../context/AuthContext'
 import { FloatingInput, GlassButton } from './AuthFields'
 import { blur } from 'three/tsl'
+import TermsModal from '../TermsModal'
 
 export default function AuthPageContainer({ initialMode = 'login' }) {
   const { login, register, sessionExpired } = useAuth()
@@ -31,6 +32,8 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
   const [regPassword, setRegPassword] = useState('')
   const [regLoading, setRegLoading] = useState(false)
   const [regError, setRegError] = useState('')
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const [showTerms, setShowTerms] = useState(false)
 
   const isRegister = mode === 'register'
 
@@ -58,10 +61,14 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
 
   async function handleRegisterSubmit(e) {
     e.preventDefault()
+    if (!acceptedTerms) {
+      setRegError('Bạn cần đồng ý với Điều khoản sử dụng trước khi đăng ký.')
+      return
+    }
     setRegError('')
     setRegLoading(true)
     try {
-      await register(regEmail, regPassword)
+      await register(regEmail, regPassword, acceptedTerms)
       navigate('/profile')
     } catch (err) {
       setRegError(err.message || 'Đăng ký không thành công.')
@@ -180,6 +187,36 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                   minLength={6}
                   required
                 />
+
+                <label className="flex cursor-pointer items-start gap-2 text-xs font-medium text-[#cbd5e1]">
+                  <input
+                    type="checkbox"
+                    required
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="sr-only"
+                  />
+                  <span
+                    className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-md border transition-colors ${
+                      acceptedTerms ? 'border-[#67D6E8] bg-[#2C8E92]' : 'border-[#67D6E8]/40 bg-transparent'
+                    }`}
+                  >
+                    <CheckCircle2
+                      className={`h-3 w-3 text-white transition-opacity ${acceptedTerms ? 'opacity-100' : 'opacity-0'}`}
+                    />
+                  </span>
+                  <span>
+                    Tôi đồng ý với{' '}
+                    <button
+                      type="button"
+                      onClick={() => setShowTerms(true)}
+                      className="font-bold text-[#67D6E8] hover:underline"
+                    >
+                      Điều khoản sử dụng
+                    </button>{' '}
+                    của Healthy Skin.
+                  </span>
+                </label>
 
                 {regError && (
                   <div className="flex items-start gap-2 rounded-xl bg-rose-500/15 border border-rose-400/40 px-3.5 py-2.5 text-xs text-rose-200">
@@ -431,6 +468,36 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                     required
                   />
 
+                  <label className="flex cursor-pointer items-start gap-2 text-xs font-medium text-[#cbd5e1]">
+                    <input
+                      type="checkbox"
+                      required
+                      checked={acceptedTerms}
+                      onChange={(e) => setAcceptedTerms(e.target.checked)}
+                      className="sr-only"
+                    />
+                    <span
+                      className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-md border transition-colors ${
+                        acceptedTerms ? 'border-[#67D6E8] bg-[#2C8E92]' : 'border-[#67D6E8]/40 bg-transparent'
+                      }`}
+                    >
+                      <CheckCircle2
+                        className={`h-3 w-3 text-white transition-opacity ${acceptedTerms ? 'opacity-100' : 'opacity-0'}`}
+                      />
+                    </span>
+                    <span>
+                      Tôi đồng ý với{' '}
+                      <button
+                        type="button"
+                        onClick={() => setShowTerms(true)}
+                        className="font-bold text-[#67D6E8] hover:underline"
+                      >
+                        Điều khoản sử dụng
+                      </button>{' '}
+                      của Healthy Skin.
+                    </span>
+                  </label>
+
                   {regError && (
                     <div className="flex items-start gap-2 rounded-xl bg-rose-500/15 border border-rose-400/40 px-3.5 py-2.5 text-xs text-rose-200">
                       <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
@@ -486,6 +553,8 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
           Phiên kết nối an toàn
         </span>
       </motion.div>
+
+      <TermsModal open={showTerms} onClose={() => setShowTerms(false)} />
     </section>
   )
 }

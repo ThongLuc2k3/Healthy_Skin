@@ -19,6 +19,7 @@ import ChatWidget from './components/ChatWidget'
 import PlanBuilderPage from './pages/PlanBuilderPage'
 import SkinPlaygroundPage from './pages/SkinPlaygroundPage'
 import WebsiteReviews from './pages/WebsiteReviews'
+import AboutPage from './pages/AboutPage'
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/reviews" element={<WebsiteReviews />} />
+          <Route path="/about" element={<AboutPage />} />
         </Routes>
       </main>
       <ChatWidget />

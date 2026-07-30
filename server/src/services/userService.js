@@ -13,11 +13,11 @@ export async function findUserById(id) {
   return rows[0]
 }
 
-export async function createUser(email, password) {
+export async function createUser(email, password, termsAcceptedAt) {
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS)
   const { rows } = await query(
-    'INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id, email, created_at',
-    [email, passwordHash],
+    'INSERT INTO users (email, password_hash, terms_accepted_at) VALUES ($1, $2, $3) RETURNING id, email, created_at',
+    [email, passwordHash, termsAcceptedAt],
   )
   return rows[0]
 }

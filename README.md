@@ -5,19 +5,19 @@ cùng người dùng suốt lộ trình cải thiện, dựa trên một hồ s�
 
 ## Tính năng
 
-- **Hồ sơ cơ địa** — khai báo loại da, dị ứng, bệnh lý, mục tiêu chăm sóc; lưu vĩnh viễn khi có tài khoản.
-- **Quét mỹ phẩm/thực phẩm** — đối chiếu rule-based dựa trên hồ sơ (`matchEngine.js`), hoặc quét ảnh
+- **Hồ sơ cơ địa**: khai báo loại da, dị ứng, bệnh lý, mục tiêu chăm sóc; lưu vĩnh viễn khi có tài khoản.
+- **Quét mỹ phẩm/thực phẩm**: đối chiếu rule-based dựa trên hồ sơ (`matchEngine.js`), hoặc quét ảnh
   thật qua Gemini API để đọc và suy luận trực tiếp (không giới hạn trong database sẵn có).
-- **Gợi ý & lộ trình chăm sóc** — sinh lộ trình theo ngày, có thể tuỳ biến; điểm danh hằng ngày,
+- **Gợi ý & lộ trình chăm sóc**: sinh lộ trình theo ngày, có thể tuỳ biến; điểm danh hằng ngày,
   theo dõi streak.
-- **Theo dõi tiến độ** — chụp lại "milestone" theo mốc thời gian, so sánh trước/sau (ảnh, tỉ lệ hoàn
+- **Theo dõi tiến độ**: chụp lại "milestone" theo mốc thời gian, so sánh trước/sau (ảnh, tỉ lệ hoàn
   thành điểm danh, số lượt quét, nhiệm vụ đã làm).
-- **Chuyên gia** — xem danh sách, đặt lịch tư vấn với chuyên gia da liễu.
-- **Diễn đàn đánh giá** — người dùng chia sẻ trải nghiệm, đánh giá kèm ảnh.
-- **Về chúng tôi** — chính sách bảo vệ thông tin cá nhân, điều khoản sử dụng, cam kết về sức khỏe và
+- **Chuyên gia**: xem danh sách, đặt lịch tư vấn với chuyên gia da liễu.
+- **Diễn đàn đánh giá**: người dùng chia sẻ trải nghiệm, đánh giá kèm ảnh.
+- **Về chúng tôi**: chính sách bảo vệ thông tin cá nhân, điều khoản sử dụng, cam kết về sức khỏe và
   giới hạn trách nhiệm khi dùng AI.
 
-Frontend luôn chạy độc lập, không bắt buộc backend — tự chuyển về chế độ demo (localStorage + JSON
+Frontend luôn chạy độc lập, không bắt buộc backend. Tự chuyển về chế độ demo (localStorage + JSON
 tĩnh) nếu backend không chạy.
 
 ## Chạy chỉ frontend (chế độ demo, không cần backend)
@@ -45,20 +45,20 @@ npm run dev:all   # tự chọn cổng trống cho frontend/backend và nối 2 
 ```
 
 Backend cần `DATABASE_URL` trỏ tới một database PostgreSQL (khuyến nghị [Neon](https://neon.tech),
-free, không cần thẻ). Không có `GEMINI_API_KEY` vẫn chạy được bình thường — chỉ riêng tính năng quét
+free, không cần thẻ). Không có `GEMINI_API_KEY` vẫn chạy được bình thường, chỉ riêng tính năng quét
 ảnh thật ở trang Quét thử sẽ báo "chưa sẵn sàng" cho tới khi bạn thêm key vào `server/.env`. Key này
-lấy miễn phí tại [Google AI Studio](https://aistudio.google.com/apikey) — xem `HUONG_DAN_CHAY.md` để
+lấy miễn phí tại [Google AI Studio](https://aistudio.google.com/apikey), xem `HUONG_DAN_CHAY.md` để
 biết chi tiết.
 
 ## Cấu trúc
 
-- `src/data` — database JSON gốc (thành phần mỹ phẩm, thực phẩm) và danh sách lựa chọn hồ sơ
-- `src/logic/matchEngine.js` — logic đối chiếu rule-based (`matchProfile`, `getRecommendations`), dùng chung cho cả frontend lẫn backend
-- `src/context/ProfileContext.jsx` — state hồ sơ cơ địa, lưu localStorage, đồng bộ lên backend khi đã đăng nhập
-- `src/context/AuthContext.jsx` — trạng thái đăng nhập, JWT
-- `src/pages` — Trang chủ, Hồ sơ, Kết quả gợi ý, Quét thử, Lịch sử quét, Lộ trình, Điểm danh, Tiến độ, Chuyên gia, Diễn đàn, Về chúng tôi, Đăng nhập/Đăng ký
-- `src/components` — component UI dùng chung
-- `server/` — backend Express + PostgreSQL: xác thực JWT, lưu hồ sơ/lịch sử quét/milestone, quét ảnh thật qua Gemini API (`server/src/services/geminiService.js`), rate limit + helmet bảo vệ API. Chuỗi kết nối được đọc từ `DATABASE_URL`.
+- `src/data`: database JSON gốc (thành phần mỹ phẩm, thực phẩm) và danh sách lựa chọn hồ sơ
+- `src/logic/matchEngine.js`: logic đối chiếu rule-based (`matchProfile`, `getRecommendations`), dùng chung cho cả frontend lẫn backend
+- `src/context/ProfileContext.jsx`: state hồ sơ cơ địa, lưu localStorage, đồng bộ lên backend khi đã đăng nhập
+- `src/context/AuthContext.jsx`: trạng thái đăng nhập, JWT
+- `src/pages`: Trang chủ, Hồ sơ, Kết quả gợi ý, Quét thử, Lịch sử quét, Lộ trình, Điểm danh, Tiến độ, Chuyên gia, Diễn đàn, Về chúng tôi, Đăng nhập/Đăng ký
+- `src/components`: component UI dùng chung
+- `server/`: backend Express + PostgreSQL. Xác thực JWT, lưu hồ sơ/lịch sử quét/milestone, quét ảnh thật qua Gemini API (`server/src/services/geminiService.js`), rate limit + helmet bảo vệ API. Chuỗi kết nối được đọc từ `DATABASE_URL`.
 
 ## Deploy
 

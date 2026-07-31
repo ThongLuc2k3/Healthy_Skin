@@ -345,7 +345,7 @@ function RoadmapPage() {
               Bạn chưa có lộ trình nào
             </h1>
             <p className="mt-4 max-w-xl mx-auto text-base leading-relaxed text-[#64748B]">
-              Cho AI biết mục tiêu, ngân sách và thói quen của bạn — AI sẽ xây dựng một kế hoạch cải thiện da và sức khoẻ hoàn toàn cá nhân hoá.
+              Cho AI biết mục tiêu, ngân sách và thói quen của bạn. AI sẽ xây dựng một kế hoạch cải thiện da và sức khoẻ hoàn toàn cá nhân hoá.
             </p>
           </motion.div>
 

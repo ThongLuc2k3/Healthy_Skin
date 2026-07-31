@@ -74,7 +74,7 @@ export default function MilestoneDiff({ diff, previous, current }) {
 
   return (
     <div className="space-y-6">
-      {/* Ảnh hồ sơ + Ảnh báo cáo — 2 cột ngang hàng */}
+      {/* Ảnh hồ sơ + Ảnh báo cáo, 2 cột ngang hàng */}
       {(current?.facePhotoUrl || current?.milestonePhotoUrl) && (
         <SectionCard title="Hình ảnh">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

@@ -96,7 +96,7 @@ export default function Hero() {
                   Tạo tài khoản để lưu hồ sơ &amp; quét ảnh thật bằng AI
                 </p>
                 <p className="text-xs font-semibold text-white mt-0.5">
-                  Đồng bộ hồ sơ trên mọi thiết bị, xem lại lịch sử quét — miễn phí.
+                  Đồng bộ hồ sơ trên mọi thiết bị, xem lại lịch sử quét, miễn phí.
                 </p>
               </div>
             </div>

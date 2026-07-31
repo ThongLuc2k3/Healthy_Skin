@@ -4,7 +4,7 @@ import { ShieldIcon, CameraIcon, TrashIcon, DocumentIcon } from './Icons'
 import AuthedImage from './AuthedImage'
 
 const DISCLAIMER =
-  'Thông tin trong mục này chỉ mang tính tham khảo để cá nhân hoá gợi ý — KHÔNG phải chẩn đoán y khoa và không thay thế tư vấn của bác sĩ.'
+  'Thông tin trong mục này chỉ mang tính tham khảo để cá nhân hoá gợi ý. KHÔNG phải chẩn đoán y khoa và không thay thế tư vấn của bác sĩ.'
 
 function emptyConditionRow() {
   return { name_vi: '', diagnosed_date: '', note: '' }
@@ -20,7 +20,7 @@ function ConsentGate({ onConsent, submitting }) {
           <ShieldIcon className="h-5 w-5" />
         </span>
         <div className="space-y-2">
-          <h3 className="text-base font-bold text-[#17353D]">Trước khi tiếp tục — dữ liệu nhạy cảm</h3>
+          <h3 className="text-base font-bold text-[#17353D]">Trước khi tiếp tục: dữ liệu nhạy cảm</h3>
           <p className="text-sm leading-relaxed text-[#5F7480]">
             Mục này cho phép bạn lưu ảnh khuôn mặt, bệnh lý da liễu đã được chẩn đoán, và file kết quả
             khám để cá nhân hoá gợi ý tốt hơn. Đây là dữ liệu sinh trắc học/sức khoẻ:

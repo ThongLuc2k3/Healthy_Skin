@@ -136,7 +136,7 @@ export default function Dashboard() {
               &amp; Báo Cáo Thông Minh.
             </>
           }
-          description="Mọi kết quả quét và hồ sơ cơ địa được kết xuất thành bảng điều khiển trực quan — điểm số, xu hướng và độ tin cậy thời gian thực."
+          description="Mọi kết quả quét và hồ sơ cơ địa được kết xuất thành bảng điều khiển trực quan: điểm số, xu hướng và độ tin cậy thời gian thực."
         />
 
         <motion.div

@@ -99,7 +99,7 @@ function BookingDetailPage() {
         </div>
 
         <p className="mt-4 rounded-xl glass border border-amber-500/30 px-4 py-3 text-xs text-amber-200">
-          Đây là lịch hẹn mô phỏng cho mục đích demo — không phải cuộc gọi video/tư vấn y tế thật.
+          Đây là lịch hẹn mô phỏng cho mục đích demo, không phải cuộc gọi video/tư vấn y tế thật.
         </p>
 
         <div className="mt-6 border-t border-cyan-400/20 pt-6">
@@ -117,7 +117,7 @@ function BookingDetailPage() {
           ) : (
             <>
               <p className="mt-2 text-sm text-slate-300/80 leading-relaxed">
-                Sau khi tư vấn (mô phỏng) xong, tải lên kết quả/báo cáo bác sĩ cung cấp — sẽ được lưu vào hồ sơ mở
+                Sau khi tư vấn (mô phỏng) xong, tải lên kết quả/báo cáo bác sĩ cung cấp, sẽ được lưu vào hồ sơ mở
                 rộng của bạn.
               </p>
               <label className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-xl glass border border-cyan-400/30 px-5 py-2.5 text-sm font-semibold text-cyan-200 hover:border-cyan-400">

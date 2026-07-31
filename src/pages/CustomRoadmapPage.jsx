@@ -63,7 +63,7 @@ function CustomRoadmapPage() {
     if (!normalized) return null
     const match = avoidItems.find((item) => normalized.includes(item.name_vi.toLowerCase()))
     if (!match) return null
-    return `Mục này có thể không phù hợp với hồ sơ của bạn (${match.name_vi} — ${match.reason}) — vẫn muốn thêm vào lộ trình?`
+    return `Mục này có thể không phù hợp với hồ sơ của bạn (${match.name_vi}: ${match.reason}). Vẫn muốn thêm vào lộ trình?`
   }
 
   function updateTask(index, value) {

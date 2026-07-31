@@ -24,7 +24,7 @@ const FEATURES = [
   {
     icon: UserIcon,
     title: 'Một hồ sơ cơ địa duy nhất',
-    desc: 'Khai báo loại da, dị ứng thực phẩm, bệnh lý nền và mục tiêu một lần — dùng chung cho cả chăm sóc da lẫn dinh dưỡng. Không chắc thì chọn "Khác" và mô tả để AI hiểu rõ hơn.',
+    desc: 'Khai báo loại da, dị ứng thực phẩm, bệnh lý nền và mục tiêu một lần, dùng chung cho cả chăm sóc da lẫn dinh dưỡng. Không chắc thì chọn "Khác" và mô tả để AI hiểu rõ hơn.',
     to: '/profile',
     tag: 'Core Profile',
     accent: 'from-[#2C8E92]/20 to-[#67D6E8]/10',
@@ -57,7 +57,7 @@ const FEATURES = [
   {
     icon: PlayIcon,
     title: 'Góc truyền động lực',
-    desc: 'Video & nội dung ngắn về skincare, dinh dưỡng, giảm cân lành mạnh — giữ động lực trên hành trình của bạn.',
+    desc: 'Video & nội dung ngắn về skincare, dinh dưỡng, giảm cân lành mạnh, giữ động lực trên hành trình của bạn.',
     to: '/motivation',
     tag: 'Motivation',
     accent: 'from-[#BFD8CF]/25 to-[#6F9D8D]/15',
@@ -73,7 +73,7 @@ const FEATURES = [
   {
     icon: ChatBubbleIcon,
     title: 'Trợ lý AI luôn sẵn sàng',
-    desc: 'Nút chat nổi ở mọi trang — hỏi bất cứ điều gì về thành phần, dinh dưỡng hoặc cách dùng app.',
+    desc: 'Nút chat nổi ở mọi trang, hỏi bất cứ điều gì về thành phần, dinh dưỡng hoặc cách dùng app.',
     to: '#chat',
     tag: '24/7 Assistant',
     accent: 'from-[#2C8E92]/20 to-[#67D6E8]/10',

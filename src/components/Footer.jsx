@@ -47,7 +47,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-[#64748B] font-normal">
-              Đúng da, đúng dưỡng chất — từ trong ra ngoài. Nền tảng cá nhân hóa chăm sóc da và dinh dưỡng dựa trên hồ sơ cơ địa duy nhất.
+              Đúng da, đúng dưỡng chất, từ trong ra ngoài. Nền tảng cá nhân hóa chăm sóc da và dinh dưỡng dựa trên hồ sơ cơ địa duy nhất.
             </p>
             <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#FCFDFC] border border-[#E7ECEE] px-4 py-2 shadow-xs">
               <span className="h-2 w-2 rounded-full bg-[#6F9D8D] animate-pulse" />

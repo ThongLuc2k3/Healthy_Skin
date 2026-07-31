@@ -112,7 +112,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                 {sessionExpired && (
                   <div className="flex items-start gap-2 rounded-xl bg-amber-500/15 border border-amber-400/40 px-3.5 py-2.5 text-xs text-amber-200">
                     <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                    <span>Phiên làm việc hết hạn — vui lòng đăng nhập lại.</span>
+                    <span>Phiên làm việc hết hạn, vui lòng đăng nhập lại.</span>
                   </div>
                 )}
 
@@ -384,7 +384,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                   {sessionExpired && (
                     <div className="flex items-start gap-2 rounded-xl bg-amber-500/15 border border-amber-400/40 px-3.5 py-2.5 text-xs text-amber-200">
                       <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                      <span>Phiên làm việc hết hạn — vui lòng đăng nhập lại.</span>
+                      <span>Phiên làm việc hết hạn, vui lòng đăng nhập lại.</span>
                     </div>
                   )}
 

@@ -44,4 +44,4 @@ assert.ok(rec['cần cân nhắc'].length > 0, 'Phải có ít nhất 1 mục c�
 assert.ok(rec['nên tránh'].length > 0, 'Phải có ít nhất 1 mục nên tránh')
 
 console.log('Tất cả test matchEngine PASS')
-console.log('Hồ sơ 3 — Phù hợp:', rec['phù hợp'].length, '| Cần cân nhắc:', rec['cần cân nhắc'].length, '| Nên tránh:', rec['nên tránh'].length)
+console.log('Hồ sơ 3, Phù hợp:', rec['phù hợp'].length, '| Cần cân nhắc:', rec['cần cân nhắc'].length, '| Nên tránh:', rec['nên tránh'].length)

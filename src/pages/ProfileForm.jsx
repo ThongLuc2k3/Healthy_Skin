@@ -94,7 +94,7 @@ function ProfileForm() {
 
           <p className="mx-auto max-w-2xl text-base sm:text-lg leading-relaxed text-[#5F7480] font-normal">
             Thông tin này chỉ dùng để cá nhân hóa gợi ý trên thiết bị của bạn. Không chắc chắn ở mục nào?
-            Chọn "Khác" và mô tả bằng lời của bạn — AI sẽ dựa vào đó để hiểu rõ hơn.
+            Chọn "Khác" và mô tả bằng lời của bạn, AI sẽ dựa vào đó để hiểu rõ hơn.
           </p>
         </motion.div>
 

@@ -10,7 +10,7 @@ export const MOTIVATION_CATEGORIES = [
     items: [
       {
         title: 'Routine skincare buổi sáng cho người mới bắt đầu',
-        desc: 'Các bước cơ bản: rửa mặt, dưỡng ẩm, chống nắng — dễ áp dụng ngay từ hôm nay.',
+        desc: 'Các bước cơ bản: rửa mặt, dưỡng ẩm, chống nắng, dễ áp dụng ngay từ hôm nay.',
         url: youtubeSearchUrl('routine skincare buổi sáng cho người mới bắt đầu'),
       },
       {

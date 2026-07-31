@@ -248,7 +248,7 @@ function ExpertDetailPage() {
               </div>
 
               <p className="text-xs text-[#64748B] leading-relaxed">
-                Đây là lịch hẹn mô phỏng cho mục đích demo — không phải cuộc gọi video/tư vấn y tế thật.
+                Đây là lịch hẹn mô phỏng cho mục đích demo, không phải cuộc gọi video/tư vấn y tế thật.
               </p>
 
               <div className="flex flex-wrap gap-3">

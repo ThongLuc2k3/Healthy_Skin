@@ -399,7 +399,7 @@ function ScanDemoPage() {
                     reason={scanResult.reason}
                   />
                   <p className="text-xs text-[#64748B] text-center italic">
-                    Kết quả do AI tự động đọc ảnh và suy luận — chỉ mang tính tham khảo, có thể chưa hoàn toàn chính xác.
+                    Kết quả do AI tự động đọc ảnh và suy luận, chỉ mang tính tham khảo, có thể chưa hoàn toàn chính xác.
                   </p>
                 </motion.div>
               )}

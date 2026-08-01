@@ -14,7 +14,7 @@ export default function WebsiteReviews() {
   const [loading, setLoading] = useState(false)
 
   // 1. Xác định domain gốc Backend (loại bỏ /api ở cuối nếu có)
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api'
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api'
   const backendHost = apiBaseUrl.replace(/\/api\/?$/, '')
 
   const fetchReviews = async () => {

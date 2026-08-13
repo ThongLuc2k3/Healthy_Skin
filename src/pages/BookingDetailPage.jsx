@@ -49,7 +49,7 @@ function BookingDetailPage() {
 
   if (ready && !user) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-20 text-center">
+      <div className="mx-auto mt-12 max-w-lg px-4 py-20 text-center">
         <h1 className="text-2xl font-bold text-gradient-cyan">Cần đăng nhập</h1>
         <Link to="/login" className="mt-6 inline-block rounded-xl bg-cyan-400 px-6 py-3 text-sm font-semibold text-slate-950 shadow-glow transition hover:bg-cyan-300">
           Đăng nhập
@@ -59,12 +59,12 @@ function BookingDetailPage() {
   }
 
   if (status === 'loading') {
-    return <p className="mx-auto max-w-2xl px-4 py-20 text-center text-sm text-cyan-300/70">Đang tải...</p>
+    return <p className="mx-auto mt-12 max-w-2xl px-4 py-20 text-center text-sm text-slate-400">Đang tải...</p>
   }
   if (status === 'error' || !booking) {
     return (
-      <div className="mx-auto max-w-lg px-4 py-20 text-center">
-        <p className="rounded-xl bg-rose-500/10 border border-rose-500/30 px-4 py-3 text-sm font-medium text-rose-300">
+      <div className="mx-auto mt-12 max-w-lg px-4 py-20 text-center">
+        <p className="rounded-xl bg-rose-500/10 border border-rose-500/30 px-4 py-3 text-sm font-medium text-rose-700">
           {errorMessage || 'Không tìm thấy lịch hẹn.'}
         </p>
       </div>
@@ -72,7 +72,7 @@ function BookingDetailPage() {
   }
 
   return (
-    <div className="mx-auto max-w-xl px-4 py-12">
+    <div className="mx-auto mt-12 max-w-xl px-4 py-12">
       <Link
         to={`/experts/${booking.expert?.id}`}
         className="inline-flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-cyan-300"
@@ -98,7 +98,7 @@ function BookingDetailPage() {
           </p>
         </div>
 
-        <p className="mt-4 rounded-xl glass border border-amber-500/30 px-4 py-3 text-xs text-amber-200">
+        <p className="mt-4 rounded-xl glass border border-amber-500/30 px-4 py-3 text-xs text-amber-800">
           Đây là lịch hẹn mô phỏng cho mục đích demo, không phải cuộc gọi video/tư vấn y tế thật.
         </p>
 
@@ -135,7 +135,7 @@ function BookingDetailPage() {
           )}
 
           {errorMessage && (
-            <p className="mt-4 rounded-xl bg-rose-500/10 border border-rose-500/30 px-4 py-3 text-sm font-medium text-rose-300">{errorMessage}</p>
+            <p className="mt-4 rounded-xl bg-rose-500/10 border border-rose-500/30 px-4 py-3 text-sm font-medium text-rose-700">{errorMessage}</p>
           )}
         </div>
       </div>

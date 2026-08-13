@@ -47,7 +47,7 @@ function RingMetric({ label, value, icon, color, delay }) {
       transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
       className="relative flex flex-col items-center"
     >
-      <div className="relative h-32 w-32">
+      <div className="relative h-24 w-24 sm:h-32 sm:w-32">
         <svg className="h-full w-full -rotate-90" viewBox="0 0 120 120">
           <circle cx="60" cy="60" r={R} fill="none" stroke="rgba(44, 142, 146, 0.12)" strokeWidth="6" />
           <motion.circle
@@ -65,7 +65,7 @@ function RingMetric({ label, value, icon, color, delay }) {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-display text-2xl font-black text-[#17353D]">
+          <span className="font-display text-xl sm:text-2xl font-black text-[#17353D]">
             <CountUp to={value} />
           </span>
           <span className="text-[10px] font-bold text-[#64748B]">/ 100</span>
@@ -169,7 +169,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="mt-10 grid grid-cols-2 gap-8 sm:grid-cols-4">
+            <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-8 sm:grid-cols-4">
               {metrics.map((m) => (
                 <RingMetric key={m.label} {...m} />
               ))}

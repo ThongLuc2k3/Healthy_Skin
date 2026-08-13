@@ -353,7 +353,8 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
               />
             </AnimatePresence>
 
-
+            {/* Dark scrim so text stays readable over the background photo */}
+            <div className="absolute inset-0 bg-[#06182e]/55" />
 
             <div className="relative z-10">
               <div className="text-center mb-6">

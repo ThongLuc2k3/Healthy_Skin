@@ -88,20 +88,20 @@ function NavBar() {
       >
 
         {/* Full-width wide container */}
-          <div className={`w-full flex items-center justify-between px-6 lg:py-2 sm:py-1 sm:px-5 
+          <div className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 sm:px-5 sm:py-2 lg:px-6
                 ${ user ? 'lg:py-5' : 'lg:py-4'
           }`}
           >
           {/* Brand Logo */}
-          <NavLink to="/" className="flex items-center group shrink-0">
-            <div className="flex items-center cursor-pointer h-10">
+          <NavLink to="/" className="flex items-center gap-2 group shrink min-w-0">
+            <div className="flex items-center cursor-pointer h-8 sm:h-10 shrink-0">
               <img
                 src="/logo1.png"
                 alt="DA DƯỠNG AI Logo"
-                className="object-cover h-30 w-auto"
+                className="h-full w-auto object-contain"
               />
             </div>
-            <span className="font-display text-lg font-extrabold tracking-tight text-white">
+            <span className="font-display text-sm sm:text-lg font-extrabold tracking-tight text-white truncate">
               DA DƯỠNG<span className="text-cyan-300"> AI</span>
             </span>
           </NavLink>
@@ -134,7 +134,7 @@ function NavBar() {
           </nav>
 
           {/* Right Action & Auth Section */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {user ? (
               <div className="flex items-center gap-2.5">
                 <span className="hidden sm:flex items-center gap-2 rounded-xl bg-sky-900 border border-cyan-700/60 px-3.5 py-2 text-xs text-white font-semibold shadow-md">
@@ -144,7 +144,7 @@ function NavBar() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 rounded-xl bg-cyan-400/15 border border-cyan-400/30 px-3.5 py-2 text-xs font-bold text-cyan-200 transition-all hover:bg-cyan-400 hover:text-slate-950 shadow-glow"
+                  className="flex items-center gap-1.5 rounded-xl bg-cyan-400/15 border border-cyan-400/30 px-2.5 py-2 sm:px-3.5 text-xs font-bold text-cyan-200 transition-all hover:bg-cyan-400 hover:text-slate-950 shadow-glow"
                 >
                   <LogOutIcon className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">Đăng xuất</span>
@@ -153,7 +153,7 @@ function NavBar() {
             ) : (
               <NavLink
                 to="/login"
-                className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-5 py-2.5 text-xs font-bold text-slate-950 hover:bg-cyan-300 transition-colors shadow-glow"
+                className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-3 py-2 sm:px-5 sm:py-2.5 text-xs font-bold text-slate-950 hover:bg-cyan-300 transition-colors shadow-glow whitespace-nowrap"
               >
                 Đăng nhập
               </NavLink>
@@ -161,7 +161,7 @@ function NavBar() {
 
             {/* Mobile Menu Trigger button */}
             <button
-              className="lg:hidden grid h-10 w-10 place-items-center  text-cyan-300"
+              className="lg:hidden grid h-9 w-9 sm:h-10 sm:w-10 shrink-0 place-items-center text-cyan-300"
               onClick={() => setOpen((v) => !v)}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}

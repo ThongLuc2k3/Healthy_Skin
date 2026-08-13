@@ -521,7 +521,7 @@ function RoadmapPage() {
               </div>
 
               {/* Stats row */}
-              <div className="grid grid-cols-3 gap-4 lg:gap-5 lg:min-w-[340px]">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-5 lg:min-w-[340px]">
                 {[
                   { label: 'Tiến độ tổng', value: `${completionRate}%`, sub: 'toàn bộ lộ trình', color: '#67D6E8', bg: 'from-cyan-50 to-sky-50', border: 'border-cyan-200/60' },
                   { label: 'Streak', value: `${streak}`, sub: 'ngày liên tiếp', color: '#D8B27A', bg: 'from-amber-50 to-yellow-50', border: 'border-amber-200/60', icon: <FlameIcon className="h-4 w-4 text-amber-500" /> },
@@ -529,11 +529,11 @@ function RoadmapPage() {
                 ].map((stat, i) => (
                   <motion.div key={i} variants={fadeUp} initial="hidden" animate="visible" custom={i + 1}
                     whileHover={{ y: -4 }}
-                    className={`rounded-2xl p-4 border ${stat.border} bg-gradient-to-br ${stat.bg} text-center shadow-sm`}>
+                    className={`rounded-2xl p-2.5 sm:p-4 border ${stat.border} bg-gradient-to-br ${stat.bg} text-center shadow-sm min-w-0`}>
                     {stat.icon && <div className="flex justify-center mb-1">{stat.icon}</div>}
-                    <p className="text-2xl font-extrabold" style={{ color: stat.color }}>{stat.value}</p>
-                    <p className="mt-0.5 text-[10px] font-semibold text-[#64748B] uppercase tracking-wider">{stat.label}</p>
-                    <p className="mt-0.5 text-[10px] text-[#94A3B8]">{stat.sub}</p>
+                    <p className="text-lg sm:text-2xl font-extrabold truncate" style={{ color: stat.color }}>{stat.value}</p>
+                    <p className="mt-0.5 text-[10px] font-semibold text-[#64748B] uppercase tracking-wider truncate">{stat.label}</p>
+                    <p className="mt-0.5 text-[10px] text-[#94A3B8] truncate">{stat.sub}</p>
                   </motion.div>
                 ))}
               </div>

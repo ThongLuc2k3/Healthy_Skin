@@ -338,7 +338,7 @@ function ScanDemoPage() {
                         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                         onClick={handleScanSubmit}
                         disabled={scanStatus === 'loading'}
-                        className="group relative inline-flex w-full sm:w-auto min-w-[300px] items-center justify-center gap-2 overflow-hidden rounded-full text-lg font-bold text-white transition-colors cursor-pointer"
+                        className="group relative inline-flex w-full sm:w-auto sm:min-w-[300px] items-center justify-center gap-2 overflow-hidden rounded-full text-lg font-bold text-white transition-colors cursor-pointer"
                         style={{
                           padding: '16px 40px',
                           backgroundImage:

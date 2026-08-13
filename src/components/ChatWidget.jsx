@@ -62,7 +62,7 @@ function ChatWidget() {
               type="button"
               onClick={() => setOpen(false)}
               aria-label="Đóng khung chat"
-              className="rounded-lg p-1 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+              className="rounded-lg p-1 text-cyan-200/80 transition hover:bg-white/10 hover:text-white"
             >
               <CloseIcon className="h-4 w-4" />
             </button>
@@ -87,7 +87,7 @@ function ChatWidget() {
             ))}
             {loading && (
               <div className="flex justify-start">
-                <p className="rounded-2xl glass border border-cyan-400/15 px-3.5 py-2 text-sm text-cyan-300/70">
+                <p className="rounded-2xl glass border border-cyan-400/15 px-3.5 py-2 text-sm text-slate-300/70">
                   Đang trả lời...
                 </p>
               </div>
@@ -105,7 +105,7 @@ function ChatWidget() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Hỏi trợ lý AI..."
-              className="flex-1 rounded-xl bg-slate-900/80 border border-cyan-400/20 px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 focus:outline-none"
+              className="flex-1 rounded-xl bg-slate-900/80 border border-cyan-400/20 px-3 py-2 text-sm text-slate-100 placeholder-white/30 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 focus:outline-none"
             />
             <button
               type="submit"

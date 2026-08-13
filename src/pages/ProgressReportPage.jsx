@@ -131,10 +131,10 @@ export default function ProgressReportPage() {
               <AuthedImage
                 src={profile.facePhotoUrl}
                 alt="Face hiện tại"
-                className="h-80 w-80 rounded-xl object-cover border-2 border-slate-200 shadow-sm"
+                className="h-56 w-56 sm:h-80 sm:w-80 max-w-full rounded-xl object-cover border-2 border-slate-200 shadow-sm"
               />
             ) : (
-              <div className="h-80 w-80 rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300 text-sm">
+              <div className="h-56 w-56 sm:h-80 sm:w-80 max-w-full rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300 text-sm">
                 Chưa có ảnh
               </div>
             )}
@@ -152,7 +152,7 @@ export default function ProgressReportPage() {
             />
             {imagePreview ? (
               <div className="mt-3 relative inline-block">
-                <img src={imagePreview} alt="Preview" className="h-80 w-80 rounded-xl object-cover border-2 border-emerald-200 shadow-sm" />
+                <img src={imagePreview} alt="Preview" className="h-56 w-56 sm:h-80 sm:w-80 max-w-full rounded-xl object-cover border-2 border-emerald-200 shadow-sm" />
                 <button
                   type="button"
                   onClick={handleRemoveImage}
@@ -162,7 +162,7 @@ export default function ProgressReportPage() {
                 </button>
               </div>
             ) : (
-              <div className="mt-3 h-80 w-80 rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300 text-sm">
+              <div className="mt-3 h-56 w-56 sm:h-80 sm:w-80 max-w-full rounded-xl bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center text-slate-300 text-sm">
                 Chưa chọn ảnh
               </div>
             )}
@@ -186,8 +186,8 @@ export default function ProgressReportPage() {
           <p className="text-slate-400 text-sm">Nhấn "Tạo báo cáo" để chụp ảnh nhanh trạng thái hiện tại.</p>
         </div>
       ) : (
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-          <table className="w-full text-sm">
+        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-x-auto">
+          <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/50">
                 <th className="text-left px-4 py-3 font-semibold text-slate-600">Ngày</th>

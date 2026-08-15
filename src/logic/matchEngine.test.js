@@ -15,10 +15,10 @@ const find = (db, id) => db.find((i) => i.id === id)
 // Hồ sơ 1: da dầu, dị ứng hải sản, tiểu đường
 const profile1 = { skinType: 'da_dau', allergies: ['hai_san'], conditions: ['tieu_duong'], goals: [] }
 
-assert.strictEqual(matchProfile(profile1, find(skincare, 'coconut_oil')).result, 'nên tránh')
+assert.strictEqual(matchProfile(profile1, find(skincare, 'coconut_oil')).result, 'cần cân nhắc')
 assert.strictEqual(matchProfile(profile1, find(skincare, 'niacinamide')).result, 'phù hợp')
-assert.strictEqual(matchProfile(profile1, find(food, 'tom')).result, 'nên tránh')
-assert.strictEqual(matchProfile(profile1, find(food, 'nuoc_ngot_co_gas')).result, 'nên tránh')
+assert.strictEqual(matchProfile(profile1, find(food, 'tom')).result, 'cần cân nhắc')
+assert.strictEqual(matchProfile(profile1, find(food, 'nuoc_ngot_co_gas')).result, 'cần cân nhắc')
 
 // Hồ sơ 2: da khô, không dị ứng, không bệnh nền
 const profile2 = { skinType: 'da_kho', allergies: [], conditions: [], goals: [] }
@@ -35,13 +35,12 @@ const profile3 = {
   goals: [],
 }
 
-assert.strictEqual(matchProfile(profile3, find(skincare, 'fragrance_parfum')).result, 'nên tránh')
-assert.strictEqual(matchProfile(profile3, find(food, 'thit_bo')).result, 'nên tránh')
+assert.strictEqual(matchProfile(profile3, find(skincare, 'fragrance_parfum')).result, 'cần cân nhắc')
+assert.strictEqual(matchProfile(profile3, find(food, 'thit_bo')).result, 'cần cân nhắc')
 
 const rec = getRecommendations(profile3, [...skincare, ...food])
 assert.ok(rec['phù hợp'].length > 0, 'Phải có ít nhất 1 mục phù hợp')
 assert.ok(rec['cần cân nhắc'].length > 0, 'Phải có ít nhất 1 mục cần cân nhắc')
-assert.ok(rec['nên tránh'].length > 0, 'Phải có ít nhất 1 mục nên tránh')
 
 console.log('Tất cả test matchEngine PASS')
-console.log('Hồ sơ 3, Phù hợp:', rec['phù hợp'].length, '| Cần cân nhắc:', rec['cần cân nhắc'].length, '| Nên tránh:', rec['nên tránh'].length)
+console.log('Hồ sơ 3, Phù hợp:', rec['phù hợp'].length, '| Cần cân nhắc:', rec['cần cân nhắc'].length)

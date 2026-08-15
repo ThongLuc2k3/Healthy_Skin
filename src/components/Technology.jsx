@@ -1,4 +1,4 @@
-import { ShieldIcon, SearchIcon, SparklesIcon, CameraIcon } from './Icons'
+import { ShieldIcon, SearchIcon, SparklesIcon } from './Icons'
 import { SectionTitle, Reveal } from './ui'
 import NeuralNetCanvas from './NeuralNetCanvas'
 import {
@@ -10,24 +10,19 @@ import {
 
 const tech = [
   {
-    name: 'Quy Tắc Rule-Based Engine',
+    name: 'Đối chiếu theo hồ sơ cá nhân',
     icon: <ShieldIcon className="h-5 w-5" />,
-    desc: 'Phân tích đối chiếu loại da, dị ứng thực phẩm và bệnh lý nền để đưa ra gợi ý minh bạch lý do.',
+    desc: 'So khớp loại da, dị ứng thực phẩm và bệnh lý nền với database thành phần đã kiểm chứng, minh bạch lý do đưa ra gợi ý.',
   },
   {
-    name: 'Computer Vision AI',
+    name: 'Đọc ảnh sản phẩm bằng AI',
     icon: <SearchIcon className="h-5 w-5" />,
-    desc: 'Trích xuất đặc trưng hình ảnh từ ảnh quét thật để tự động đọc thành phần và nhãn sản phẩm.',
+    desc: 'Tự động đọc bảng thành phần/nhãn dinh dưỡng từ ảnh chụp thật, kèm giá tham khảo và sản phẩm liên quan.',
   },
   {
-    name: 'Vision Transformer',
+    name: 'Gợi ý, không phán quyết',
     icon: <SparklesIcon className="h-5 w-5" />,
-    desc: 'Mô hình học sâu phân tích bề mặt da, độ bóng dầu và cấu trúc lỗ chân lông với độ chính xác cao.',
-  },
-  {
-    name: 'Neural Match Engine',
-    icon: <CameraIcon className="h-5 w-5" />,
-    desc: 'Tính toán điểm phù hợp và sinh ra phân loại Phù hợp / Cần cân nhắc / Nên tránh tức thì.',
+    desc: 'Chỉ đưa ra gợi ý Phù hợp / Cần cân nhắc mang tính tham khảo — không thay thế chẩn đoán từ chuyên gia.',
   },
 ]
 
@@ -81,7 +76,7 @@ export default function Technology() {
               Minh Bạch &amp; Chính Xác.
             </>
           }
-          description="Sự kết hợp giữa quy tắc kiểm tra minh bạch theo hồ sơ cơ địa và mô hình trí tuệ nhân tạo đọc ảnh sản phẩm thực tế."
+          description="Sự kết hợp giữa quy tắc kiểm tra minh bạch theo hồ sơ cá nhân và mô hình trí tuệ nhân tạo đọc ảnh sản phẩm thực tế."
         />
 
         <div className="mt-16 grid gap-8 lg:grid-cols-2 items-center">

@@ -7,9 +7,12 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import config from './config/env.js'
 import { initDatabase } from './db/connection.js'
-import { seed, seedExperts } from './db/seed.js'
+import { seed, seedExperts, seedSponsoredContent, seedVenuesAndVouchers } from './db/seed.js'
 import { listSkincareItems } from './services/itemService.js'
 import { listExperts } from './services/expertService.js'
+import { listHomepageAds } from './services/sponsoredContentService.js'
+import { seedExpertAccounts } from './services/expertAccountService.js'
+import { listVenues } from './services/venueService.js'
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js'
 import { generalLimiter } from './middleware/rateLimit.js'
 import authRoutes from './routes/auth.routes.js'
@@ -18,11 +21,12 @@ import itemsRoutes from './routes/items.routes.js'
 import scanRoutes from './routes/scan.routes.js'
 import explainRoutes from './routes/explain.routes.js'
 import chatRoutes from './routes/chat.routes.js'
-import roadmapRoutes from './routes/roadmap.routes.js'
-import checkinRoutes from './routes/checkin.routes.js'
 import expertsRoutes from './routes/experts.routes.js'
+import expertPortalRoutes from './routes/expertPortal.routes.js'
 import reviewRoutes from './routes/review.routes.js'
-import milestoneRoutes from './routes/milestone.routes.js'
+import sponsoredRoutes from './routes/sponsored.routes.js'
+import venuesRoutes from './routes/venues.routes.js'
+import vouchersRoutes from './routes/vouchers.routes.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const clientDistPath = path.resolve(__dirname, '../../dist')
@@ -36,9 +40,25 @@ if ((await listSkincareItems()).length === 0) {
   console.log(`[db] Đã tự động seed dữ liệu ban đầu: ${skincareCount} skincare, ${foodCount} food.`)
 }
 
-if ((await listExperts()).length === 0) {
+let experts = await listExperts()
+if (experts.length === 0) {
   const { expertsCount } = await seedExperts()
   console.log(`[db] Đã tự động seed dữ liệu chuyên gia mẫu (demo): ${expertsCount} chuyên gia.`)
+  experts = await listExperts()
+}
+if (experts.length > 0) {
+  await seedExpertAccounts(experts.map((e) => e.id))
+  console.log(`[db] Đã tự động seed tài khoản đăng nhập demo cho ${experts.length} chuyên gia (mật khẩu: demo1234).`)
+}
+
+if ((await listHomepageAds()).length === 0) {
+  const { productsCount, adsCount } = await seedSponsoredContent()
+  console.log(`[db] Đã tự động seed dữ liệu tiếp thị liên kết mẫu (demo): ${productsCount} sản phẩm, ${adsCount} quảng cáo.`)
+}
+
+if ((await listVenues()).length === 0) {
+  const { venuesCount, servicesCount, vouchersCount } = await seedVenuesAndVouchers()
+  console.log(`[db] Đã tự động seed dữ liệu Dịch Vụ Quanh Bạn (demo): ${venuesCount} trung tâm, ${servicesCount} dịch vụ, ${vouchersCount} voucher.`)
 }
 
 const app = express()
@@ -90,11 +110,12 @@ app.use('/api/items', itemsRoutes)
 app.use('/api/scan', scanRoutes)
 app.use('/api/explain', explainRoutes)
 app.use('/api/chat', chatRoutes)
-app.use('/api/roadmap', roadmapRoutes)
-app.use('/api/checkin', checkinRoutes)
 app.use('/api/experts', expertsRoutes)
+app.use('/api/expert-portal', expertPortalRoutes)
 app.use('/api/reviews', reviewRoutes)
-app.use('/api/milestones', milestoneRoutes)
+app.use('/api/sponsored', sponsoredRoutes)
+app.use('/api/venues', venuesRoutes)
+app.use('/api/vouchers', vouchersRoutes)
 app.use(express.static(path.join(process.cwd(), 'public')))
 app.use('/uploads', express.static(path.join(process.cwd(), 'public/uploads')))
 app.use(cors())
@@ -127,7 +148,7 @@ app.use(notFoundHandler)
 app.use(errorHandler)
 
 app.listen(config.port, () => {
-  console.log(`[server] DA DƯỠNG backend đang chạy tại http://localhost:${config.port}`)
+  console.log(`[server] HEALTHY SKIN backend đang chạy tại http://localhost:${config.port}`)
 
   // "Làm nóng" bcrypt native (threadpool libuv) để request đăng ký/đăng nhập đầu tiên
   // của người dùng thật không phải gánh chi phí khởi tạo — chạy nền, không chặn gì cả.

@@ -6,6 +6,7 @@ import { scanLimiter } from '../middleware/rateLimit.js'
 import { analyzeImage, GeminiNotConfiguredError, GeminiRequestError } from '../services/geminiService.js'
 import { getProfile } from '../services/profileService.js'
 import { recordScan, listScanHistory } from '../services/scanHistoryService.js'
+import { findSponsoredAlternatives } from '../services/sponsoredContentService.js'
 
 const router = Router()
 
@@ -48,10 +49,20 @@ router.post(
       reason: analysis.reason,
     })
 
+    // Gợi ý tiếp thị liên kết tách riêng khỏi betterAlternatives (do AI tự suy luận) — luôn gắn
+    // nhãn quảng cáo rõ ràng ở phía frontend để người dùng phân biệt được đâu là nội dung tài trợ.
+    const sponsoredAlternatives = await findSponsoredAlternatives(null, 3)
+
     res.json({
       productName: analysis.productName,
       result: analysis.result,
       reason: analysis.reason,
+      marketPriceRange: analysis.marketPriceRange || '',
+      origin: analysis.origin || '',
+      authenticityNote: analysis.authenticityNote || '',
+      betterAlternatives: analysis.betterAlternatives || [],
+      nearbySellers: analysis.nearbySellers || [],
+      sponsoredAlternatives,
     })
   }),
 )

@@ -11,17 +11,18 @@ function truncate(text) {
 function buildPrompt({ nameVi, category, result, reason, profile }) {
   const categoryLabel = category === 'food' ? 'thực phẩm' : 'sản phẩm chăm sóc da'
 
-  return `Bạn là trợ lý giải thích chuyên sâu cho ứng dụng "DA DƯỠNG".
+  return `Bạn là trợ lý giải thích chuyên sâu cho ứng dụng "HEALTHY SKIN".
 
-Một ${categoryLabel} tên "${truncate(nameVi)}" vừa được đối chiếu rule-based với hồ sơ cơ địa người
+Một ${categoryLabel} tên "${truncate(nameVi)}" vừa được đối chiếu rule-based với hồ sơ cá nhân người
 dùng, cho kết quả "${result}" với lý do ngắn gọn: "${truncate(reason)}".
 
-Hồ sơ cơ địa người dùng:
+Hồ sơ cá nhân người dùng:
 ${profileSummaryText(profile)}
 
-Hãy giải thích chi tiết hơn (khoảng 3-5 câu, tiếng Việt, giọng thân thiện dễ hiểu):
-- Cơ chế vì sao thành phần/thực phẩm này gây ảnh hưởng như vậy tới loại da/tình trạng sức khỏe này
-- Một mẹo thực tế nếu người dùng vẫn muốn dùng (hoặc gợi ý thay thế nếu nên tránh)
+Hãy giải thích chi tiết hơn (khoảng 3-5 câu, tiếng Việt, giọng thân thiện dễ hiểu, như một gợi ý cá
+nhân chứ không phải phán quyết y khoa):
+- Cơ chế vì sao thành phần/thực phẩm này liên quan tới loại da/hồ sơ đã khai báo
+- Một mẹo thực tế nếu người dùng vẫn muốn dùng, hoặc gợi ý cân nhắc thay thế nếu cần
 
 Không lặp lại nguyên văn lý do ngắn đã cho, hãy mở rộng thêm thông tin hữu ích. Không đưa ra chẩn đoán
 y khoa, chỉ mang tính tham khảo.`

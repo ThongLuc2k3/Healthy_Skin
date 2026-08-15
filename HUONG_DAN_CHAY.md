@@ -1,4 +1,4 @@
-# Hướng dẫn chạy dự án DA DƯỠNG
+# Hướng dẫn chạy dự án HEALTHY SKIN
 
 ## Bước 0 — Lấy code về máy (dành cho người mới / đồng đội trong nhóm)
 

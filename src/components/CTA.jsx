@@ -70,7 +70,7 @@ export default function CTA() {
             </h2>
 
             <p className="mx-auto mt-6 max-w-2xl text-base sm:text-lg text-[#64748B] leading-relaxed font-normal">
-              Chỉ cần khai báo loại da, dị ứng và mục tiêu một lần để nhận ngay gợi ý sản phẩm mỹ phẩm &amp; thực phẩm phù hợp với chính cơ địa của bạn.
+              Chỉ cần khai báo loại da, dị ứng và mục tiêu một lần để nhận ngay gợi ý sản phẩm mỹ phẩm &amp; thực phẩm phù hợp với chính bạn.
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">

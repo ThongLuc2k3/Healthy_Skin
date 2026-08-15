@@ -7,7 +7,7 @@ import { GeminiNotConfiguredError, GeminiRequestError } from '../services/gemini
 
 const router = Router()
 
-const RESULT_VALUES = ['phù hợp', 'cần cân nhắc', 'nên tránh']
+const RESULT_VALUES = ['phù hợp', 'cần cân nhắc']
 
 router.post(
   '/',

@@ -68,7 +68,7 @@ function MotivationPage() {
           </h1>
 
           <p className="mx-auto max-w-2xl text-base sm:text-lg leading-relaxed text-[#64748B] font-normal">
-            Video &amp; nội dung ngắn chọn lọc giúp bạn duy trì thói quen chăm sóc da, dinh dưỡng và lối sống lành mạnh mỗi ngày bên cạnh hồ sơ cơ địa cá nhân.
+            Video &amp; nội dung ngắn chọn lọc giúp bạn duy trì thói quen chăm sóc da, dinh dưỡng và lối sống lành mạnh mỗi ngày bên cạnh hồ sơ cá nhân.
           </p>
         </motion.div>
 
@@ -124,10 +124,10 @@ function MotivationPage() {
                         <div className="relative h-48 sm:h-56 w-full overflow-hidden">
                           <ThumbnailArtwork themeKey={category.color} title={item.title} />
 
-                          {/* AI Recommended Badge */}
+                          {/* Curated Badge */}
                           <div className="absolute top-3 left-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-white/90 border border-[#E8EEF0] px-3 py-1 text-[11px] font-extrabold text-[#17353D] shadow-xs backdrop-blur-md">
                             <SparklesIcon className="h-3 w-3 text-[#2C8E92]" />
-                            AI Recommended
+                            Đề xuất cho bạn
                           </div>
 
                           {/* Duration Badge */}

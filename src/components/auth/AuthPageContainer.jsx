@@ -104,7 +104,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
               <div className="mb-6">
                 <h2 className="text-2xl font-black tracking-tight text-white">Chào mừng trở lại</h2>
                 <p className="mt-2 text-sm text-[#cbd5e1] font-medium">
-                  Đăng nhập để xem hồ sơ cơ địa và hành trình cải thiện da của bạn.
+                  Đăng nhập để xem hồ sơ cá nhân và hành trình cải thiện da của bạn.
                 </p>
               </div>
 
@@ -367,7 +367,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                 </h2>
                 <p className="mt-1.5 text-xs text-[#cbd5e1] font-medium">
                   {isRegister
-                    ? 'Lưu trữ hồ sơ cơ địa và hành trình cải thiện làn da.'
+                    ? 'Lưu trữ hồ sơ cá nhân và hành trình cải thiện làn da.'
                     : 'Đăng nhập để lưu hồ sơ và xem lịch sử quét.'}
                 </p>
               </div>

@@ -1,0 +1,14 @@
+[
+  {
+    "sponsor_name": "Demo Skin Co. (đối tác minh hoạ)",
+    "image_url": "placeholder",
+    "link_url": "https://example.com/aff/demo-skin-co",
+    "priority": 1
+  },
+  {
+    "sponsor_name": "Demo Sun Care (đối tác minh hoạ)",
+    "image_url": "placeholder",
+    "link_url": "https://example.com/aff/demo-sun-care",
+    "priority": 2
+  }
+]

@@ -1,16 +1,16 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   GamepadIcon,
   SparklesIcon,
   TrophyIcon,
   CheckCircleIcon,
-  ShieldIcon,
   FlameIcon,
   TargetIcon,
   StarIcon,
-  LeafIcon,
 } from '../components/Icons'
+import { useAuth } from '../context/AuthContext'
+import { apiClient } from '../lib/apiClient'
 
 const QUESTIONS = [
   {
@@ -70,8 +70,11 @@ const fadeUp = {
 }
 
 function SkinPlaygroundPage() {
+  const { user } = useAuth()
   const [answers, setAnswers] = useState({})
   const [pickedChallenge, setPickedChallenge] = useState(DAILY_CHALLENGES[0])
+  const [rewardClaimed, setRewardClaimed] = useState(false)
+  const [rewardMessage, setRewardMessage] = useState('')
 
   const answeredCount = Object.keys(answers).length
   const progressPercent = Math.round((answeredCount / QUESTIONS.length) * 100)
@@ -112,6 +115,15 @@ function SkinPlaygroundPage() {
       chips: ['Khóa ẩm', 'Dưỡng sâu', 'Mềm mịn'],
     }
   }, [answers])
+
+  useEffect(() => {
+    if (!result || rewardClaimed || !user) return
+    setRewardClaimed(true)
+    apiClient
+      .post('/vouchers/game-reward', {}, { auth: true })
+      .then(() => setRewardMessage('Bạn vừa nhận 1 voucher vào Kho Voucher vì hoàn thành trắc nghiệm!'))
+      .catch(() => {})
+  }, [result, rewardClaimed, user])
 
   function shuffleChallenge() {
     const next = DAILY_CHALLENGES[Math.floor(Math.random() * DAILY_CHALLENGES.length)]
@@ -328,6 +340,12 @@ function SkinPlaygroundPage() {
                           </span>
                         ))}
                       </div>
+
+                      {rewardMessage && (
+                        <p className="rounded-xl bg-amber-50 border border-amber-200 px-3 py-2 text-xs font-semibold text-amber-700">
+                          {rewardMessage}
+                        </p>
+                      )}
                     </motion.div>
                   ) : (
                     <div className="py-6 text-center space-y-3">

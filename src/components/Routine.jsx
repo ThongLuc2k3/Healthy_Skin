@@ -1,4 +1,4 @@
-import { CheckCircleIcon, WarningIcon, XCircleIcon } from './Icons'
+import { CheckCircleIcon, WarningIcon } from './Icons'
 import { SectionTitle, Reveal } from './ui'
 import RoutineTimelineSection from './RoutineTimelineSection'
 import {
@@ -12,21 +12,15 @@ import {
 const LEGEND = [
   {
     title: 'Phù hợp',
-    desc: 'Sản phẩm/thực phẩm tương thích hoàn toàn với loại da, dị ứng và bệnh lý nền của bạn.',
+    desc: 'Sản phẩm/thực phẩm tương thích tốt với loại da, dị ứng và bệnh lý nền của bạn.',
     icon: <CheckCircleIcon className="h-6 w-6 text-[#6F9D8D]" />,
     badge: 'bg-[#6F9D8D]/15 border-[#6F9D8D]/30 text-[#2C8E92]',
   },
   {
     title: 'Cần cân nhắc',
-    desc: 'Có thành phần cần chú ý liều lượng hoặc thói quen sử dụng đối với cơ địa của bạn.',
+    desc: 'Có thành phần cần chú ý, nếu là bạn thì nên tìm hiểu thêm hoặc hỏi chuyên gia trước khi dùng.',
     icon: <WarningIcon className="h-6 w-6 text-[#D8B27A]" />,
     badge: 'bg-[#D8B27A]/15 border-[#D8B27A]/30 text-[#A87A45]',
-  },
-  {
-    title: 'Nên tránh',
-    desc: 'Chứa chất gây kích ứng da hoặc dị ứng/bệnh lý nền được khai báo trong hồ sơ của bạn.',
-    icon: <XCircleIcon className="h-6 w-6 text-[#EF4444]" />,
-    badge: 'bg-[#EF4444]/15 border-[#EF4444]/30 text-[#DC2626]',
   },
 ]
 
@@ -91,7 +85,7 @@ export default function Routine() {
           description="Mọi gợi ý sản phẩm và thực phẩm đều được xếp nhóm minh bạch kèm lý do chi tiết từ AI."
         />
 
-        <div className="mt-16 grid gap-6 sm:grid-cols-3 text-left">
+        <div className="mt-16 grid gap-6 sm:grid-cols-2 max-w-3xl mx-auto text-left">
           {LEGEND.map((item, index) => (
             <Reveal key={item.title} delay={index * 0.1}>
               <div className="group relative rounded-[28px] bg-[#FCFDFC] p-8 border border-[#E7ECEE] shadow-[0_10px_30px_rgba(44,142,146,0.04)] transition-all duration-300 hover:-translate-y-1 hover:border-[#2C8E92]">

@@ -54,7 +54,7 @@ export default function Hero() {
           transition={{ duration: 0.9, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="mt-6 max-w-2xl text-base sm:text-lg text-cyan-50/95 leading-relaxed font-semibold drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)] bg-[#050b18]/60 backdrop-blur-md px-6 py-3.5 rounded-2xl border border-cyan-400/20 shadow-xl"
         >
-          Nền tảng cá nhân hóa chăm sóc da và dinh dưỡng dựa trên một hồ sơ cơ địa dùng chung, giúp bạn biết ngay sản phẩm hay thực phẩm nào phù hợp với chính mình.
+          Nền tảng cá nhân hóa chăm sóc da và dinh dưỡng dựa trên một hồ sơ cá nhân dùng chung, giúp bạn biết ngay sản phẩm hay thực phẩm nào phù hợp với chính mình.
         </motion.p>
 
         {/* Centered Action Buttons */}

@@ -1,9 +1,19 @@
 import { Router } from 'express'
-import { optionalAuth } from '../middleware/auth.js'
+import { optionalAuth, requireAuth } from '../middleware/auth.js'
 import { chatLimiter } from '../middleware/rateLimit.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
 import { chatReply } from '../services/chatService.js'
 import { GeminiNotConfiguredError, GeminiRequestError } from '../services/geminiService.js'
+import {
+  CHAT_PLANS,
+  consumeChatQuestion,
+  getWalletStatus,
+  topupWallet,
+  purchasePlan,
+} from '../services/chatWalletService.js'
+import { awardVoucher } from '../services/voucherService.js'
+
+const PACKAGE_BONUS_VOUCHER_ID = 'voucher_goi_tro_ly'
 
 const router = Router()
 
@@ -28,13 +38,27 @@ router.post(
       return res.status(400).json({ error: 'Dữ liệu tin nhắn không hợp lệ.' })
     }
 
+    // Ẩn danh (chưa đăng nhập) không có ví/gói riêng — chỉ bị giới hạn theo chatLimiter (IP).
+    let walletStatus = null
+    if (req.userId) {
+      const quota = await consumeChatQuestion(req.userId)
+      walletStatus = quota.status
+      if (!quota.allowed) {
+        return res.status(200).json({
+          reply: null,
+          quotaExceeded: true,
+          wallet: walletStatus,
+        })
+      }
+    }
+
     let reply
     try {
       reply = await chatReply(messages, context ?? {})
     } catch (err) {
       if (err instanceof GeminiNotConfiguredError) {
         return res.status(503).json({
-          error: 'Trợ lý AI chưa sẵn sàng — thiếu cấu hình Gemini API key.',
+          error: 'Trợ lý chưa sẵn sàng — thiếu cấu hình Gemini API key.',
         })
       }
       if (err instanceof GeminiRequestError) {
@@ -43,8 +67,37 @@ router.post(
       throw err
     }
 
-    res.json({ reply })
+    res.json({ reply, wallet: walletStatus })
   }),
 )
+
+router.get('/wallet', requireAuth, asyncHandler(async (req, res) => {
+  res.json(await getWalletStatus(req.userId))
+}))
+
+router.get('/plans', (req, res) => {
+  res.json(CHAT_PLANS)
+})
+
+// Nạp ví — DEMO, không tích hợp cổng thanh toán thật, chỉ cộng thẳng số dư + điểm tích luỹ.
+router.post('/topup', requireAuth, asyncHandler(async (req, res) => {
+  const amount = Number(req.body?.amountVnd)
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return res.status(400).json({ error: 'Số tiền nạp không hợp lệ.' })
+  }
+  res.json(await topupWallet(req.userId, amount))
+}))
+
+// Mua Gói Trợ Lý — DEMO, không tích hợp cổng thanh toán thật, chỉ cộng thẳng quota đã mua.
+router.post('/upgrade', requireAuth, asyncHandler(async (req, res) => {
+  const { planId } = req.body ?? {}
+  if (!CHAT_PLANS.some((p) => p.id === planId)) {
+    return res.status(400).json({ error: 'Gói Trợ Lý không hợp lệ.' })
+  }
+  const status = await purchasePlan(req.userId, planId)
+  // Tặng kèm voucher khi mua gói — không để lỗi cấp voucher làm hỏng giao dịch mua gói chính.
+  await awardVoucher(req.userId, PACKAGE_BONUS_VOUCHER_ID, 'package_bonus').catch(() => {})
+  res.json(status)
+}))
 
 export default router

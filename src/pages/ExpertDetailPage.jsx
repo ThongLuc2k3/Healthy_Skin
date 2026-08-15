@@ -35,6 +35,7 @@ function ExpertDetailPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [selectedSlot, setSelectedSlot] = useState('')
   const [booking, setBooking] = useState(false)
+  const [consentGiven, setConsentGiven] = useState(false)
 
   useEffect(() => {
     apiClient
@@ -58,11 +59,15 @@ function ExpertDetailPage() {
   }, [id, user])
 
   async function handleBook() {
-    if (!selectedSlot) return
+    if (!selectedSlot || !consentGiven) return
     setBooking(true)
     setErrorMessage('')
     try {
-      const created = await apiClient.post(`/experts/${id}/book`, { slot: selectedSlot }, { auth: true })
+      const created = await apiClient.post(
+        `/experts/${id}/book`,
+        { slot: selectedSlot, consent: true },
+        { auth: true },
+      )
       navigate(`/my-bookings/${created.id}`)
     } catch (err) {
       setErrorMessage(err.message)
@@ -166,24 +171,26 @@ function ExpertDetailPage() {
               </div>
             </div>
 
-            {/* Right AI Matching Score summary badge card */}
+            {/* Giá tư vấn — minh bạch ngay từ đầu, không phải điểm số AI tự chấm */}
             <div className="rounded-3xl bg-gradient-to-br from-[#2C8E92]/10 via-[#FCFDFC] to-[#67D6E8]/10 border border-[#2C8E92]/25 p-6 space-y-4 shadow-xs text-center lg:text-left">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-extrabold uppercase tracking-widest text-[#2C8E92]">
-                  AI MATCHING SCORE
+                  GIÁ TƯ VẤN
                 </span>
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#67D6E8]/20 text-[#2C8E92]">
-                  <SparklesIcon className="h-4.5 w-4.5" />
+                  <CalendarIcon className="h-4.5 w-4.5" />
                 </span>
               </div>
               <div>
-                <p className="font-display text-5xl font-black text-[#17353D]">96%</p>
-                <p className="mt-1 text-xs font-bold text-[#2C8E92]">
-                  Phù hợp với hồ sơ cơ địa của bạn
+                <p className="font-display text-4xl font-black text-[#17353D]">
+                  {expert.consultation_fee_vnd
+                    ? `${expert.consultation_fee_vnd.toLocaleString('vi-VN')}đ`
+                    : 'Liên hệ'}
                 </p>
+                <p className="mt-1 text-xs font-bold text-[#2C8E92]">mỗi buổi tư vấn</p>
               </div>
               <p className="text-xs text-[#64748B] leading-relaxed">
-                Được AI đối chiếu kinh nghiệm và chuyên môn phù hợp nhất với các chỉ số da bạn đã khai báo.
+                Giá tham khảo do chuyên gia niêm yết, thanh toán/mô phỏng ngay trong bước đặt lịch bên dưới.
               </p>
             </div>
           </div>
@@ -273,27 +280,40 @@ function ExpertDetailPage() {
 
               <div>
                 {user ? (
-                  <motion.button
-                    type="button"
-                    disabled={!selectedSlot || booking}
-                    onClick={handleBook}
-                    whileHover={
-                      !selectedSlot || booking
-                        ? {}
-                        : { backgroundPosition: 'right center' }
-                    }
-                    whileTap={{ scale: !selectedSlot || booking ? 1 : 0.97 }}
-                    transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    className="w-full rounded-2xl px-6 py-4 text-sm font-extrabold uppercase tracking-wider text-white shadow-[0_8px_25px_rgba(103,214,232,0.35)] transition-colors disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer overflow-hidden"
+                  <>
+                    <label className="mb-4 flex items-start gap-2.5 text-xs leading-relaxed text-[#17353D] cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={consentGiven}
+                        onChange={(e) => setConsentGiven(e.target.checked)}
+                        className="mt-0.5 h-4 w-4 shrink-0 accent-[#2C8E92]"
+                      />
+                      <span>
+                        Tôi đồng ý gửi <strong>Hồ sơ cá nhân</strong> (loại da, dị ứng, bệnh lý nền, mục tiêu) cho chuyên gia này xem trước khi tư vấn.
+                      </span>
+                    </label>
+                    <motion.button
+                      type="button"
+                      disabled={!selectedSlot || !consentGiven || booking}
+                      onClick={handleBook}
+                      whileHover={
+                        !selectedSlot || !consentGiven || booking
+                          ? {}
+                          : { backgroundPosition: 'right center' }
+                      }
+                      whileTap={{ scale: !selectedSlot || !consentGiven || booking ? 1 : 0.97 }}
+                      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                      className="w-full rounded-2xl px-6 py-4 text-sm font-extrabold uppercase tracking-wider text-white shadow-[0_8px_25px_rgba(103,214,232,0.35)] transition-colors disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer overflow-hidden"
                     style={{
                       backgroundImage:
                         'linear-gradient(to right, #2C8E92 0%, #67D6E8 51%, #2C8E92 100%)',
                       backgroundSize: '200% auto',
                       transition: '0.5s',
                     }}
-                  >
-                    {booking ? 'Đang đặt lịch...' : 'Đặt lịch tư vấn (Demo)'}
-                  </motion.button>
+                    >
+                      {booking ? 'Đang đặt lịch...' : 'Đặt lịch tư vấn (Demo)'}
+                    </motion.button>
+                  </>
                 ) : (
                   <Link
                     to="/login"

@@ -8,32 +8,27 @@ import {
   LogOutIcon,
   HomeIcon,
   CameraIcon,
-  DocumentIcon,
   HistoryIcon,
   FlameIcon,
-  MapIcon,
-  CheckCircleIcon,
   SparklesIcon,
   StethoscopeIcon,
   ChatBubbleIcon,
   ShieldIcon,
-  TrophyIcon,
+  MapIcon,
 } from './Icons'
 import { useAuth } from '../context/AuthContext'
+import { apiClient } from '../lib/apiClient'
 
 const LINKS = [
   { to: '/', label: 'Trang chủ', end: true, icon: HomeIcon },
-  { to: '/profile', label: 'Hồ sơ', icon: UserIcon },
+  { to: '/profile', label: 'Hồ sơ cá nhân', icon: UserIcon },
   { to: '/scan', label: 'Quét thử', icon: CameraIcon },
-  { to: '/results', label: 'Kết quả', icon: DocumentIcon },
   { to: '/motivation', label: 'Động lực', icon: FlameIcon },
   { to: '/experts', label: 'Chuyên gia', icon: StethoscopeIcon },
+  { to: '/dich-vu', label: 'Dịch Vụ Quanh Bạn', icon: MapIcon },
   { to: '/history', label: 'Lịch sử', icon: HistoryIcon },
-  { to: '/checkin', label: 'Điểm danh', icon: CheckCircleIcon },
-  { to: '/roadmap', label: 'Lộ trình', icon: MapIcon },
   { to: '/skin-lab', label: 'Skin Lab', icon: SparklesIcon },
   { to: '/reviews', label: 'Diễn đàn', icon: ChatBubbleIcon },
-  { to: '/progress-report', label: 'Tiến độ', icon: TrophyIcon },
   { to: '/about', label: 'Về chúng tôi', icon: ShieldIcon },
 ]
 
@@ -42,6 +37,7 @@ function NavBar() {
   const navigate = useNavigate()
   const location = useLocation()
   const [scrolled, setScrolled] = useState(false)
+  const [voucherCount, setVoucherCount] = useState(0)
   const [open, setOpen] = useState(false)
   const timeoutRef = useRef(null)
 
@@ -67,6 +63,17 @@ function NavBar() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  useEffect(() => {
+    if (!user) {
+      setVoucherCount(0)
+      return
+    }
+    apiClient
+      .get('/vouchers/mine?onlyUnused=true', { auth: true })
+      .then((vouchers) => setVoucherCount(vouchers.length))
+      .catch(() => {})
+  }, [user])
 
   function handleLogout() {
     logout()
@@ -97,12 +104,12 @@ function NavBar() {
             <div className="flex items-center cursor-pointer h-8 sm:h-10 shrink-0">
               <img
                 src="/logo1.png"
-                alt="DA DƯỠNG AI Logo"
+                alt="HEALTHY SKIN Logo"
                 className="h-full w-auto object-contain"
               />
             </div>
             <span className="font-display text-sm sm:text-lg font-extrabold tracking-tight text-white truncate">
-              DA DƯỠNG<span className="text-cyan-300"> AI</span>
+              HEALTHY<span className="text-cyan-300"> SKIN</span>
             </span>
           </NavLink>
 
@@ -122,6 +129,11 @@ function NavBar() {
                 {({ isActive }) => (
                   <>
                     {l.label}
+                    {l.to === '/dich-vu' && voucherCount > 0 && (
+                      <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-cyan-400 px-1 text-[10px] font-bold text-slate-950">
+                        {voucherCount}
+                      </span>
+                    )}
                     <span
                       className={`absolute left-3.5 right-3.5 -bottom-0.5 h-px bg-cyan-400 transition-transform origin-left ${
                         isActive ? 'scale-x-100 shadow-glow' : 'scale-x-0 group-hover:scale-x-100'
@@ -209,6 +221,11 @@ function NavBar() {
                   >
                     {Icon && <Icon className="h-5 w-5 shrink-0 text-cyan-400" />}
                     <span className="truncate">{l.label}</span>
+                    {l.to === '/dich-vu' && voucherCount > 0 && (
+                      <span className="ml-auto inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-cyan-400 px-1 text-[10px] font-bold text-slate-950">
+                        {voucherCount}
+                      </span>
+                    )}
                   </NavLink>
                 )
               })}

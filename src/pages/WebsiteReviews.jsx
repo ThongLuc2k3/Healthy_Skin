@@ -219,7 +219,7 @@ export default function WebsiteReviews() {
             </div>
             )}
             <div className="text-xs text-gray-400 border-t border-gray-50 pt-2">
-              Người đánh giá: <span className="font-medium text-gray-600">{item.author_name || 'Người dùng DA DƯỠNG'}</span>
+              Người đánh giá: <span className="font-medium text-gray-600">{item.author_name || 'Người dùng HEALTHY SKIN'}</span>
             </div>
           </div>
         ))}

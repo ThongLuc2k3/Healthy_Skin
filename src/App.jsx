@@ -2,25 +2,23 @@ import { Routes, Route } from 'react-router-dom'
 import NavBar from './components/NavBar'
 import HomePage from './pages/HomePage'
 import ProfileForm from './pages/ProfileForm'
-import RecommendationPage from './pages/RecommendationPage'
 import ScanDemoPage from './pages/ScanDemoPage'
 import ScanHistoryPage from './pages/ScanHistoryPage'
 import MotivationPage from './pages/MotivationPage'
-import RoadmapPage from './pages/RoadmapPage'
-import CheckInPage from './pages/CheckInPage'
-import StreakCalendarPage from './pages/StreakCalendarPage'
 import ExpertListPage from './pages/ExpertListPage'
 import ExpertDetailPage from './pages/ExpertDetailPage'
 import BookingDetailPage from './pages/BookingDetailPage'
-import CustomRoadmapPage from './pages/CustomRoadmapPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ChatWidget from './components/ChatWidget'
-import PlanBuilderPage from './pages/PlanBuilderPage'
+import PricingPage from './pages/PricingPage'
+import ExpertDashboardPage from './pages/expert/ExpertDashboardPage'
+import ServicesNearbyPage from './pages/ServicesNearbyPage'
+import ServiceDetailPage from './pages/ServiceDetailPage'
+import MyVouchersPage from './pages/MyVouchersPage'
 import SkinPlaygroundPage from './pages/SkinPlaygroundPage'
 import WebsiteReviews from './pages/WebsiteReviews'
 import AboutPage from './pages/AboutPage'
-import ProgressReportPage from './pages/ProgressReportPage'
 
 function App() {
   return (
@@ -34,24 +32,22 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/profile" element={<ProfileForm />} />
-          <Route path="/results" element={<RecommendationPage />} />
           <Route path="/scan" element={<ScanDemoPage />} />
           <Route path="/history" element={<ScanHistoryPage />} />
           <Route path="/motivation" element={<MotivationPage />} />
-          <Route path="/roadmap" element={<RoadmapPage />} />
-          <Route path="/roadmap/plan" element={<PlanBuilderPage />} />
-          <Route path="/checkin" element={<CheckInPage />} />
-          <Route path="/streak" element={<StreakCalendarPage />} />
           <Route path="/skin-lab" element={<SkinPlaygroundPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/expert-dashboard" element={<ExpertDashboardPage />} />
+          <Route path="/dich-vu" element={<ServicesNearbyPage />} />
+          <Route path="/dich-vu/voucher" element={<MyVouchersPage />} />
+          <Route path="/dich-vu/:id" element={<ServiceDetailPage />} />
           <Route path="/experts" element={<ExpertListPage />} />
           <Route path="/experts/:id" element={<ExpertDetailPage />} />
           <Route path="/my-bookings/:id" element={<BookingDetailPage />} />
-          <Route path="/roadmap/custom" element={<CustomRoadmapPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/reviews" element={<WebsiteReviews />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/progress-report" element={<ProgressReportPage />} />
         </Routes>
       </main>
       <ChatWidget />

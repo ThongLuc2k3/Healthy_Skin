@@ -1,5 +1,6 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 const TOKEN_KEY = 'da_duong_token'
+const EXPERT_TOKEN_KEY = 'da_duong_expert_token'
 const REQUEST_TIMEOUT_MS = 15000
 
 export function getToken() {
@@ -14,11 +15,25 @@ export function setToken(token) {
   }
 }
 
-async function request(path, { method = 'GET', body, isFormData = false, auth = false } = {}) {
+// Token riêng cho Expert Dashboard (đăng nhập chuyên gia demo) — tách khỏi token người dùng
+// thường để một trình duyệt có thể vừa đăng nhập tài khoản cá nhân vừa mở dashboard chuyên gia.
+export function getExpertToken() {
+  return localStorage.getItem(EXPERT_TOKEN_KEY)
+}
+
+export function setExpertToken(token) {
+  if (token) {
+    localStorage.setItem(EXPERT_TOKEN_KEY, token)
+  } else {
+    localStorage.removeItem(EXPERT_TOKEN_KEY)
+  }
+}
+
+async function request(path, { method = 'GET', body, isFormData = false, auth = false, tokenKey = TOKEN_KEY } = {}) {
   const headers = {}
   if (!isFormData) headers['Content-Type'] = 'application/json'
   if (auth) {
-    const token = getToken()
+    const token = localStorage.getItem(tokenKey)
     if (token) headers.Authorization = `Bearer ${token}`
   }
 
@@ -94,4 +109,12 @@ export const apiClient = {
   put: (path, body, opts) => request(path, { ...opts, method: 'PUT', body }),
   patch: (path, body, opts) => request(path, { ...opts, method: 'PATCH', body }),
   delete: (path, opts) => request(path, { ...opts, method: 'DELETE' }),
+}
+
+// Dùng cho Expert Dashboard — giống apiClient nhưng luôn gắn token chuyên gia (EXPERT_TOKEN_KEY).
+// Gửi kèm token ở mọi request kể cả endpoint công khai (server bỏ qua nếu không cần) để tránh
+// phải nhớ truyền auth:true ở từng lời gọi.
+export const expertApiClient = {
+  get: (path, opts) => request(path, { ...opts, method: 'GET', auth: true, tokenKey: EXPERT_TOKEN_KEY }),
+  post: (path, body, opts) => request(path, { ...opts, method: 'POST', body, auth: true, tokenKey: EXPERT_TOKEN_KEY }),
 }

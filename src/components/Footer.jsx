@@ -4,10 +4,11 @@ const cols = [
   {
     title: 'Nền tảng',
     links: [
-      { label: 'Hồ sơ cơ địa', to: '/profile' },
-      { label: 'Gợi ý cá nhân hóa', to: '/results' },
+      { label: 'Hồ sơ cá nhân', to: '/profile' },
       { label: 'Quét ảnh thật AI', to: '/scan' },
-      { label: 'Lộ trình cải thiện', to: '/roadmap' },
+      { label: 'Lịch sử quét', to: '/history' },
+      { label: 'Chuyên gia tư vấn', to: '/experts' },
+      { label: 'Gói Trợ Lý', to: '/pricing' },
     ],
   },
   {
@@ -15,8 +16,9 @@ const cols = [
     links: [
       { label: 'Skin Lab', to: '/skin-lab' },
       { label: 'Góc truyền động lực', to: '/motivation' },
-      { label: 'Chuyên gia tư vấn', to: '/experts' },
-      { label: 'Điểm danh hằng ngày', to: '/checkin' },
+      { label: 'Diễn đàn đánh giá', to: '/reviews' },
+      { label: 'Về chúng tôi', to: '/about' },
+      { label: 'Dành cho chuyên gia', to: '/expert-dashboard' },
     ],
   },
   {
@@ -39,15 +41,15 @@ export default function Footer() {
             <Link to="/" className="flex items-center gap-2">
               <img
                 src="/logo1.png"
-                alt="DA DƯỠNG AI Logo"
+                alt="HEALTHY SKIN Logo"
                 className="h-10 w-auto object-contain"
               />
               <span className="font-display text-xl font-extrabold text-[#17353D]">
-                DA DƯỠNG<span className="text-[#2C8E92]"> AI</span>
+                HEALTHY<span className="text-[#2C8E92]"> SKIN</span>
               </span>
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-[#64748B] font-normal">
-              Đúng da, đúng dưỡng chất, từ trong ra ngoài. Nền tảng cá nhân hóa chăm sóc da và dinh dưỡng dựa trên hồ sơ cơ địa duy nhất.
+              Đúng da, đúng dưỡng chất, từ trong ra ngoài. Nền tảng cá nhân hóa chăm sóc da và dinh dưỡng dựa trên hồ sơ cá nhân duy nhất.
             </p>
             <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#FCFDFC] border border-[#E7ECEE] px-4 py-2 shadow-xs">
               <span className="h-2 w-2 rounded-full bg-[#6F9D8D] animate-pulse" />
@@ -82,7 +84,7 @@ export default function Footer() {
 
         <div className="mt-16 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-[#E7ECEE] pt-8">
           <p className="text-xs font-semibold text-[#64748B]">
-            © 2026 DA DƯỠNG AI. Cá nhân hóa chăm sóc da &amp; dinh dưỡng.
+            © 2026 HEALTHY SKIN. Cá nhân hóa chăm sóc da &amp; dinh dưỡng.
           </p>
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#2C8E92]">
             POWERED BY SKIN AI ENGINE

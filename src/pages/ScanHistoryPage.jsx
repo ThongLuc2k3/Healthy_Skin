@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { apiClient } from '../lib/apiClient'
-import { CheckCircleIcon, WarningIcon, XCircleIcon, SparklesIcon, SearchIcon } from '../components/Icons'
+import { CheckCircleIcon, WarningIcon, SparklesIcon, SearchIcon } from '../components/Icons'
 import { RESULT } from '../logic/matchEngine'
 
 const THEME = {
@@ -16,11 +16,6 @@ const THEME = {
     badge: 'bg-[#D8B27A]/15 text-[#A87A45] border border-[#D8B27A]/30',
     label: 'Cần cân nhắc',
     icon: WarningIcon,
-  },
-  [RESULT.AVOID]: {
-    badge: 'bg-rose-500/15 text-rose-700 border border-rose-400/30',
-    label: 'Nên tránh dùng',
-    icon: XCircleIcon,
   },
 }
 
@@ -104,7 +99,6 @@ function ScanHistoryPage() {
   const totalScans = history?.length || 0
   const suitableCount = history?.filter((e) => e.result === RESULT.SUITABLE).length || 0
   const cautionCount = history?.filter((e) => e.result === RESULT.CAUTION).length || 0
-  const avoidCount = history?.filter((e) => e.result === RESULT.AVOID).length || 0
 
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-[#F7FBFC] via-[#FCFDFC] to-[#F7FBFC] py-16 px-4 sm:px-6 lg:px-8 mt-12 overflow-hidden">
@@ -140,7 +134,7 @@ function ScanHistoryPage() {
 
           {/* DASHBOARD SUMMARY METRICS CARDS */}
           {history !== null && (
-            <div className="mt-8 grid gap-4 grid-cols-2 sm:grid-cols-4 text-left">
+            <div className="mt-8 grid gap-4 grid-cols-3 text-left">
               <div className="rounded-2xl bg-white border border-[#E8ECEE] p-5 shadow-xs">
                 <p className="text-xs font-bold uppercase tracking-wider text-[#64748B]">Tổng quét</p>
                 <p className="mt-2 font-display text-3xl font-black text-[#17353D]">{totalScans}</p>
@@ -157,12 +151,6 @@ function ScanHistoryPage() {
                 <p className="text-xs font-bold uppercase tracking-wider text-[#A87A45]">Cân nhắc</p>
                 <p className="mt-2 font-display text-3xl font-black text-[#A87A45]">{cautionCount}</p>
                 <p className="mt-1 text-[11px] text-[#64748B]">Chú ý thành phần</p>
-              </div>
-
-              <div className="rounded-2xl bg-white border border-[#E8EEF0] p-5 shadow-xs">
-                <p className="text-xs font-bold uppercase tracking-wider text-rose-700">Nên tránh</p>
-                <p className="mt-2 font-display text-3xl font-black text-rose-700">{avoidCount}</p>
-                <p className="mt-1 text-[11px] text-[#64748B]">Nguy cơ kích ứng</p>
               </div>
             </div>
           )}

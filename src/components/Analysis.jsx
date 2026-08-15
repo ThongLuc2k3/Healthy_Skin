@@ -3,12 +3,11 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   UserIcon,
-  SparklesIcon,
   SearchIcon,
-  CalendarIcon,
   PlayIcon,
   GamepadIcon,
   ChatBubbleIcon,
+  MapIcon,
   ArrowLeftIcon,
 } from './Icons'
 import { SectionTitle } from './ui'
@@ -23,7 +22,7 @@ import {
 const FEATURES = [
   {
     icon: UserIcon,
-    title: 'Một hồ sơ cơ địa duy nhất',
+    title: 'Một hồ sơ cá nhân duy nhất',
     desc: 'Khai báo loại da, dị ứng thực phẩm, bệnh lý nền và mục tiêu một lần, dùng chung cho cả chăm sóc da lẫn dinh dưỡng. Không chắc thì chọn "Khác" và mô tả để AI hiểu rõ hơn.',
     to: '/profile',
     tag: 'Core Profile',
@@ -31,28 +30,12 @@ const FEATURES = [
     featured: true,
   },
   {
-    icon: SparklesIcon,
-    title: 'Gợi ý rõ ràng, có lý do',
-    desc: 'Mỗi sản phẩm/thực phẩm được phân vào Phù hợp, Cần cân nhắc hoặc Nên tránh, bấm vào từng mục để AI giải thích sâu hơn.',
-    to: '/results',
-    tag: 'Transparent AI',
-    accent: 'from-[#6F9D8D]/20 to-[#BFD8CF]/15',
-  },
-  {
     icon: SearchIcon,
     title: 'Quét thử nhanh',
-    desc: 'Tìm thủ công hoặc quét ảnh thật bằng AI để kiểm tra ngay mức độ phù hợp với cơ địa của bạn.',
+    desc: 'Tìm thủ công hoặc quét ảnh thật bằng AI để xem gợi ý phù hợp, giá tham khảo và sản phẩm liên quan.',
     to: '/scan',
     tag: 'AI Scan',
     accent: 'from-[#67D6E8]/20 to-[#2C8E92]/10',
-  },
-  {
-    icon: CalendarIcon,
-    title: 'Có lộ trình cải thiện riêng',
-    desc: 'Sau khi có kết quả, bạn có thể tạo kế hoạch theo mục tiêu, ngân sách, nhịp sống và sản phẩm đang dùng thay vì chỉ xem danh sách gợi ý tĩnh.',
-    to: '/roadmap',
-    tag: 'Roadmap',
-    accent: 'from-[#D8B27A]/20 to-[#A87A45]/10',
   },
   {
     icon: PlayIcon,
@@ -72,11 +55,19 @@ const FEATURES = [
   },
   {
     icon: ChatBubbleIcon,
-    title: 'Trợ lý AI luôn sẵn sàng',
-    desc: 'Nút chat nổi ở mọi trang, hỏi bất cứ điều gì về thành phần, dinh dưỡng hoặc cách dùng app.',
-    to: '#chat',
-    tag: '24/7 Assistant',
+    title: 'Trợ Lý hỏi nhanh',
+    desc: 'Vài câu hỏi cơ bản mỗi ngày là miễn phí — hỏi sâu hơn thì Trợ Lý sẽ gợi ý đặt lịch chuyên gia thay vì tự đoán.',
+    to: '/pricing',
+    tag: 'Trợ Lý',
     accent: 'from-[#2C8E92]/20 to-[#67D6E8]/10',
+  },
+  {
+    icon: MapIcon,
+    title: 'Dịch Vụ Quanh Bạn',
+    desc: 'Đặt spa, phòng khám, gym... tại trung tâm đối tác với giá cố định, áp voucher từ Kho Voucher để giảm giá.',
+    to: '/dich-vu',
+    tag: 'Đặt dịch vụ',
+    accent: 'from-[#D8B27A]/20 to-[#A87A45]/10',
   },
 ]
 
@@ -219,12 +210,12 @@ export default function Analysis() {
           eyebrow="HỆ SINH THÁI CÁ NHÂN HÓA"
           title={
             <>
-              Hệ sinh thái DA DƯỠNG
+              Hệ sinh thái HEALTHY SKIN
               <br />
               toàn diện &amp; thông minh.
             </>
           }
-          description="Được thiết kế dựa trên một hồ sơ cơ địa dùng chung cho cả chăm sóc da và dinh dưỡng, giúp bạn biết rõ sản phẩm hay thực phẩm nào phù hợp với chính mình."
+          description="Được thiết kế dựa trên một hồ sơ cá nhân dùng chung cho cả chăm sóc da và dinh dưỡng, giúp bạn biết rõ sản phẩm hay thực phẩm nào phù hợp với chính mình."
         />
 
         <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr">

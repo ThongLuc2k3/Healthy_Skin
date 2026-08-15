@@ -44,7 +44,7 @@ export const MOTIVATION_CATEGORIES = [
     items: [
       {
         title: 'Cách đọc nhãn dinh dưỡng thực phẩm đóng gói',
-        desc: 'Hiểu đúng thành phần trên bao bì để chọn thực phẩm phù hợp cơ địa.',
+        desc: 'Hiểu đúng thành phần trên bao bì để chọn thực phẩm phù hợp với bạn.',
         url: youtubeSearchUrl('cách đọc nhãn dinh dưỡng thực phẩm đóng gói'),
       },
       {

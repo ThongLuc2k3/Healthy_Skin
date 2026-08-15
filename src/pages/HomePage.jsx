@@ -1,8 +1,10 @@
 import Hero from '../components/Hero'
+import ExpertsShowcase from '../components/ExpertsShowcase'
 import Analysis from '../components/Analysis'
 import Technology from '../components/Technology'
-import Dashboard from '../components/Dashboard'
 import Routine from '../components/Routine'
+import ServicesHighlight from '../components/ServicesHighlight'
+import SponsoredStrip from '../components/SponsoredStrip'
 import CTA from '../components/CTA'
 import Footer from '../components/Footer'
 import { SectionSeam } from '../components/SectionSeam'
@@ -16,11 +18,14 @@ function HomePage() {
       <main>
         <Hero />
         <SectionSeam />
+        <ExpertsShowcase />
+        <SectionSeam />
         <Analysis />
         <SectionSeam />
         <Technology />
-        <Dashboard />
         <Routine />
+        <ServicesHighlight />
+        <SponsoredStrip />
         <CTA />
       </main>
       <Footer />

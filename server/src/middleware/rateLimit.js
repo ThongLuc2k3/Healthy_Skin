@@ -49,15 +49,6 @@ export const chatLimiter = rateLimit({
   message: { error: 'Bạn đã nhắn quá nhiều tin trong thời gian ngắn, vui lòng thử lại sau ít phút.' },
 })
 
-export const checkinLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  keyGenerator: userOrIpKey,
-  message: { error: 'Bạn điểm danh quá nhiều lần trong thời gian ngắn, vui lòng thử lại sau ít phút.' },
-})
-
 export const profileUploadLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 15,

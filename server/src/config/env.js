@@ -33,12 +33,6 @@ const config = {
   corsOrigins,
 }
 
-if (!config.cloudinaryCloudName || !config.cloudinaryApiKey || !config.cloudinaryApiSecret) {
-  console.warn(
-    '[config] Cloudinary chưa được cấu hình — tính năng upload ảnh milestone sẽ không hoạt động.',
-  )
-}
-
 if (!process.env.JWT_SECRET) {
   console.warn(
     '[config] JWT_SECRET chưa được cấu hình trong .env — đang dùng giá trị mặc định KHÔNG an toàn cho production.',

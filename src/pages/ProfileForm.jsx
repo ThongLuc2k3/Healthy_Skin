@@ -66,8 +66,8 @@ function ProfileForm() {
       goalsNote: goals.includes(OTHER_OPTION_ID) ? goalsNote : '',
     }
     setProfile(nextProfile)
-    console.log('Hồ sơ cơ địa đã lưu:', nextProfile)
-    navigate('/results')
+    console.log('Hồ sơ cá nhân đã lưu:', nextProfile)
+    navigate('/scan')
   }
 
   return (
@@ -89,7 +89,7 @@ function ProfileForm() {
         >
         
           <h1 className="font-display text-4xl sm:text-5xl font-black tracking-tight text-[#17353D]">
-            Hồ sơ cơ địa của bạn
+            Hồ sơ cá nhân của bạn
           </h1>
 
           <p className="mx-auto max-w-2xl text-base sm:text-lg leading-relaxed text-[#5F7480] font-normal">

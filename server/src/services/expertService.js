@@ -10,6 +10,7 @@ function toShape(row) {
     id: row.id, name: row.name, specialty: row.specialty, clinic_name: row.clinic_name,
     area_vi: row.area_vi, bio_vi: row.bio_vi, certifications: parsed(row.certifications),
     rating_avg: row.rating_avg, reviews: parsed(row.reviews), available_slots: parsed(row.available_slots),
+    consultation_fee_vnd: row.consultation_fee_vnd || 0,
   }
 }
 

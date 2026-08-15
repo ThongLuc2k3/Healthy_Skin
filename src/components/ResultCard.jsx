@@ -1,4 +1,4 @@
-import { CheckCircleIcon, WarningIcon, XCircleIcon } from './Icons'
+import { CheckCircleIcon, WarningIcon } from './Icons'
 import { RESULT } from '../logic/matchEngine'
 import ExplainButton from './ExplainButton'
 
@@ -12,11 +12,6 @@ const THEME = {
     wrap: 'border-amber-500/30 glass text-[#183B3B] shadow-glow',
     badge: 'bg-amber-500/20 text-amber-800 border border-amber-500/40',
     icon: WarningIcon,
-  },
-  [RESULT.AVOID]: {
-    wrap: 'border-rose-500/30 glass text-[#183B3B] shadow-glow',
-    badge: 'bg-rose-500/20 text-rose-800 border border-rose-500/40',
-    icon: XCircleIcon,
   },
 }
 

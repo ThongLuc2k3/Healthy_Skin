@@ -1,0 +1,29 @@
+[
+  {
+    "id": "sp_serum_niacinamide_demo",
+    "name": "Serum Niacinamide 10% + Zinc 1%",
+    "brand": "Demo Skin Co.",
+    "matched_item_id": "niacinamide",
+    "price_vnd": 189000,
+    "affiliate_url": "https://example.com/aff/serum-niacinamide-demo",
+    "sponsor_name": "Demo Skin Co. (đối tác minh hoạ)"
+  },
+  {
+    "id": "sp_kem_chong_nang_demo",
+    "name": "Kem chống nắng phổ rộng SPF50+ PA++++",
+    "brand": "Demo Sun Care",
+    "matched_item_id": null,
+    "price_vnd": 245000,
+    "affiliate_url": "https://example.com/aff/kem-chong-nang-demo",
+    "sponsor_name": "Demo Sun Care (đối tác minh hoạ)"
+  },
+  {
+    "id": "sp_sua_rua_mat_diu_nhe_demo",
+    "name": "Sữa rửa mặt dịu nhẹ không xà phòng",
+    "brand": "Demo Gentle Lab",
+    "matched_item_id": null,
+    "price_vnd": 159000,
+    "affiliate_url": "https://example.com/aff/sua-rua-mat-diu-nhe-demo",
+    "sponsor_name": "Demo Gentle Lab (đối tác minh hoạ)"
+  }
+]

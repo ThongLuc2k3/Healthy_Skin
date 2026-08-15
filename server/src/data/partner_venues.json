@@ -1,0 +1,53 @@
+[
+  {
+    "id": "venue_spa_lotus",
+    "name": "Lotus Spa & Skincare (Demo)",
+    "category": "spa",
+    "address_vi": "12 Nguyễn Huệ, Quận 1",
+    "area_vi": "Quận 1, TP.HCM",
+    "description_vi": "Spa chăm sóc da mặt, trị mụn nhẹ nhàng, không xâm lấn.",
+    "cover_image_url": "placeholder",
+    "services": [
+      { "name_vi": "Chăm sóc da mặt cơ bản", "price_vnd": 250000, "duration_minutes": 60 },
+      { "name_vi": "Liệu trình trị mụn 3 buổi", "price_vnd": 690000, "duration_minutes": 180 }
+    ]
+  },
+  {
+    "id": "venue_clinic_glow",
+    "name": "Phòng khám Da liễu Glow (Demo)",
+    "category": "phòng khám",
+    "address_vi": "45 Lê Văn Sỹ, Quận 3",
+    "area_vi": "Quận 3, TP.HCM",
+    "description_vi": "Phòng khám da liễu, tư vấn và điều trị các vấn đề về da.",
+    "cover_image_url": "placeholder",
+    "services": [
+      { "name_vi": "Khám da liễu tổng quát", "price_vnd": 300000, "duration_minutes": 30 },
+      { "name_vi": "Nặn mụn y khoa", "price_vnd": 200000, "duration_minutes": 45 }
+    ]
+  },
+  {
+    "id": "venue_gym_fit",
+    "name": "FitZone Gym (Demo)",
+    "category": "gym",
+    "address_vi": "78 Cách Mạng Tháng 8, Quận 10",
+    "area_vi": "Quận 10, TP.HCM",
+    "description_vi": "Phòng gym hiện đại, có huấn luyện viên cá nhân.",
+    "cover_image_url": "placeholder",
+    "services": [
+      { "name_vi": "Vé tập 1 ngày", "price_vnd": 100000, "duration_minutes": 120 },
+      { "name_vi": "Buổi tập cùng PT", "price_vnd": 350000, "duration_minutes": 60 }
+    ]
+  },
+  {
+    "id": "venue_sauna_relax",
+    "name": "Relax Sauna & Massage (Demo)",
+    "category": "xông hơi",
+    "address_vi": "9 Phan Xích Long, Phú Nhuận",
+    "area_vi": "Phú Nhuận, TP.HCM",
+    "description_vi": "Xông hơi thảo dược kết hợp massage thư giãn.",
+    "cover_image_url": "placeholder",
+    "services": [
+      { "name_vi": "Xông hơi + massage 90 phút", "price_vnd": 320000, "duration_minutes": 90 }
+    ]
+  }
+]

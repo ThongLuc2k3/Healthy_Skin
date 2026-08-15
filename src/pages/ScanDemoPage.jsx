@@ -18,7 +18,7 @@ const CATALOG = [
 const SCAN_MESSAGES = [
   'Đang nhận diện sản phẩm...',
   'Đang phân tích bảng thành phần...',
-  'Đang đối chiếu với hồ sơ cơ địa...',
+  'Đang đối chiếu với hồ sơ cá nhân...',
   'Đang tổng hợp đánh giá AI...',
 ]
 
@@ -101,7 +101,7 @@ function ScanDemoPage() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#67D6E8]/15 text-[#2C8E92] border border-[#2C8E92]/20">
             <SparklesIcon className="h-7 w-7" />
           </div>
-          <h1 className="mt-5 text-2xl font-bold text-[#17353D]">Chưa có hồ sơ cơ địa</h1>
+          <h1 className="mt-5 text-2xl font-bold text-[#17353D]">Chưa có hồ sơ cá nhân</h1>
           <p className="mt-2 text-sm leading-relaxed text-[#64748B]">
             Vui lòng khai báo loại da của bạn trước khi sử dụng tính năng AI Scan Studio.
           </p>
@@ -398,9 +398,58 @@ function ScanDemoPage() {
                     result={scanResult.result}
                     reason={scanResult.reason}
                   />
+
+                  {(scanResult.marketPriceRange || scanResult.origin || scanResult.authenticityNote || scanResult.betterAlternatives?.length > 0 || scanResult.nearbySellers?.length > 0) && (
+                    <div className="rounded-2xl border border-[#E8EEF0] bg-[#F7FBFC] p-5 space-y-3 text-sm text-[#17353D]">
+                      <p className="text-xs font-bold uppercase tracking-wider text-[#2C8E92]">Thông tin sản phẩm</p>
+                      {scanResult.marketPriceRange && (
+                        <p><span className="font-semibold">Giá thị trường tham khảo:</span> {scanResult.marketPriceRange}</p>
+                      )}
+                      {scanResult.origin && (
+                        <p><span className="font-semibold">Xuất xứ:</span> {scanResult.origin}</p>
+                      )}
+                      {scanResult.authenticityNote && (
+                        <p><span className="font-semibold">Dấu hiệu chính hãng (tham khảo):</span> {scanResult.authenticityNote}</p>
+                      )}
+                      {scanResult.betterAlternatives?.length > 0 && (
+                        <p><span className="font-semibold">Sản phẩm liên quan/tốt hơn:</span> {scanResult.betterAlternatives.join(', ')}</p>
+                      )}
+                      {scanResult.nearbySellers?.length > 0 && (
+                        <p><span className="font-semibold">Nơi thường bán:</span> {scanResult.nearbySellers.join(', ')}</p>
+                      )}
+                    </div>
+                  )}
+
                   <p className="text-xs text-[#64748B] text-center italic">
                     Kết quả do AI tự động đọc ảnh và suy luận, chỉ mang tính tham khảo, có thể chưa hoàn toàn chính xác.
                   </p>
+
+                  {scanResult.sponsoredAlternatives?.length > 0 && (
+                    <div className="rounded-2xl border border-[#D8B27A]/30 bg-[#D8B27A]/8 p-5 space-y-3">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-[#A87A45]">
+                        Quảng cáo · Liên kết tiếp thị
+                      </p>
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        {scanResult.sponsoredAlternatives.map((p) => (
+                          <a
+                            key={p.id}
+                            href={p.affiliateUrl}
+                            target="_blank"
+                            rel="noopener noreferrer nofollow sponsored"
+                            className="block rounded-xl bg-white border border-[#E8EEF0] p-3.5 text-left transition hover:border-[#D8B27A] hover:shadow-sm"
+                          >
+                            <p className="text-sm font-bold text-[#17353D] leading-snug">{p.name}</p>
+                            {p.priceVnd && (
+                              <p className="mt-1 text-xs font-semibold text-[#A87A45]">
+                                {p.priceVnd.toLocaleString('vi-VN')}đ
+                              </p>
+                            )}
+                            <p className="mt-1 text-[11px] text-[#64748B]">{p.sponsorName}</p>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               )}
             </div>
@@ -507,7 +556,7 @@ function ScanDemoPage() {
             </div>
             <h3 className="text-base font-bold text-[#17353D]">Minh Bạch Lý Do</h3>
             <p className="mt-1.5 text-sm leading-relaxed text-[#64748B]">
-              Mọi kết quả được phân loại Phù hợp / Cần cân nhắc / Nên tránh kèm lý do chi tiết theo hồ sơ cơ địa.
+              Mỗi kết quả đều có gợi ý Phù hợp / Cần cân nhắc kèm lý do, cùng thông tin giá, xuất xứ và sản phẩm liên quan.
             </p>
           </div>
         </motion.div>

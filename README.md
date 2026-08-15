@@ -1,18 +1,14 @@
 # Healthy Skin
 
 Nền tảng cá nhân hóa chăm sóc da và dinh dưỡng, ứng dụng AI để phân tích tình trạng da và đồng hành
-cùng người dùng suốt lộ trình cải thiện, dựa trên một hồ sơ cơ địa dùng chung cho toàn bộ trải nghiệm.
+cùng người dùng suốt lộ trình cải thiện, dựa trên một hồ sơ cá nhân dùng chung cho toàn bộ trải nghiệm.
 
 ## Tính năng
 
-- **Hồ sơ cơ địa**: khai báo loại da, dị ứng, bệnh lý, mục tiêu chăm sóc; lưu vĩnh viễn khi có tài khoản.
+- **Hồ sơ cá nhân**: khai báo loại da, dị ứng, bệnh lý, mục tiêu chăm sóc; lưu vĩnh viễn khi có tài khoản.
 - **Quét mỹ phẩm/thực phẩm**: đối chiếu rule-based dựa trên hồ sơ (`matchEngine.js`), hoặc quét ảnh
   thật qua Gemini API để đọc và suy luận trực tiếp (không giới hạn trong database sẵn có).
-- **Gợi ý & lộ trình chăm sóc**: sinh lộ trình theo ngày, có thể tuỳ biến; điểm danh hằng ngày,
-  theo dõi streak.
-- **Theo dõi tiến độ**: chụp lại "milestone" theo mốc thời gian, so sánh trước/sau (ảnh, tỉ lệ hoàn
-  thành điểm danh, số lượt quét, nhiệm vụ đã làm).
-- **Chuyên gia**: xem danh sách, đặt lịch tư vấn với chuyên gia da liễu.
+- **Chuyên gia**: xem danh sách, đặt lịch tư vấn với chuyên gia da liễu/dinh dưỡng.
 - **Diễn đàn đánh giá**: người dùng chia sẻ trải nghiệm, đánh giá kèm ảnh.
 - **Về chúng tôi**: chính sách bảo vệ thông tin cá nhân, điều khoản sử dụng, cam kết về sức khỏe và
   giới hạn trách nhiệm khi dùng AI.
@@ -54,11 +50,11 @@ biết chi tiết.
 
 - `src/data`: database JSON gốc (thành phần mỹ phẩm, thực phẩm) và danh sách lựa chọn hồ sơ
 - `src/logic/matchEngine.js`: logic đối chiếu rule-based (`matchProfile`, `getRecommendations`), dùng chung cho cả frontend lẫn backend
-- `src/context/ProfileContext.jsx`: state hồ sơ cơ địa, lưu localStorage, đồng bộ lên backend khi đã đăng nhập
+- `src/context/ProfileContext.jsx`: state hồ sơ cá nhân, lưu localStorage, đồng bộ lên backend khi đã đăng nhập
 - `src/context/AuthContext.jsx`: trạng thái đăng nhập, JWT
-- `src/pages`: Trang chủ, Hồ sơ, Kết quả gợi ý, Quét thử, Lịch sử quét, Lộ trình, Điểm danh, Tiến độ, Chuyên gia, Diễn đàn, Về chúng tôi, Đăng nhập/Đăng ký
+- `src/pages`: Trang chủ, Hồ sơ, Quét thử, Lịch sử quét, Chuyên gia, Diễn đàn, Về chúng tôi, Đăng nhập/Đăng ký
 - `src/components`: component UI dùng chung
-- `server/`: backend Express + PostgreSQL. Xác thực JWT, lưu hồ sơ/lịch sử quét/milestone, quét ảnh thật qua Gemini API (`server/src/services/geminiService.js`), rate limit + helmet bảo vệ API. Chuỗi kết nối được đọc từ `DATABASE_URL`.
+- `server/`: backend Express + PostgreSQL. Xác thực JWT, lưu hồ sơ/lịch sử quét, quét ảnh thật qua Gemini API (`server/src/services/geminiService.js`), rate limit + helmet bảo vệ API. Chuỗi kết nối được đọc từ `DATABASE_URL`.
 
 ## Deploy
 
@@ -73,8 +69,7 @@ Nếu muốn deploy thủ công thay vì dùng blueprint, cấu hình tương đ
 - Root directory: thư mục gốc của repo
 
 Khi tạo service trên Render, nhớ đặt các biến môi trường cần thiết trong dashboard, tối thiểu là
-`DATABASE_URL` và `JWT_SECRET`. Nếu dùng quét ảnh thật thì thêm `GEMINI_API_KEY`, dùng tính năng
-upload ảnh milestone thì thêm `CLOUDINARY_CLOUD_NAME`/`CLOUDINARY_API_KEY`/`CLOUDINARY_API_SECRET`.
+`DATABASE_URL` và `JWT_SECRET`. Nếu dùng quét ảnh thật thì thêm `GEMINI_API_KEY`.
 
 ## Ghi chú dev mode
 

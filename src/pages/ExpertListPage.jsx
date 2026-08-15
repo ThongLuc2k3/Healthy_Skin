@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { apiClient } from '../lib/apiClient'
-import { StarIcon, WarningIcon, StethoscopeIcon, SparklesIcon, CheckCircleIcon } from '../components/Icons'
+import { StarIcon, WarningIcon, StethoscopeIcon, CheckCircleIcon } from '../components/Icons'
 
 function MapPinIcon({ className }) {
   return (
@@ -14,9 +14,13 @@ function MapPinIcon({ className }) {
   )
 }
 
+function formatFee(feeVnd) {
+  if (!feeVnd) return 'Liên hệ để biết giá'
+  return `${feeVnd.toLocaleString('vi-VN')}đ / buổi`
+}
+
 function ExpertCard({ expert, index }) {
   const hasUnverified = expert.certifications?.some((c) => !c.verified) ?? false
-  const isAiRecommended = expert.rating_avg >= 4.8
 
   return (
     <motion.div
@@ -42,17 +46,10 @@ function ExpertCard({ expert, index }) {
               </span>
             </div>
 
-            {isAiRecommended ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#2C8E92]/30 bg-[#2C8E92]/10 px-3 py-1 text-[11px] font-extrabold text-[#2C8E92] backdrop-blur-md">
-                <SparklesIcon className="h-3 w-3 text-[#2C8E92]" />
-                AI Recommended
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-[#E7ECEE] bg-[#F7FBFC] px-3 py-1 text-[11px] font-bold text-[#64748B]">
-                <MapPinIcon className="h-3 w-3 text-[#2C8E92]" />
-                {expert.area_vi}
-              </span>
-            )}
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#E7ECEE] bg-[#F7FBFC] px-3 py-1 text-[11px] font-bold text-[#64748B]">
+              <MapPinIcon className="h-3 w-3 text-[#2C8E92]" />
+              {expert.area_vi}
+            </span>
           </div>
 
           {/* DOCTOR NAME & CLINIC */}
@@ -80,6 +77,9 @@ function ExpertCard({ expert, index }) {
               ({expert.reviews.length} đánh giá thực tế)
             </span>
           </div>
+
+          {/* GIÁ TƯ VẤN */}
+          <p className="text-sm font-bold text-[#2C8E92]">{formatFee(expert.consultation_fee_vnd)}</p>
 
           {/* CERTIFICATION STATUS BADGE */}
           <div>
@@ -171,7 +171,7 @@ function ExpertListPage() {
           </h1>
 
           <p className="text-sm leading-relaxed text-[#64748B] max-w-md mx-auto font-normal">
-            Vui lòng đăng nhập để truy cập mạng lưới tư vấn 1-1 với bác sĩ da liễu, đối chiếu hồ sơ cơ địa cá nhân và đặt lịch hẹn.
+            Vui lòng đăng nhập để truy cập mạng lưới tư vấn 1-1 với bác sĩ da liễu, đối chiếu hồ sơ cá nhân và đặt lịch hẹn.
           </p>
 
           <div className="pt-2">

@@ -92,6 +92,37 @@ function MyVouchersPage() {
           </p>
         )}
 
+        <div className="mt-10 rounded-3xl border border-[#2C8E92]/25 bg-white p-6 sm:p-8">
+          <div className="flex items-center gap-2">
+            <SparklesIcon className="h-5 w-5 text-[#2C8E92]" />
+            <h2 className="text-sm font-bold uppercase tracking-wider text-[#2C8E92]">Đổi điểm lấy voucher</h2>
+          </div>
+          {catalog.length === 0 ? (
+            <p className="mt-3 text-sm text-[#64748B]">
+              Hiện chưa có voucher nào mở đổi bằng điểm. Nạp ví ở trang{' '}
+              <Link to="/pricing" className="font-semibold text-[#2C8E92] underline">Gói Trợ Lý</Link> để tích điểm.
+            </p>
+          ) : (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {catalog.map((v) => (
+                <div key={v.id} className="rounded-2xl border border-[#E8EEF0] bg-[#F7FBFC] p-5">
+                  <p className="font-bold text-[#17353D]">{v.titleVi}</p>
+                  <p className="mt-1 text-sm font-semibold text-[#2C8E92]">{formatDiscount(v)}</p>
+                  <p className="mt-2 text-xs text-[#64748B]">{v.pointsCost} điểm</p>
+                  <button
+                    type="button"
+                    onClick={() => handleRedeem(v.id)}
+                    disabled={busyId === v.id || points < v.pointsCost}
+                    className="mt-3 w-full rounded-full bg-[#2C8E92] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#17353D] disabled:opacity-50"
+                  >
+                    {busyId === v.id ? 'Đang đổi...' : points < v.pointsCost ? 'Chưa đủ điểm' : 'Đổi voucher'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="mt-10">
           <h2 className="text-sm font-bold uppercase tracking-wider text-[#2C8E92]">Voucher đang có</h2>
           {myVouchers.length === 0 ? (
@@ -113,27 +144,6 @@ function MyVouchersPage() {
               ))}
             </div>
           )}
-        </div>
-
-        <div className="mt-12">
-          <h2 className="text-sm font-bold uppercase tracking-wider text-[#2C8E92]">Đổi điểm lấy voucher</h2>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            {catalog.map((v) => (
-              <div key={v.id} className="rounded-2xl border border-[#E8EEF0] bg-white p-5">
-                <p className="font-bold text-[#17353D]">{v.titleVi}</p>
-                <p className="mt-1 text-sm font-semibold text-[#2C8E92]">{formatDiscount(v)}</p>
-                <p className="mt-2 text-xs text-[#64748B]">{v.pointsCost} điểm</p>
-                <button
-                  type="button"
-                  onClick={() => handleRedeem(v.id)}
-                  disabled={busyId === v.id || points < v.pointsCost}
-                  className="mt-3 w-full rounded-full bg-[#2C8E92] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#17353D] disabled:opacity-50"
-                >
-                  {busyId === v.id ? 'Đang đổi...' : points < v.pointsCost ? 'Chưa đủ điểm' : 'Đổi voucher'}
-                </button>
-              </div>
-            ))}
-          </div>
         </div>
 
         <div className="mt-12 grid gap-4 sm:grid-cols-2">

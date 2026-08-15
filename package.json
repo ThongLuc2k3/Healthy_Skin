@@ -10,7 +10,7 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "node src/logic/matchEngine.test.js"
+    "test": "node src/logic/matchEngine.test.js && node server/src/logic/voucherPricing.test.js"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

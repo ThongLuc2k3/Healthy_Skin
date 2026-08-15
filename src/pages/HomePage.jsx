@@ -2,7 +2,6 @@ import Hero from '../components/Hero'
 import ExpertsShowcase from '../components/ExpertsShowcase'
 import Analysis from '../components/Analysis'
 import Technology from '../components/Technology'
-import Routine from '../components/Routine'
 import ServicesHighlight from '../components/ServicesHighlight'
 import SponsoredStrip from '../components/SponsoredStrip'
 import CTA from '../components/CTA'
@@ -23,7 +22,6 @@ function HomePage() {
         <Analysis />
         <SectionSeam />
         <Technology />
-        <Routine />
         <ServicesHighlight />
         <SponsoredStrip />
         <CTA />

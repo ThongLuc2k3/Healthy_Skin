@@ -1,33 +1,50 @@
 import { useEffect, useState } from 'react'
 import { apiClient } from '../lib/apiClient'
+import { SerumDropper, SunscreenTube, LotionPumpBottle, CreamJar } from '../CosmeticDecoration'
+
+const PRODUCT_ICONS = {
+  sp_serum_niacinamide_demo: SerumDropper,
+  sp_kem_chong_nang_demo: SunscreenTube,
+  sp_sua_rua_mat_diu_nhe_demo: LotionPumpBottle,
+}
 
 export default function SponsoredStrip() {
-  const [ads, setAds] = useState([])
+  const [products, setProducts] = useState([])
 
   useEffect(() => {
-    apiClient.get('/sponsored/ads').then(setAds).catch(() => {})
+    apiClient.get('/sponsored/products').then(setProducts).catch(() => {})
   }, [])
 
-  if (ads.length === 0) return null
+  if (products.length === 0) return null
 
   return (
     <section className="relative py-16 bg-[#F7FBFC] border-t border-[#E7ECEE]">
       <div className="mx-auto max-w-[1200px] px-6 text-center">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#A87A45]">
-          Quảng cáo · Liên kết tiếp thị
+          Sản phẩm gợi ý · Quảng cáo / Liên kết tiếp thị
         </p>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          {ads.map((ad) => (
-            <a
-              key={ad.id}
-              href={ad.linkUrl}
-              target="_blank"
-              rel="noopener noreferrer nofollow sponsored"
-              className="flex items-center justify-center rounded-2xl border border-[#D8B27A]/30 bg-[#D8B27A]/8 px-6 py-5 text-sm font-bold text-[#A87A45] transition hover:border-[#D8B27A] hover:bg-[#D8B27A]/15"
-            >
-              {ad.sponsorName}
-            </a>
-          ))}
+        <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          {products.slice(0, 3).map((p) => {
+            const Icon = PRODUCT_ICONS[p.id] || CreamJar
+            return (
+              <a
+                key={p.id}
+                href={p.affiliateUrl}
+                target="_blank"
+                rel="noopener noreferrer nofollow sponsored"
+                className="group flex flex-col items-center rounded-2xl border border-[#D8B27A]/30 bg-white px-5 py-6 text-center transition hover:border-[#D8B27A] hover:shadow-md"
+              >
+                <Icon className="h-20 w-20 transition-transform duration-300 group-hover:scale-105" />
+                <p className="mt-3 text-sm font-bold text-[#17353D]">{p.name}</p>
+                {p.priceVnd && (
+                  <p className="mt-1 text-xs font-bold text-[#A87A45]">
+                    {p.priceVnd.toLocaleString('vi-VN')}đ
+                  </p>
+                )}
+                <p className="mt-1 text-[11px] text-[#64748B]">{p.sponsorName}</p>
+              </a>
+            )
+          })}
         </div>
         <p className="mt-4 text-[11px] text-[#64748B]">
           Nội dung tài trợ, không phải đánh giá khách quan từ HEALTHY SKIN.

@@ -1,5 +1,6 @@
 import crypto from 'node:crypto'
 import { query, transaction } from '../db/connection.js'
+import { computeDiscountedPrice } from '../logic/voucherPricing.js'
 
 function toVenueShape(row) {
   return {
@@ -72,32 +73,36 @@ function generateInvoiceCode() {
 
 // Đặt dịch vụ tại trung tâm đối tác — DEMO: đặt cọc/thanh toán là giả lập, invoice_code là mã
 // hoá đơn nội bộ của web, KHÔNG phải hoá đơn điện tử hợp lệ theo quy định thuế.
+//
+// Khoá voucher (FOR UPDATE) và kiểm tra used_at NGAY TRONG transaction đặt chỗ — nếu chỉ kiểm tra
+// trước rồi mới UPDATE riêng như trước đây, 2 request đặt chỗ gửi gần như đồng thời cùng 1 voucher
+// đều có thể đọc thấy used_at IS NULL trước khi cái kia commit, dẫn đến double-apply cùng 1 voucher
+// cho 2 booking khác nhau.
 export async function bookService(userId, serviceId, { userVoucherId, scheduledAt } = {}) {
   const service = await getServiceRawById(serviceId)
   if (!service) return null
 
-  let finalPrice = service.price_vnd
-  let appliedUserVoucherId = null
-
-  if (userVoucherId) {
-    const { rows } = await query(
-      `SELECT uv.*, v.discount_type, v.discount_value FROM user_vouchers uv
-       JOIN vouchers v ON v.id = uv.voucher_id
-       WHERE uv.id = $1 AND uv.user_id = $2 AND uv.used_at IS NULL`,
-      [userVoucherId, userId],
-    )
-    const voucher = rows[0]
-    if (voucher) {
-      finalPrice = voucher.discount_type === 'percent'
-        ? Math.round(finalPrice * (1 - voucher.discount_value / 100))
-        : Math.max(finalPrice - voucher.discount_value, 0)
-      appliedUserVoucherId = voucher.id
-    }
-  }
-
   const invoiceCode = generateInvoiceCode()
 
   return transaction(async (client) => {
+    let finalPrice = service.price_vnd
+    let appliedUserVoucherId = null
+
+    if (userVoucherId) {
+      const { rows } = await client.query(
+        `SELECT uv.*, v.discount_type, v.discount_value FROM user_vouchers uv
+         JOIN vouchers v ON v.id = uv.voucher_id
+         WHERE uv.id = $1 AND uv.user_id = $2 AND uv.used_at IS NULL
+         FOR UPDATE OF uv`,
+        [userVoucherId, userId],
+      )
+      const voucher = rows[0]
+      if (voucher) {
+        finalPrice = computeDiscountedPrice(service.price_vnd, voucher)
+        appliedUserVoucherId = voucher.id
+      }
+    }
+
     const { rows } = await client.query(
       `INSERT INTO venue_bookings (user_id,service_id,user_voucher_id,scheduled_at,final_price_vnd,status,invoice_code)
        VALUES ($1,$2,$3,$4,$5,'confirmed',$6) RETURNING *`,

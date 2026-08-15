@@ -29,7 +29,7 @@ export default function Hero() {
       </div>
 
       {/* Centered Hero Content */}
-      <div className="relative z-30 mx-auto flex min-h-[100svh] max-w-5xl flex-col items-center justify-end px-6 pb-[10vh] text-center">
+      <div className="relative z-30 mx-auto flex min-h-[100svh] max-w-5xl flex-col items-center justify-end px-6 pt-28 pb-10 sm:pb-[10vh] text-center">
         {/* Eyebrow Badge */}
         
 

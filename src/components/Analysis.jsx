@@ -26,7 +26,7 @@ const FEATURES = [
     desc: 'Khai báo loại da, dị ứng thực phẩm, bệnh lý nền và mục tiêu một lần, dùng chung cho cả chăm sóc da lẫn dinh dưỡng. Không chắc thì chọn "Khác" và mô tả để AI hiểu rõ hơn.',
     to: '/profile',
     tag: 'Core Profile',
-    accent: 'from-[#2C8E92]/20 to-[#67D6E8]/10',
+    accent: 'from-[#2fa98c]/20 to-[#70c4af]/10',
     featured: true,
   },
   {
@@ -35,7 +35,7 @@ const FEATURES = [
     desc: 'Tìm thủ công hoặc quét ảnh thật bằng AI để xem gợi ý phù hợp, giá tham khảo và sản phẩm liên quan.',
     to: '/scan',
     tag: 'AI Scan',
-    accent: 'from-[#67D6E8]/20 to-[#2C8E92]/10',
+    accent: 'from-[#70c4af]/20 to-[#2fa98c]/10',
   },
   {
     icon: PlayIcon,
@@ -51,15 +51,15 @@ const FEATURES = [
     desc: 'Mini quiz và thử thách nho nhỏ để người dùng quay lại mỗi ngày, giúp app giống một hệ sinh thái sống động hơn.',
     to: '/skin-lab',
     tag: 'Mini Games',
-    accent: 'from-[#67D6E8]/20 to-[#BFD8CF]/15',
+    accent: 'from-[#70c4af]/20 to-[#BFD8CF]/15',
   },
   {
     icon: ChatBubbleIcon,
     title: 'Trợ Lý hỏi nhanh',
-    desc: 'Vài câu hỏi cơ bản mỗi ngày là miễn phí — hỏi sâu hơn thì Trợ Lý sẽ gợi ý đặt lịch chuyên gia thay vì tự đoán.',
+    desc: 'Vài câu hỏi cơ bản mỗi ngày là miễn phí, hỏi sâu hơn thì Trợ Lý sẽ gợi ý đặt lịch chuyên gia thay vì tự đoán.',
     to: '/pricing',
     tag: 'Trợ Lý',
-    accent: 'from-[#2C8E92]/20 to-[#67D6E8]/10',
+    accent: 'from-[#2fa98c]/20 to-[#70c4af]/10',
   },
   {
     icon: MapIcon,
@@ -107,8 +107,8 @@ function FeatureTiltCard({ feature, index }) {
           transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg)`,
           transition: 'transform 0.15s ease-out',
         }}
-        className={`group preserve-3d relative flex flex-col justify-between h-full overflow-hidden rounded-[28px] bg-[#FCFDFC] p-8 text-left border border-[#E7ECEE] shadow-[0_10px_35px_rgba(44,142,146,0.04)] transition-all duration-300 hover:border-[#2C8E92] hover:shadow-[0_16px_45px_rgba(103,214,232,0.18)] hover:-translate-y-1.5 ${
-          isFeatured ? 'p-10 bg-gradient-to-br from-[#FCFDFC] via-white to-[#67D6E8]/10' : ''
+        className={`group preserve-3d relative flex flex-col justify-between h-full overflow-hidden rounded-[28px] bg-[#FCFDFC] p-8 text-left border border-[#E7ECEE] shadow-[0_10px_35px_rgba(47, 169, 140,0.04)] transition-all duration-300 hover:border-[#2fa98c] hover:shadow-[0_16px_45px_rgba(112, 196, 175,0.18)] hover:-translate-y-1.5 ${
+          isFeatured ? 'p-10 bg-gradient-to-br from-[#FCFDFC] via-white to-[#70c4af]/10' : ''
         }`}
       >
         {/* Animated Gradient Spotlight Underlay */}
@@ -119,19 +119,19 @@ function FeatureTiltCard({ feature, index }) {
         <div className="relative preserve-3d z-10" style={{ transform: 'translateZ(30px)' }}>
           <div className="flex items-center justify-between">
             <span
-              className={`flex items-center justify-center rounded-2xl bg-[#2C8E92]/10 text-[#2C8E92] border border-[#2C8E92]/20 shadow-xs transition-all duration-300 group-hover:scale-110 group-hover:bg-[#2C8E92] group-hover:text-white group-hover:shadow-md ${
+              className={`flex items-center justify-center rounded-2xl bg-[#2fa98c]/10 text-[#2fa98c] border border-[#2fa98c]/20 shadow-xs transition-all duration-300 group-hover:scale-110 group-hover:bg-[#2fa98c] group-hover:text-white group-hover:shadow-md ${
                 isFeatured ? 'h-14 w-14' : 'h-12 w-12'
               }`}
             >
               <IconComp className={isFeatured ? 'h-7 w-7' : 'h-6 w-6'} />
             </span>
-            <span className="font-mono text-[11px] font-bold text-[#2C8E92] uppercase tracking-wider bg-[#F7FBFC] px-3.5 py-1.5 rounded-full border border-[#E7ECEE]">
+            <span className="font-mono text-[11px] font-bold text-[#2fa98c] uppercase tracking-wider bg-[#eaf7f1] px-3.5 py-1.5 rounded-full border border-[#E7ECEE]">
               {feature.tag}
             </span>
           </div>
 
           <h3
-            className={`mt-6 font-display font-extrabold text-[#17353D] group-hover:text-[#2C8E92] transition-colors ${
+            className={`mt-6 font-display font-extrabold text-[#0e3b33] group-hover:text-[#2fa98c] transition-colors ${
               isFeatured ? 'text-2xl sm:text-3xl' : 'text-xl'
             }`}
           >
@@ -146,7 +146,7 @@ function FeatureTiltCard({ feature, index }) {
           </p>
         </div>
 
-        <div className="relative preserve-3d z-10 mt-8 flex items-center gap-2 text-xs font-bold text-[#2C8E92] group-hover:text-[#17353D] transition-colors">
+        <div className="relative preserve-3d z-10 mt-8 flex items-center gap-2 text-xs font-bold text-[#2fa98c] group-hover:text-[#0e3b33] transition-colors">
           Khám phá ngay <ArrowLeftIcon className="h-4 w-4 rotate-180 transition-transform duration-300 group-hover:translate-x-1.5" />
         </div>
       </Link>
@@ -156,10 +156,10 @@ function FeatureTiltCard({ feature, index }) {
 
 export default function Analysis() {
   return (
-    <section id="analysis" className="relative py-24 sm:py-32 bg-gradient-to-b from-[#F7FBFC] via-[#FCFDFC] to-[#F7FBFC] overflow-hidden">
+    <section id="analysis" className="relative py-24 sm:py-32 bg-gradient-to-b from-[#eaf7f1] via-[#FCFDFC] to-[#eaf7f1] overflow-hidden">
       {/* Soft Ambient Radial Orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-[#67D6E8]/10 blur-3xl opacity-60" />
+        <div className="absolute top-1/4 left-1/4 h-96 w-96 rounded-full bg-[#70c4af]/10 blur-3xl opacity-60" />
         <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-[#BFD8CF]/15 blur-3xl opacity-50" />
       </div>
 
@@ -171,7 +171,7 @@ export default function Analysis() {
         yRange={[0, -32, 0]}
         duration={5.5}
         delay={0.2}
-        accent="#2C8E92"
+        accent="#2fa98c"
         parallaxOffset={70}
       />
       <FloatingCosmeticDecoration
@@ -181,7 +181,7 @@ export default function Analysis() {
         yRange={[-28, 28, -28]}
         duration={5.0}
         delay={0.4}
-        accent="#67D6E8"
+        accent="#70c4af"
         parallaxOffset={-65}
       />
       <FloatingCosmeticDecoration

@@ -8,6 +8,7 @@
     "start": "node src/index.js",
     "seed": "node src/db/seed.js",
     "seed:demo": "node src/db/seedDemo.js",
+    "qa": "node src/qa/runQa.js",
     "test": "node --test test/"
   },
   "dependencies": {
@@ -20,6 +21,7 @@
     "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.2.0",
-    "pg": "^8.22.0"
+    "pg": "^8.22.0",
+    "ws": "^8.21.3"
   }
 }

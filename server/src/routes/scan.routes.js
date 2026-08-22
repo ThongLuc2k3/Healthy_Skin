@@ -28,7 +28,7 @@ router.post(
     } catch (err) {
       if (err instanceof GeminiNotConfiguredError) {
         return res.status(503).json({
-          error: 'Tính năng quét ảnh thật chưa sẵn sàng — thiếu cấu hình Gemini API key. Vui lòng thử lại sau.',
+          error: 'Tính năng quét ảnh thật chưa sẵn sàng, thiếu cấu hình Gemini API key. Vui lòng thử lại sau.',
         })
       }
       if (err instanceof GeminiRequestError) {

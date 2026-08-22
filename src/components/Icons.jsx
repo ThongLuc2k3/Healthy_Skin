@@ -311,6 +311,28 @@ export function HistoryIcon({ className }) {
   )
 }
 
+export function HeartIcon({ className, filled = false }) {
+  return (
+    <svg viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} className={className} aria-hidden="true">
+      <path
+        d="M12 20.5s-7.5-4.6-10-9.3C.4 8 2 4.5 5.5 4c2.1-.3 4 .8 6.5 3.5C14.5 4.8 16.4 3.7 18.5 4c3.5.5 5.1 4 3.5 7.2-2.5 4.7-10 9.3-10 9.3z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+export function UploadIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M12 16V4M12 4l-4 4M12 4l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export function MapIcon({ className }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">

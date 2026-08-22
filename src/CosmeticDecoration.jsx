@@ -52,13 +52,7 @@ const cardRevealVariants = {
   },
 };
 
-// Hover: gentle lift + rotate (kept subtle since there's no card box)
-const cardHoverVariants = {
-  rest: { y: 0, rotate: 0 },
-  hover: { y: -8, rotate: -1.5, transition: { type: "spring", stiffness: 300, damping: 18 } },
-};
-
-// Ambient glow behind the icon — "breathes" and expands further on hover
+// Ambient glow behind the icon, "breathes" and expands further on hover
 const glowVariants = {
   rest: { opacity: 0.5, scale: 1 },
   hover: { opacity: 0.85, scale: 1.3, transition: { duration: 0.5, ease: "easeOut" } },
@@ -94,19 +88,6 @@ function ShineSweep({ clipId, x0 = -40, x1 = 240, y = 0, height = 220, duration 
         transition={{ duration, repeat: Infinity, repeatDelay: 1.6, ease: "easeInOut", delay }}
       />
     </g>
-  );
-}
-
-// A tiny 4-point twinkling sparkle
-function Sparkle({ cx, cy, size = 7, color = "#ffffff", delay = 0, duration = 2.2 }) {
-  return (
-    <motion.path
-      d={`M ${cx} ${cy - size} L ${cx + size * 0.28} ${cy - size * 0.28} L ${cx + size} ${cy} L ${cx + size * 0.28} ${cy + size * 0.28} L ${cx} ${cy + size} L ${cx - size * 0.28} ${cy + size * 0.28} L ${cx - size} ${cy} L ${cx - size * 0.28} ${cy - size * 0.28} Z`}
-      fill={color}
-      animate={{ opacity: [0, 1, 0], scale: [0.4, 1, 0.4] }}
-      transition={{ duration, repeat: Infinity, delay, ease: "easeInOut" }}
-      style={{ transformOrigin: `${cx}px ${cy}px` }}
-    />
   );
 }
 
@@ -146,7 +127,7 @@ export function CreamJar({ className = DEFAULT_ICON_SIZE }) {
 
       <ellipse cx="100" cy="178" rx="52" ry="9" fill="#0f172a" opacity="0.16" filter={`url(#${uid}-shadow)`} />
 
-      <rect x="45" y="82" width="110" height="86" rx="20" fill={`url(#${uid}-glass)`} stroke="#38bdf8" strokeOpacity="0.35" />
+      <rect x="45" y="82" width="110" height="86" rx="20" fill={`url(#${uid}-glass)`} stroke="#9fd8c9" strokeOpacity="0.35" />
       <rect x="45" y="150" width="110" height="6" fill={`url(#${uid}-gold)`} opacity="0.85" />
 
       <motion.g
@@ -188,7 +169,7 @@ export function CreamJar({ className = DEFAULT_ICON_SIZE }) {
         transition={{ duration: 3.6, repeat: Infinity, times: [0, 0.2, 0.5, 0.7, 1], ease: "easeInOut" }}
       >
         <rect x="38" y="56" width="124" height="26" rx="13" fill={`url(#${uid}-lid)`} />
-        <rect x="54" y="45" width="92" height="16" rx="8" fill="#0284c7" />
+        <rect x="54" y="45" width="92" height="16" rx="8" fill="#126b59" />
         <rect x="54" y="66" width="92" height="4" fill={`url(#${uid}-gold)`} opacity="0.9" />
         <circle cx="100" cy="53" r="3" fill="#ffffff" opacity="0.7" />
       </motion.g>
@@ -209,8 +190,8 @@ export function LotionPumpBottle({ className = DEFAULT_ICON_SIZE }) {
           <stop offset="100%" stopColor="#7dd3fc" />
         </linearGradient>
         <linearGradient id={`${uid}-pump`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#38bdf8" />
-          <stop offset="100%" stopColor="#0284c7" />
+          <stop offset="0%" stopColor="#9fd8c9" />
+          <stop offset="100%" stopColor="#126b59" />
         </linearGradient>
         <radialGradient id={`${uid}-breathe`} cx="50%" cy="40%" r="60%">
           <stop offset="0%" stopColor="#ffffff" stopOpacity="0.7" />
@@ -226,7 +207,7 @@ export function LotionPumpBottle({ className = DEFAULT_ICON_SIZE }) {
 
       <ellipse cx="100" cy="178" rx="46" ry="8" fill="#0f172a" opacity="0.16" filter={`url(#${uid}-shadow)`} />
 
-      <rect x="60" y="90" width="80" height="82" rx="18" fill={`url(#${uid}-bottle)`} stroke="#38bdf8" strokeOpacity="0.35" />
+      <rect x="60" y="90" width="80" height="82" rx="18" fill={`url(#${uid}-bottle)`} stroke="#9fd8c9" strokeOpacity="0.35" />
       <g clipPath={`url(#${uid}-bodyClip)`}>
         <motion.circle
           cx="100"
@@ -238,8 +219,8 @@ export function LotionPumpBottle({ className = DEFAULT_ICON_SIZE }) {
         />
       </g>
       <rect x="70" y="118" width="60" height="30" rx="6" fill="#ffffff" opacity="0.55" />
-      <line x1="78" y1="128" x2="122" y2="128" stroke="#0284c7" strokeWidth="2" opacity="0.6" />
-      <line x1="78" y1="136" x2="108" y2="136" stroke="#0284c7" strokeWidth="2" opacity="0.4" />
+      <line x1="78" y1="128" x2="122" y2="128" stroke="#126b59" strokeWidth="2" opacity="0.6" />
+      <line x1="78" y1="136" x2="108" y2="136" stroke="#126b59" strokeWidth="2" opacity="0.4" />
       <rect x="68" y="98" width="10" height="66" rx="5" fill="#ffffff" opacity="0.45" />
       <ShineSweep clipId={`${uid}-bodyClip`} x0={40} x1={220} duration={3.6} delay={0.4} />
 
@@ -259,7 +240,7 @@ export function LotionPumpBottle({ className = DEFAULT_ICON_SIZE }) {
       >
         <rect x="82" y="50" width="36" height="14" rx="7" fill={`url(#${uid}-pump)`} />
         <rect x="94" y="36" width="12" height="18" rx="5" fill="#0ea5e9" />
-        <circle cx="100" cy="34" r="6" fill="#0284c7" />
+        <circle cx="100" cy="34" r="6" fill="#126b59" />
       </motion.g>
     </svg>
   );
@@ -279,7 +260,7 @@ export function MoisturizerTube({ className = DEFAULT_ICON_SIZE }) {
         </linearGradient>
         <linearGradient id={`${uid}-drop`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#bae6fd" />
-          <stop offset="100%" stopColor="#38bdf8" />
+          <stop offset="100%" stopColor="#9fd8c9" />
         </linearGradient>
         <filter id={`${uid}-shadow`} x="-60%" y="-60%" width="220%" height="220%">
           <feGaussianBlur stdDeviation="6" />
@@ -480,7 +461,7 @@ export function AlcoholFreeBadge({ className = DEFAULT_ICON_SIZE }) {
         </radialGradient>
         <linearGradient id={`${uid}-drop`} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#bae6fd" />
-          <stop offset="100%" stopColor="#38bdf8" />
+          <stop offset="100%" stopColor="#9fd8c9" />
         </linearGradient>
         <linearGradient id={`${uid}-leaf`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#86efac" />
@@ -1031,7 +1012,7 @@ export function FloatingCosmeticDecoration({
   rotateRange = [-4, 4, -4],
   duration = 5.5,
   delay = 0,
-  accent = "#38bdf8",
+  accent = "#9fd8c9",
   showGlow = true,
   parallaxOffset = 50,
 }) {
@@ -1092,7 +1073,7 @@ export function FloatingCosmeticDecoration({
  * layer, and entrance + hover interactions. No background box — just the
  * illustration, its light, and its motion.
  * -------------------------------------------------------------------------- */
-export function CosmeticCard({ Icon, label, accent = "#38bdf8", delay = 0, className = "" }) {
+export function CosmeticCard({ Icon, label, accent = "#9fd8c9", delay = 0, className = "" }) {
   return (
     <motion.div
       className={`relative flex flex-col items-center justify-center ${className}`}
@@ -1140,7 +1121,7 @@ export function CosmeticCard({ Icon, label, accent = "#38bdf8", delay = 0, class
  * -------------------------------------------------------------------------- */
 export default function CosmeticDecoration({ className = "" }) {
   const items = [
-    { Icon: CreamJar, label: "Cream Jar", accent: "#38bdf8" },
+    { Icon: CreamJar, label: "Cream Jar", accent: "#9fd8c9" },
     { Icon: LotionPumpBottle, label: "Lotion", accent: "#0ea5e9" },
     { Icon: MoisturizerTube, label: "Moisturizer", accent: "#3b82f6" },
     { Icon: SunscreenTube, label: "Sunscreen", accent: "#f59e0b" },

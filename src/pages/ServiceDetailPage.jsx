@@ -3,11 +3,10 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { apiClient } from '../lib/apiClient'
-import { ArrowLeftIcon, CheckCircleIcon } from '../components/Icons'
-
-function formatVnd(amount) {
-  return (amount || 0).toLocaleString('vi-VN') + 'đ'
-}
+import { formatVnd, formatDate } from '../lib/format'
+import { ArrowLeftIcon, CheckCircleIcon, StarIcon } from '../components/Icons'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
+import PaymentMethodModal from '../components/PaymentMethodModal'
 
 function ServiceDetailPage() {
   const { id } = useParams()
@@ -15,22 +14,57 @@ function ServiceDetailPage() {
   const navigate = useNavigate()
 
   const [venue, setVenue] = useState(null)
+  useDocumentTitle(venue?.name || 'Dịch vụ')
+  const [reviews, setReviews] = useState([])
   const [vouchers, setVouchers] = useState([])
   const [selectedServiceId, setSelectedServiceId] = useState(null)
   const [selectedVoucherId, setSelectedVoucherId] = useState('')
   const [status, setStatus] = useState('loading')
-  const [booking, setBooking] = useState(false)
   const [error, setError] = useState('')
   const [confirmedBooking, setConfirmedBooking] = useState(null)
+  const [coords, setCoords] = useState(null)
+  const [fallbackAddress, setFallbackAddress] = useState('')
+  const [showPayment, setShowPayment] = useState(false)
 
   useEffect(() => {
+    if (!navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => {
+        // Không có quyền vị trí — dùng địa chỉ tự khai trong hồ sơ làm phương án dự phòng
+        // (mô phỏng theo quận/huyện, xem vnAreaCoords.js).
+        if (user) {
+          apiClient.get('/account', { auth: true })
+            .then((account) => {
+              if (account.addressVi) setFallbackAddress(account.addressVi)
+            })
+            .catch(() => {})
+        }
+      },
+      { timeout: 8000 },
+    )
+  }, [user])
+
+  useEffect(() => {
+    const params = new URLSearchParams()
+    if (coords) {
+      params.set('lat', coords.lat)
+      params.set('lng', coords.lng)
+    } else if (fallbackAddress) {
+      params.set('address', fallbackAddress)
+    }
+    const query = params.toString()
     apiClient
-      .get(`/venues/${id}`)
+      .get(`/venues/${id}${query ? `?${query}` : ''}`)
       .then((data) => {
         setVenue(data)
         setStatus('ready')
       })
       .catch(() => setStatus('error'))
+  }, [id, coords, fallbackAddress])
+
+  useEffect(() => {
+    apiClient.get(`/venues/${id}/reviews`).then(setReviews).catch(() => {})
   }, [id])
 
   useEffect(() => {
@@ -39,8 +73,6 @@ function ServiceDetailPage() {
   }, [user])
 
   async function handleBook() {
-    if (!selectedServiceId) return
-    setBooking(true)
     setError('')
     try {
       const result = await apiClient.post(
@@ -51,8 +83,7 @@ function ServiceDetailPage() {
       setConfirmedBooking(result)
     } catch (err) {
       setError(err.message)
-    } finally {
-      setBooking(false)
+      throw err
     }
   }
 
@@ -65,7 +96,7 @@ function ServiceDetailPage() {
         <p className="rounded-xl bg-rose-50 border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-700">
           Không tìm thấy trung tâm.
         </p>
-        <Link to="/dich-vu" className="mt-4 inline-block text-sm font-bold text-[#2C8E92] underline">
+        <Link to="/dich-vu" className="mt-4 inline-block text-sm font-bold text-[#2fa98c] underline">
           Quay lại danh sách
         </Link>
       </div>
@@ -77,18 +108,22 @@ function ServiceDetailPage() {
       <div className="mx-auto mt-16 max-w-lg px-4 py-12">
         <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-8 text-center space-y-3">
           <CheckCircleIcon className="mx-auto h-10 w-10 text-emerald-600" />
-          <h1 className="text-xl font-bold text-[#17353D]">Đặt dịch vụ thành công (demo)</h1>
-          <p className="text-sm text-[#17353D]">
+          <h1 className="text-xl font-bold text-[#0e3b33]">Đặt dịch vụ thành công</h1>
+          <p className="text-sm text-[#0e3b33]">
             Mã hoá đơn: <span className="font-mono font-bold">{confirmedBooking.invoiceCode}</span>
           </p>
-          <p className="text-2xl font-black text-[#2C8E92]">{formatVnd(confirmedBooking.finalPriceVnd)}</p>
+          {confirmedBooking.paymentRef && (
+            <p className="text-xs text-[#64748B]">
+              Mã giao dịch đặt cọc: <span className="font-mono">{confirmedBooking.paymentRef}</span>
+            </p>
+          )}
+          <p className="text-2xl font-black text-[#2fa98c]">{formatVnd(confirmedBooking.finalPriceVnd)}</p>
           <p className="text-xs text-[#64748B] leading-relaxed">
-            Đây là hoá đơn nội bộ của web dùng cho mục đích demo, không phải hoá đơn điện tử hợp lệ.
             Vui lòng đến trực tiếp {venue.name} và xuất trình mã hoá đơn này.
           </p>
           <Link
             to="/dich-vu"
-            className="mt-4 inline-block rounded-full bg-[#2C8E92] px-6 py-2.5 text-sm font-bold text-white hover:bg-[#17353D]"
+            className="mt-4 inline-block rounded-full bg-[#2fa98c] px-6 py-2.5 text-sm font-bold text-white hover:bg-[#0e3b33]"
           >
             Quay lại Dịch Vụ Quanh Bạn
           </Link>
@@ -106,9 +141,9 @@ function ServiceDetailPage() {
     : selectedService?.priceVnd
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-[#F7FBFC] via-[#FCFDFC] to-[#F7FBFC] py-16 px-4 sm:px-6 lg:px-8 mt-12">
+    <div className="relative min-h-screen bg-gradient-to-b from-[#eaf7f1] via-[#FCFDFC] to-[#eaf7f1] py-16 px-4 sm:px-6 lg:px-8 mt-12">
       <div className="relative z-10 mx-auto max-w-[800px]">
-        <Link to="/dich-vu" className="inline-flex items-center gap-2 text-xs font-bold text-[#64748B] hover:text-[#2C8E92]">
+        <Link to="/dich-vu" className="inline-flex items-center gap-2 text-xs font-bold text-[#64748B] hover:text-[#2fa98c]">
           <ArrowLeftIcon className="h-4 w-4" />
           Dịch Vụ Quanh Bạn
         </Link>
@@ -117,17 +152,25 @@ function ServiceDetailPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mt-6 rounded-[28px] border border-[#E8EEF0] bg-white p-8 shadow-xs"
+          className="mt-6 rounded-[28px] border border-[#c5e7dd] bg-white p-8 shadow-xs"
         >
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#2C8E92]/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#2C8E92]">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#2fa98c]/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#2fa98c]">
             {venue.category}
           </span>
-          <h1 className="mt-3 text-2xl font-bold text-[#17353D]">{venue.name}</h1>
-          <p className="mt-1 text-sm text-[#64748B]">{venue.addressVi}</p>
+          <h1 className="mt-3 text-2xl font-bold text-[#0e3b33]">{venue.name}</h1>
+          <p className="mt-1 text-sm text-[#64748B]">
+            {venue.addressVi}
+            {venue.distanceKm != null && <span className="font-semibold text-[#A87A45]"> · cách bạn {venue.distanceKm}km</span>}
+          </p>
+          <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#eaf7f1] border border-[#c5e7dd] px-3 py-1">
+            <StarIcon className="h-4 w-4 fill-amber-400 text-amber-400" />
+            <span className="text-sm font-bold text-[#0e3b33]">{venue.ratingAvg.toFixed(1)}</span>
+            <span className="text-xs text-[#64748B]">({venue.reviewCount} đánh giá)</span>
+          </div>
           <p className="mt-3 text-sm leading-relaxed text-[#64748B]">{venue.descriptionVi}</p>
 
-          <div className="mt-6 border-t border-[#E8EEF0] pt-6 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#2C8E92]">Chọn dịch vụ</p>
+          <div className="mt-6 border-t border-[#c5e7dd] pt-6 space-y-3">
+            <p className="text-xs font-bold uppercase tracking-wider text-[#2fa98c]">Chọn dịch vụ</p>
             {venue.services.map((s) => (
               <button
                 key={s.id}
@@ -135,15 +178,15 @@ function ServiceDetailPage() {
                 onClick={() => setSelectedServiceId(s.id)}
                 className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left text-sm transition ${
                   selectedServiceId === s.id
-                    ? 'border-[#2C8E92] bg-[#2C8E92]/5'
-                    : 'border-[#E8EEF0] hover:border-[#2C8E92]/40'
+                    ? 'border-[#2fa98c] bg-[#2fa98c]/5'
+                    : 'border-[#c5e7dd] hover:border-[#2fa98c]/40'
                 }`}
               >
                 <span>
-                  <span className="font-bold text-[#17353D]">{s.nameVi}</span>
+                  <span className="font-bold text-[#0e3b33]">{s.nameVi}</span>
                   {s.durationMinutes && <span className="ml-2 text-xs text-[#64748B]">{s.durationMinutes} phút</span>}
                 </span>
-                <span className="font-bold text-[#2C8E92]">{formatVnd(s.priceVnd)}</span>
+                <span className="font-bold text-[#2fa98c]">{formatVnd(s.priceVnd)}</span>
               </button>
             ))}
           </div>
@@ -151,12 +194,12 @@ function ServiceDetailPage() {
           {user ? (
             <>
               {vouchers.length > 0 && (
-                <div className="mt-6 border-t border-[#E8EEF0] pt-6">
-                  <p className="text-xs font-bold uppercase tracking-wider text-[#2C8E92]">Áp voucher (không bắt buộc)</p>
+                <div className="mt-6 border-t border-[#c5e7dd] pt-6">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#2fa98c]">Áp voucher (không bắt buộc)</p>
                   <select
                     value={selectedVoucherId}
                     onChange={(e) => setSelectedVoucherId(e.target.value)}
-                    className="mt-2 w-full rounded-xl border border-[#E8EEF0] bg-[#F7FBFC] px-3 py-2.5 text-sm text-[#17353D]"
+                    className="mt-2 w-full rounded-xl border border-[#c5e7dd] bg-[#eaf7f1] px-3 py-2.5 text-sm text-[#0e3b33]"
                   >
                     <option value="">Không dùng voucher</option>
                     {vouchers.map((v) => (
@@ -167,19 +210,19 @@ function ServiceDetailPage() {
               )}
 
               {selectedService && (
-                <div className="mt-6 flex items-center justify-between rounded-xl bg-[#F7FBFC] border border-[#E8EEF0] px-4 py-3">
-                  <span className="text-sm font-semibold text-[#17353D]">Tổng cộng (demo)</span>
-                  <span className="text-lg font-black text-[#2C8E92]">{formatVnd(previewPrice)}</span>
+                <div className="mt-6 flex items-center justify-between rounded-xl bg-[#eaf7f1] border border-[#c5e7dd] px-4 py-3">
+                  <span className="text-sm font-semibold text-[#0e3b33]">Tổng cộng</span>
+                  <span className="text-lg font-black text-[#2fa98c]">{formatVnd(previewPrice)}</span>
                 </div>
               )}
 
               <button
                 type="button"
-                onClick={handleBook}
-                disabled={!selectedServiceId || booking}
-                className="mt-6 w-full rounded-2xl bg-[#2C8E92] px-6 py-4 text-sm font-extrabold uppercase tracking-wider text-white transition hover:bg-[#17353D] disabled:opacity-50"
+                onClick={() => setShowPayment(true)}
+                disabled={!selectedServiceId}
+                className="mt-6 w-full rounded-2xl bg-[#2fa98c] px-6 py-4 text-sm font-extrabold uppercase tracking-wider text-white transition hover:bg-[#0e3b33] disabled:opacity-50"
               >
-                {booking ? 'Đang xử lý...' : 'Đặt cọc & xác nhận (demo)'}
+                Đặt cọc & xác nhận
               </button>
               {error && <p className="mt-3 text-sm font-medium text-rose-600">{error}</p>}
             </>
@@ -187,13 +230,57 @@ function ServiceDetailPage() {
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="mt-6 w-full rounded-2xl bg-[#2C8E92] px-6 py-4 text-sm font-extrabold uppercase tracking-wider text-white hover:bg-[#17353D]"
+              className="mt-6 w-full rounded-2xl bg-[#2fa98c] px-6 py-4 text-sm font-extrabold uppercase tracking-wider text-white hover:bg-[#0e3b33]"
             >
               Đăng nhập để đặt dịch vụ
             </button>
           )}
         </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="mt-6 rounded-[28px] border border-[#c5e7dd] bg-white p-8 shadow-xs space-y-5"
+        >
+          <div className="flex items-center gap-2">
+            <StarIcon className="h-5 w-5 fill-amber-400 text-amber-400" />
+            <h2 className="text-lg font-bold text-[#0e3b33]">
+              Đánh giá từ khách hàng ({venue.reviewCount})
+            </h2>
+          </div>
+
+          {reviews.length === 0 ? (
+            <p className="text-sm text-[#64748B]">Chưa có đánh giá nào cho trung tâm này.</p>
+          ) : (
+            <ul className="space-y-4">
+              {reviews.map((review) => (
+                <li
+                  key={review.id}
+                  className="rounded-2xl border border-[#c5e7dd] bg-[#eaf7f1] p-5 space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-amber-500">
+                      <StarIcon className="h-4 w-4 fill-amber-400 text-amber-400" />
+                      <span className="text-sm font-bold text-[#0e3b33]">{review.rating}/5</span>
+                    </div>
+                    <span className="text-xs text-[#64748B]">{formatDate(review.createdAt)}</span>
+                  </div>
+                  <p className="text-sm leading-relaxed text-[#0e3b33]">"{review.commentVi}"</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </motion.div>
       </div>
+
+      <PaymentMethodModal
+        open={showPayment}
+        amountVnd={previewPrice ?? 0}
+        title={`Đặt cọc tại ${venue.name}`}
+        onClose={() => setShowPayment(false)}
+        onConfirm={handleBook}
+      />
     </div>
   )
 }

@@ -9,6 +9,8 @@ import {
   saveProfile,
   hasGivenConsent,
   giveConsent,
+  revokeConsent,
+  deleteSensitiveData,
   setFacePhoto,
   deleteFacePhoto,
   setDiagnosedConditions,
@@ -19,6 +21,7 @@ import {
   getExpertReportRawById,
   deleteExpertReport,
 } from '../services/expertReportService.js'
+import { extractDiagnosedConditions } from '../services/reportExtractionService.js'
 
 const router = Router()
 
@@ -102,6 +105,16 @@ router.post('/consent', requireAuth, asyncHandler(async (req, res) => {
   res.json(await giveConsent(req.userId))
 }))
 
+// Thu hồi đồng ý — chỉ tắt cờ, không xoá dữ liệu đã có (xem DELETE /sensitive-data để xoá hẳn).
+router.delete('/consent', requireAuth, asyncHandler(async (req, res) => {
+  res.json(await revokeConsent(req.userId))
+}))
+
+// Xoá hẳn dữ liệu nhạy cảm (ảnh khuôn mặt, bệnh lý đã chẩn đoán, báo cáo khám) — không xoá tài khoản.
+router.delete('/sensitive-data', requireAuth, asyncHandler(async (req, res) => {
+  res.json(await deleteSensitiveData(req.userId))
+}))
+
 router.put('/diagnosed-conditions', requireAuth, asyncHandler(async (req, res) => {
   if (!await hasGivenConsent(req.userId)) {
     return res.status(403).json({ error: 'Bạn cần đồng ý sử dụng dữ liệu nhạy cảm trước khi khai bệnh lý.' })
@@ -154,7 +167,11 @@ router.post(
     if (!req.file) {
       return res.status(400).json({ error: 'Vui lòng chọn một file ảnh hoặc PDF.' })
     }
-    res.status(201).json(await addExpertReport(req.userId, req.file))
+    const report = await addExpertReport(req.userId, req.file)
+    // AI đọc lại file để gợi ý điền sẵn bệnh lý — chỉ là gợi ý, người dùng vẫn phải tự bấm "Lưu bệnh
+    // lý" ở bước sau mới thật sự lưu (xem reportExtractionService).
+    const suggestedConditions = await extractDiagnosedConditions(req.file.buffer, req.file.mimetype)
+    res.status(201).json({ ...report, suggestedConditions })
   }),
 )
 

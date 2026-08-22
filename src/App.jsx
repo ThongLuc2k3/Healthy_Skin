@@ -1,11 +1,14 @@
 import { Routes, Route } from 'react-router-dom'
 import NavBar from './components/NavBar'
+import Footer from './components/Footer'
 import HomePage from './pages/HomePage'
 import ProfileForm from './pages/ProfileForm'
+import AccountSettingsPage from './pages/AccountSettingsPage'
 import ScanDemoPage from './pages/ScanDemoPage'
 import ScanHistoryPage from './pages/ScanHistoryPage'
 import MotivationPage from './pages/MotivationPage'
 import ExpertListPage from './pages/ExpertListPage'
+import ExpertApplicationPage from './pages/ExpertApplicationPage'
 import ExpertDetailPage from './pages/ExpertDetailPage'
 import BookingDetailPage from './pages/BookingDetailPage'
 import LoginPage from './pages/LoginPage'
@@ -13,7 +16,9 @@ import RegisterPage from './pages/RegisterPage'
 import ChatWidget from './components/ChatWidget'
 import PricingPage from './pages/PricingPage'
 import ExpertDashboardPage from './pages/expert/ExpertDashboardPage'
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import ServicesNearbyPage from './pages/ServicesNearbyPage'
+import VenueApplicationPage from './pages/VenueApplicationPage'
 import ServiceDetailPage from './pages/ServiceDetailPage'
 import MyVouchersPage from './pages/MyVouchersPage'
 import SkinPlaygroundPage from './pages/SkinPlaygroundPage'
@@ -22,9 +27,9 @@ import AboutPage from './pages/AboutPage'
 
 function App() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-gradient-to-br from-[#e4eff3] via-[#d8e5ec] to-[#eaf2f5] text-[#0F4C5C] antialiased selection:bg-[#0F4C5C]/20 selection:text-[#0F4C5C]">
-      {/* Background ambient radial glow layers matching light glass theme */}
-      <div className="pointer-events-none fixed inset-0 -z-10 bg-gradient-to-br from-[#e4eff3] via-[#d8e5ec] to-[#eaf2f5]" />
+    <div className="relative min-h-screen overflow-x-hidden bg-gradient-to-br from-[#f6fbf9] via-[#eef7f2] to-[#eaf7f1] text-[#0e3b33] antialiased selection:bg-[#0e3b33]/20 selection:text-[#0e3b33]">
+      {/* Background ambient radial glow layers matching light brand theme */}
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-gradient-to-br from-[#f6fbf9] via-[#eef7f2] to-[#eaf7f1]" />
       <div className="pointer-events-none fixed inset-0 -z-10 grid-bg opacity-30 mask-fade-b" />
 
       <NavBar />
@@ -32,16 +37,20 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/profile" element={<ProfileForm />} />
+          <Route path="/tai-khoan" element={<AccountSettingsPage />} />
           <Route path="/scan" element={<ScanDemoPage />} />
           <Route path="/history" element={<ScanHistoryPage />} />
           <Route path="/motivation" element={<MotivationPage />} />
           <Route path="/skin-lab" element={<SkinPlaygroundPage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/expert-dashboard" element={<ExpertDashboardPage />} />
+          <Route path="/admin" element={<AdminDashboardPage />} />
           <Route path="/dich-vu" element={<ServicesNearbyPage />} />
+          <Route path="/dich-vu/dang-ky" element={<VenueApplicationPage />} />
           <Route path="/dich-vu/voucher" element={<MyVouchersPage />} />
           <Route path="/dich-vu/:id" element={<ServiceDetailPage />} />
           <Route path="/experts" element={<ExpertListPage />} />
+          <Route path="/experts/dang-ky" element={<ExpertApplicationPage />} />
           <Route path="/experts/:id" element={<ExpertDetailPage />} />
           <Route path="/my-bookings/:id" element={<BookingDetailPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -50,6 +59,7 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
         </Routes>
       </main>
+      <Footer />
       <ChatWidget />
     </div>
   )

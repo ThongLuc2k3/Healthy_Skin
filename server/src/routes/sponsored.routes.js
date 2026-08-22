@@ -5,7 +5,7 @@ import { listSponsoredProducts, listHomepageAds } from '../services/sponsoredCon
 const router = Router()
 
 router.get('/products', asyncHandler(async (req, res) => {
-  res.json(await listSponsoredProducts())
+  res.json(await listSponsoredProducts(req.query.placement))
 }))
 
 router.get('/ads', asyncHandler(async (req, res) => {

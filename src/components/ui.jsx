@@ -20,7 +20,7 @@ export function Reveal({ children, delay = 0, y = 40, className = '', once = tru
 export function Eyebrow({ children }) {
   return (
     <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full glass border border-white/90 shadow-md bg-white/70">
-      <span className="h-2 w-2 rounded-full bg-[#00b4d8] animate-pulse" />
+      <span className="h-2 w-2 rounded-full bg-[#2fa98c] animate-pulse" />
       <span className="font-mono text-[11px] font-black uppercase tracking-[0.24em] text-[#082531]">
         {children}
       </span>
@@ -37,7 +37,11 @@ export function SectionTitle({ eyebrow, title, description, align = 'center' }) 
           : 'flex flex-col items-start text-left max-w-2xl'
       }
     >
-      
+      {eyebrow && (
+        <Reveal>
+          <Eyebrow>{eyebrow}</Eyebrow>
+        </Reveal>
+      )}
       <Reveal delay={0.08}>
         <h2 className="mt-6 font-display text-3xl sm:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight">
           {title}
@@ -62,7 +66,7 @@ export function GlassPanel({ children, className = '', strong = false }) {
   )
 }
 
-export function Corners({ color = '#00b4d8' }) {
+export function Corners({ color = '#2fa98c' }) {
   const base = 'absolute h-3 w-3'
   return (
     <>

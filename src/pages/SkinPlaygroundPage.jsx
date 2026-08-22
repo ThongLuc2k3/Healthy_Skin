@@ -11,6 +11,7 @@ import {
 } from '../components/Icons'
 import { useAuth } from '../context/AuthContext'
 import { apiClient } from '../lib/apiClient'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 const QUESTIONS = [
   {
@@ -70,6 +71,7 @@ const fadeUp = {
 }
 
 function SkinPlaygroundPage() {
+  useDocumentTitle('Skin Lab')
   const { user } = useAuth()
   const [answers, setAnswers] = useState({})
   const [pickedChallenge, setPickedChallenge] = useState(DAILY_CHALLENGES[0])
@@ -136,19 +138,19 @@ function SkinPlaygroundPage() {
       style={{ background: 'linear-gradient(135deg, #F0FAFA 0%, #EBF8F5 60%, #F7F3EE 100%)' }}
     >
       {/* Background ambient radial glow layers */}
-      <FloatingBlob className="w-[600px] h-[600px] bg-cyan-200/20 -top-40 -left-40" />
-      <FloatingBlob className="w-[500px] h-[500px] bg-teal-200/15 top-1/3 -right-40" />
+      <FloatingBlob className="w-[600px] h-[600px] bg-[#9fd8c9]/30 -top-40 -left-40" />
+      <FloatingBlob className="w-[500px] h-[500px] bg-[#c5e7dd]/40 top-1/3 -right-40" />
       <FloatingBlob className="w-[400px] h-[400px] bg-amber-100/20 bottom-10 left-1/4" />
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-10 pt-28 space-y-8">
         {/* ── Hero Section ───────────────────────────────────── */}
         <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={0}>
-          <div className="rounded-3xl p-8 sm:p-10 border border-[#E8ECEE] bg-white/70 backdrop-blur-xl shadow-[0_8px_48px_rgba(44,142,146,0.10)] overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#2C8E92]/5 via-transparent to-[#D8B27A]/5 pointer-events-none" />
+          <div className="rounded-3xl p-8 sm:p-10 border border-[#c5e7dd] bg-white/70 backdrop-blur-xl shadow-[0_8px_48px_rgba(47, 169, 140,0.10)] overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#2fa98c]/5 via-transparent to-[#D8B27A]/5 pointer-events-none" />
             <div className="relative grid gap-8 lg:grid-cols-[1fr_320px] items-center">
               <div>
                 
-                <h1 className="mt-4 text-4xl sm:text-5xl font-extrabold tracking-tight text-[#17353D] leading-tight">
+                <h1 className="mt-4 text-4xl sm:text-5xl font-extrabold tracking-tight text-[#0e3b33] leading-tight">
                   Chơi nhanh để hiểu da mình hơn
                 </h1>
                 <p className="mt-3 text-base leading-relaxed text-[#64748B] max-w-xl">
@@ -157,15 +159,15 @@ function SkinPlaygroundPage() {
 
                 {/* Progress bar inside hero */}
                 <div className="mt-6 space-y-2 max-w-md">
-                  <div className="flex justify-between text-xs font-bold text-[#17353D]">
+                  <div className="flex justify-between text-xs font-bold text-[#0e3b33]">
                     <span>Tiến trình trắc nghiệm</span>
-                    <span className="text-[#2C8E92]">
+                    <span className="text-[#2fa98c]">
                       {answeredCount}/{QUESTIONS.length} câu hoàn thành
                     </span>
                   </div>
-                  <div className="h-2.5 w-full rounded-full bg-[#E8ECEE] overflow-hidden">
+                  <div className="h-2.5 w-full rounded-full bg-[#c5e7dd] overflow-hidden">
                     <motion.div
-                      className="h-full rounded-full bg-gradient-to-r from-[#2C8E92] to-[#67D6E8]"
+                      className="h-full rounded-full bg-gradient-to-r from-[#2fa98c] to-[#70c4af]"
                       initial={{ width: 0 }}
                       animate={{ width: `${progressPercent}%` }}
                       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -179,14 +181,14 @@ function SkinPlaygroundPage() {
                 <motion.div
                   animate={{ y: [0, -12, 0], rotate: [0, 3, 0] }}
                   transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                  className="relative h-36 w-36 rounded-3xl bg-gradient-to-br from-white/90 via-cyan-100/50 to-teal-200/40 border border-white/80 backdrop-blur-xl shadow-[0_16px_40px_rgba(103,214,232,0.25)] flex items-center justify-center"
+                  className="relative h-36 w-36 rounded-3xl bg-gradient-to-br from-white/90 via-[#eaf7f1] to-[#c5e7dd]/50 border border-white/80 backdrop-blur-xl shadow-[0_16px_40px_rgba(112, 196, 175,0.25)] flex items-center justify-center"
                 >
                   <motion.div
                     animate={{ scale: [1, 1.1, 1], rotate: [0, -6, 0] }}
                     transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-                    className="h-20 w-20 rounded-full bg-gradient-to-tr from-[#2C8E92]/30 to-[#67D6E8]/60 border border-white/60 backdrop-blur-md shadow-[0_0_20px_rgba(44,142,146,0.3)] flex items-center justify-center"
+                    className="h-20 w-20 rounded-full bg-gradient-to-tr from-[#2fa98c]/30 to-[#70c4af]/60 border border-white/60 backdrop-blur-md shadow-[0_0_20px_rgba(47, 169, 140,0.3)] flex items-center justify-center"
                   >
-                    <GamepadIcon className="h-10 w-10 text-[#2C8E92]" />
+                    <GamepadIcon className="h-10 w-10 text-[#2fa98c]" />
                   </motion.div>
                 </motion.div>
 
@@ -196,7 +198,7 @@ function SkinPlaygroundPage() {
                   transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
                   className="absolute -bottom-2 right-12 h-14 w-28 rounded-full bg-gradient-to-r from-[#D8B27A]/40 to-[#BFD8CF]/50 border border-white/70 backdrop-blur-lg shadow-lg flex items-center justify-center"
                 >
-                  <SparklesIcon className="h-6 w-6 text-[#A87A45]" />
+                  <SparklesIcon className="h-6 w-6 text-[#B5872A]" />
                 </motion.div>
               </div>
             </div>
@@ -207,9 +209,9 @@ function SkinPlaygroundPage() {
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           {/* ── LEFT COLUMN: QUESTIONS ────────────────────────── */}
           <section className="space-y-6">
-            <div className="rounded-3xl border border-[#E8ECEE] bg-white/70 backdrop-blur-xl shadow-[0_4px_32px_rgba(44,142,146,0.10)] p-6 sm:p-8 space-y-6">
+            <div className="rounded-3xl border border-[#c5e7dd] bg-white/70 backdrop-blur-xl shadow-[0_4px_32px_rgba(47, 169, 140,0.10)] p-6 sm:p-8 space-y-6">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-extrabold tracking-widest text-[#2C8E92] uppercase">
+                <span className="text-xs font-extrabold tracking-widest text-[#2fa98c] uppercase">
                   TRẮC NGHIỆM TƯƠNG TÁC
                 </span>
                 <span className="text-xs font-bold text-[#64748B]">
@@ -229,13 +231,13 @@ function SkinPlaygroundPage() {
                       custom={index + 1}
                       className={`rounded-2xl border p-5 sm:p-6 transition-all duration-300 ${
                         isAnswered
-                          ? 'border-[#2C8E92]/40 bg-gradient-to-br from-cyan-50/80 to-teal-50/80 shadow-sm'
-                          : 'border-[#E8ECEE] bg-white/80'
+                          ? 'border-[#2fa98c]/40 bg-gradient-to-br from-[#eaf7f1]/80 to-[#c5e7dd]/60 shadow-sm'
+                          : 'border-[#c5e7dd] bg-white/80'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[#2C8E92]">
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#2C8E92]/10 text-[11px]">
+                        <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-[#2fa98c]">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#2fa98c]/10 text-[11px]">
                             {index + 1}
                           </span>
                           Câu hỏi {index + 1}
@@ -247,7 +249,7 @@ function SkinPlaygroundPage() {
                         )}
                       </div>
 
-                      <h2 className="text-base sm:text-lg font-bold text-[#17353D]">
+                      <h2 className="text-base sm:text-lg font-bold text-[#0e3b33]">
                         {question.question}
                       </h2>
 
@@ -265,8 +267,8 @@ function SkinPlaygroundPage() {
                               }
                               className={`relative rounded-2xl border p-4 text-left text-sm font-medium transition-all duration-200 flex items-center justify-between ${
                                 isSelected
-                                  ? 'border-[#2C8E92] bg-gradient-to-r from-[#2C8E92] to-[#67D6E8] text-white shadow-[0_4px_20px_rgba(44,142,146,0.3)]'
-                                  : 'border-[#E8ECEE] bg-white/90 text-[#17353D] hover:border-[#2C8E92]/40 hover:bg-cyan-50/40'
+                                  ? 'border-[#2fa98c] bg-gradient-to-r from-[#2fa98c] to-[#70c4af] text-white shadow-[0_4px_20px_rgba(47, 169, 140,0.3)]'
+                                  : 'border-[#c5e7dd] bg-white/90 text-[#0e3b33] hover:border-[#2fa98c]/40 hover:bg-[#eaf7f1]/60'
                               }`}
                             >
                               <span>{option.label}</span>
@@ -298,13 +300,13 @@ function SkinPlaygroundPage() {
           <aside className="space-y-6">
             {/* AI Analysis Result Card */}
             <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={2}>
-              <div className="rounded-3xl border border-[#E8ECEE] bg-white/70 backdrop-blur-xl shadow-[0_4px_32px_rgba(44,142,146,0.10)] p-6 sm:p-7 space-y-4">
+              <div className="rounded-3xl border border-[#c5e7dd] bg-white/70 backdrop-blur-xl shadow-[0_4px_32px_rgba(47, 169, 140,0.10)] p-6 sm:p-7 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-2 text-xs font-bold tracking-widest text-[#2C8E92] uppercase">
-                    <SparklesIcon className="h-4 w-4 text-[#2C8E92]" /> KẾT QUẢ MINI QUIZ
+                  <span className="inline-flex items-center gap-2 text-xs font-bold tracking-widest text-[#2fa98c] uppercase">
+                    <SparklesIcon className="h-4 w-4 text-[#2fa98c]" /> KẾT QUẢ MINI QUIZ
                   </span>
                   {result && (
-                    <span className="rounded-full bg-[#2C8E92]/10 border border-[#2C8E92]/20 px-3 py-0.5 text-xs font-bold text-[#2C8E92]">
+                    <span className="rounded-full bg-[#2fa98c]/10 border border-[#2fa98c]/20 px-3 py-0.5 text-xs font-bold text-[#2fa98c]">
                       {result.confidence}
                     </span>
                   )}
@@ -319,10 +321,10 @@ function SkinPlaygroundPage() {
                       exit={{ opacity: 0, y: -12 }}
                       className="space-y-4 pt-2"
                     >
-                      <div className="inline-block rounded-full bg-gradient-to-r from-[#2C8E92]/10 to-[#67D6E8]/20 border border-[#2C8E92]/30 px-3.5 py-1 text-xs font-extrabold text-[#2C8E92]">
+                      <div className="inline-block rounded-full bg-gradient-to-r from-[#2fa98c]/10 to-[#70c4af]/20 border border-[#2fa98c]/30 px-3.5 py-1 text-xs font-extrabold text-[#2fa98c]">
                         {result.badge}
                       </div>
-                      <h2 className="text-2xl font-extrabold text-[#17353D] leading-tight">
+                      <h2 className="text-2xl font-extrabold text-[#0e3b33] leading-tight">
                         {result.title}
                       </h2>
                       <p className="text-sm leading-relaxed text-[#64748B]">
@@ -330,11 +332,11 @@ function SkinPlaygroundPage() {
                       </p>
 
                       {/* Chips */}
-                      <div className="flex flex-wrap gap-2 pt-2 border-t border-[#E8ECEE]">
+                      <div className="flex flex-wrap gap-2 pt-2 border-t border-[#c5e7dd]">
                         {result.chips.map((chip) => (
                           <span
                             key={chip}
-                            className="rounded-full bg-cyan-50 border border-cyan-200 px-3 py-1 text-xs font-semibold text-[#2C8E92]"
+                            className="rounded-full bg-[#eaf7f1] border border-[#c5e7dd] px-3 py-1 text-xs font-semibold text-[#2fa98c]"
                           >
                             ✓ {chip}
                           </span>
@@ -349,7 +351,7 @@ function SkinPlaygroundPage() {
                     </motion.div>
                   ) : (
                     <div className="py-6 text-center space-y-3">
-                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-50 text-[#2C8E92] border border-cyan-200">
+                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eaf7f1] text-[#2fa98c] border border-[#c5e7dd]">
                         <TargetIcon className="h-7 w-7" />
                       </div>
                       <p className="text-sm leading-relaxed text-[#64748B]">
@@ -363,9 +365,9 @@ function SkinPlaygroundPage() {
 
             {/* Daily Challenge Card (Mission Style) */}
             <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={3}>
-              <div className="rounded-3xl border border-[#E8ECEE] bg-white/70 backdrop-blur-xl shadow-[0_4px_32px_rgba(44,142,146,0.10)] p-6 sm:p-7 space-y-5">
+              <div className="rounded-3xl border border-[#c5e7dd] bg-white/70 backdrop-blur-xl shadow-[0_4px_32px_rgba(47, 169, 140,0.10)] p-6 sm:p-7 space-y-5">
                 <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-2 text-xs font-bold tracking-widest text-[#2C8E92] uppercase">
+                  <span className="inline-flex items-center gap-2 text-xs font-bold tracking-widest text-[#2fa98c] uppercase">
                     <TrophyIcon className="h-4 w-4 text-amber-500" /> THỬ THÁCH HÔM NAY
                   </span>
                   <span className="rounded-full bg-amber-50 border border-amber-200 px-3 py-0.5 text-xs font-bold text-amber-700">
@@ -378,7 +380,7 @@ function SkinPlaygroundPage() {
                     <FlameIcon className="h-4 w-4 text-amber-500" />
                     <span>Nhiệm vụ hàng ngày</span>
                   </div>
-                  <p className="text-base font-bold text-[#17353D] leading-relaxed">
+                  <p className="text-base font-bold text-[#0e3b33] leading-relaxed">
                     {pickedChallenge}
                   </p>
                 </div>
@@ -392,7 +394,7 @@ function SkinPlaygroundPage() {
                   className="w-full rounded-2xl py-3.5 text-sm font-bold text-white shadow-md transition"
                   style={{
                     backgroundImage:
-                      'linear-gradient(to right, #2C8E92 0%, #67D6E8 51%, #2C8E92 100%)',
+                      'linear-gradient(to right, #2fa98c 0%, #70c4af 51%, #2fa98c 100%)',
                     backgroundSize: '200% auto',
                   }}
                 >
@@ -403,8 +405,8 @@ function SkinPlaygroundPage() {
 
             {/* Achievement Badges Section */}
             <motion.div variants={fadeUp} initial="hidden" animate="visible" custom={4}>
-              <div className="rounded-3xl border border-[#E8ECEE] bg-white/70 backdrop-blur-xl shadow-[0_4px_32px_rgba(44,142,146,0.10)] p-6 sm:p-7 space-y-4">
-                <span className="inline-flex items-center gap-2 text-xs font-bold tracking-widest text-[#2C8E92] uppercase">
+              <div className="rounded-3xl border border-[#c5e7dd] bg-white/70 backdrop-blur-xl shadow-[0_4px_32px_rgba(47, 169, 140,0.10)] p-6 sm:p-7 space-y-4">
+                <span className="inline-flex items-center gap-2 text-xs font-bold tracking-widest text-[#2fa98c] uppercase">
                   <StarIcon className="h-4 w-4 text-amber-500" /> HUY HIỆU SKIN LAB
                 </span>
                 <div className="grid grid-cols-3 gap-3">
@@ -419,11 +421,11 @@ function SkinPlaygroundPage() {
                       className={`rounded-2xl p-3 text-center border transition-all ${
                         badge.unlocked
                           ? 'border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 shadow-sm'
-                          : 'border-[#E8ECEE] bg-white/40 opacity-60'
+                          : 'border-[#c5e7dd] bg-white/40 opacity-60'
                       }`}
                     >
                       <div className="text-2xl mb-1">{badge.icon}</div>
-                      <p className="text-xs font-extrabold text-[#17353D] truncate">
+                      <p className="text-xs font-extrabold text-[#0e3b33] truncate">
                         {badge.title}
                       </p>
                       <span className="text-[10px] font-bold text-[#94A3B8]">

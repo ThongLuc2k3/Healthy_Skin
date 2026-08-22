@@ -1,7 +1,98 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import aboutContent from '../data/aboutContent'
-import { LeafIcon, SparklesIcon } from '../components/Icons'
+import { useAuth } from '../context/AuthContext'
+import { apiClient } from '../lib/apiClient'
+import { LeafIcon, SparklesIcon, TrashIcon } from '../components/Icons'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
+
+const DELETE_CONFIRM_TEXT = 'XOÁ TÀI KHOẢN'
+
+function DeleteAccountSection() {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+  const [open, setOpen] = useState(false)
+  const [confirmText, setConfirmText] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState('')
+
+  if (!user) return null
+
+  async function handleDelete() {
+    setDeleting(true)
+    setError('')
+    try {
+      await apiClient.delete('/auth/me', { auth: true })
+      logout()
+      navigate('/')
+    } catch (err) {
+      setError(err.message)
+      setDeleting(false)
+    }
+  }
+
+  return (
+    <section className="motion-rise mt-6 rounded-[2rem] border border-rose-200 bg-rose-50/60 p-6 shadow-sm sm:p-8">
+      <h2 className="flex items-center gap-2 text-lg font-bold tracking-tight text-rose-900">
+        <TrashIcon className="h-5 w-5" />
+        Xoá tài khoản và dữ liệu
+      </h2>
+      <p className="mt-2 text-sm leading-6 text-rose-800/80">
+        Xoá vĩnh viễn tài khoản cùng toàn bộ dữ liệu liên quan: hồ sơ cá nhân, ảnh khuôn mặt, bệnh lý
+        đã khai báo, lịch sử quét, lịch hẹn chuyên gia và tin nhắn tư vấn, đánh giá trên diễn đàn. Hành
+        động này không thể hoàn tác.
+      </p>
+
+      {!open ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="mt-4 rounded-xl border border-rose-300 bg-white px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-100"
+        >
+          Tôi muốn xoá tài khoản
+        </button>
+      ) : (
+        <div className="mt-4 space-y-3">
+          <p className="text-sm text-rose-800/80">
+            Gõ chính xác <span className="font-mono font-bold">{DELETE_CONFIRM_TEXT}</span> để xác nhận.
+          </p>
+          <input
+            type="text"
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            className="w-full max-w-xs rounded-xl border border-rose-300 bg-white px-3 py-2 text-sm text-rose-900 focus:border-rose-500 focus:outline-none"
+            placeholder={DELETE_CONFIRM_TEXT}
+          />
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={confirmText !== DELETE_CONFIRM_TEXT || deleting}
+              onClick={handleDelete}
+              className="rounded-xl bg-rose-600 px-4 py-2 text-sm font-bold text-white hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {deleting ? 'Đang xoá...' : 'Xác nhận xoá vĩnh viễn'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false)
+                setConfirmText('')
+                setError('')
+              }}
+              className="text-sm font-semibold text-rose-700/70 hover:text-rose-900"
+            >
+              Huỷ
+            </button>
+          </div>
+          {error && <p className="text-sm font-medium text-rose-700">{error}</p>}
+        </div>
+      )}
+    </section>
+  )
+}
 
 function AboutPage() {
+  useDocumentTitle('Về chúng tôi')
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 pt-28">
       <div className="text-center">
@@ -36,6 +127,8 @@ function AboutPage() {
           ),
         )}
       </section>
+
+      <DeleteAccountSection />
     </div>
   )
 }

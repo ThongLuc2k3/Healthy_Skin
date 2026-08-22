@@ -73,7 +73,7 @@ export async function redeemVoucherWithPoints(userId, voucherId) {
 
 // Cấp voucher trực tiếp (thưởng minigame Skin Lab hoặc tặng kèm khi mua Gói Trợ Lý) — không trừ điểm.
 export async function awardVoucher(userId, voucherId, obtainedVia) {
-  const { rows: voucherRows } = await query('SELECT id FROM vouchers WHERE id = $1', [voucherId])
+  const { rows: voucherRows } = await query('SELECT id, title_vi FROM vouchers WHERE id = $1', [voucherId])
   if (!voucherRows[0]) {
     throw new Error('Voucher không hợp lệ.')
   }
@@ -81,5 +81,5 @@ export async function awardVoucher(userId, voucherId, obtainedVia) {
     `INSERT INTO user_vouchers (user_id, voucher_id, obtained_via) VALUES ($1,$2,$3) RETURNING *`,
     [userId, voucherId, obtainedVia],
   )
-  return { id: rows[0].id, voucherId, obtainedVia }
+  return { id: rows[0].id, voucherId, obtainedVia, voucherTitle: voucherRows[0].title_vi }
 }

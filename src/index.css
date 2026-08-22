@@ -1,29 +1,27 @@
 @import "tailwindcss";
 
+/* Bảng màu thương hiệu Healthy Skin — nội suy đúng từ 4 mã màu logo thật
+   (xem HEALTHY_SKIN_logo/HEALTHY_SKIN_icon.svg): #0E3B33 / #126B59 / #2FA98C / #EAF7F1,
+   cộng vàng đồng #B5872A làm điểm nhấn phụ. Thay cho bộ cyan/azure/mint "AI demo" cũ. */
 @theme {
-  --color-ink-950: #0b3542;
-  --color-ink-900: #0f4c5c;
-  --color-ink-800: #135c70;
-  --color-ink-700: #166478;
-  --color-ink-600: #1e788e;
+  --color-brand-50: #f6fbf9;
+  --color-brand-100: #eaf7f1;
+  --color-brand-200: #c5e7dd;
+  --color-brand-300: #9fd8c9;
+  --color-brand-400: #70c4af;
+  --color-brand-500: #2fa98c;
+  --color-brand-600: #218a73;
+  --color-brand-700: #126b59;
+  --color-brand-900: #0e3b33;
 
-  --color-cyan-glow: #00b4d8;
-  --color-cyan-deep: #0077b6;
-  --color-cyan-soft: #38bdf8;
-  --color-cyan-light: #e0f2fe;
+  --color-accent-100: #f4eddf;
+  --color-accent-500: #b5872a;
+  --color-accent-600: #916c22;
 
-  --color-azure-400: #38bdf8;
-  --color-azure-500: #00b4d8;
-  --color-azure-600: #0f4c5c;
-
-  --color-mint-400: #34d399;
-  --color-mint-500: #10b981;
-
-  --color-slate-200: #183b3b;
-  --color-slate-300: #183b3b;
-  --color-slate-400: #183b3b;
-  --color-slate-500: #183b3b;
-  --color-slate-600: #183b3b;
+  --color-ink-900: #0e3b33;
+  --color-ink-800: #126b59;
+  --color-ink-700: #218a73;
+  --color-ink-600: #2fa98c;
 }
 
 :root {
@@ -39,8 +37,8 @@ body {
   font-family:
     Inter;
   -webkit-font-smoothing: antialiased;
-  background-color: #e4eff3;
-  color: #183b3b;
+  background-color: #f6fbf9;
+  color: #0e3b33;
   overflow-x: hidden;
 }
 
@@ -55,12 +53,12 @@ body {
 .subpage-container span,
 .subpage-container label,
 .subpage-container div {
-  color: #183b3b;
+  color: #0e3b33;
 }
 
 ::selection {
-  background-color: rgba(24, 59, 59, 0.25);
-  color: #183b3b;
+  background-color: rgba(47, 169, 140, 0.25);
+  color: #0e3b33;
 }
 
 
@@ -72,11 +70,11 @@ body {
   background: #dce7ec;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #0f4c5c, #00b4d8);
+  background: linear-gradient(180deg, #126b59, #2fa98c);
   border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #0f4c5c;
+  background: #126b59;
 }
 
 /* Premium Light Glassmorphic Cards */
@@ -91,8 +89,8 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.85);
   box-shadow:
     inset 0 1px 1px rgba(255, 255, 255, 0.9),
-    0 12px 32px -8px rgba(15, 76, 92, 0.09),
-    0 4px 12px 0 rgba(15, 76, 92, 0.04);
+    0 12px 32px -8px rgba(14, 59, 51, 0.09),
+    0 4px 12px 0 rgba(14, 59, 51, 0.04);
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -100,8 +98,8 @@ body {
   border-color: rgba(255, 255, 255, 0.95);
   box-shadow:
     inset 0 1px 2px rgba(255, 255, 255, 1),
-    0 20px 48px -12px rgba(15, 76, 92, 0.14),
-    0 6px 16px 0 rgba(15, 76, 92, 0.08);
+    0 20px 48px -12px rgba(14, 59, 51, 0.14),
+    0 6px 16px 0 rgba(14, 59, 51, 0.08);
 }
 
 .glass-strong {
@@ -115,8 +113,8 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.95);
   box-shadow:
     inset 0 1px 2px rgba(255, 255, 255, 1),
-    0 20px 48px -12px rgba(15, 76, 92, 0.12),
-    0 6px 16px 0 rgba(15, 76, 92, 0.06);
+    0 20px 48px -12px rgba(14, 59, 51, 0.12),
+    0 6px 16px 0 rgba(14, 59, 51, 0.06);
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -124,20 +122,20 @@ body {
   border-color: #ffffff;
   box-shadow:
     inset 0 1px 2px rgba(255, 255, 255, 1),
-    0 24px 60px -10px rgba(15, 76, 92, 0.18);
+    0 24px 60px -10px rgba(14, 59, 51, 0.18);
 }
 
 .text-gradient-cyan,
 .text-gradient-emerald,
 .text-gradient-logo {
-  background: linear-gradient(120deg, #0b3542 0%, #0f4c5c 50%, #00b4d8 100%);
+  background: linear-gradient(120deg, #0e3b33 0%, #126b59 50%, #2fa98c 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-gradient-muted {
-  background: linear-gradient(120deg, #0f4c5c 0%, #00b4d8 100%);
+  background: linear-gradient(120deg, #126b59 0%, #2fa98c 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -145,14 +143,14 @@ body {
 
 .border-glow {
   box-shadow:
-    0 0 0 1px rgba(0, 180, 216, 0.4),
-    0 0 20px -4px rgba(0, 180, 216, 0.3);
+    0 0 0 1px rgba(47, 169, 140, 0.4),
+    0 0 20px -4px rgba(47, 169, 140, 0.3);
 }
 
 .grid-bg {
   background-image:
-    linear-gradient(rgba(0, 180, 216, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 180, 216, 0.07) 1px, transparent 1px);
+    linear-gradient(rgba(47, 169, 140, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(47, 169, 140, 0.07) 1px, transparent 1px);
   background-size: 56px 56px;
 }
 
@@ -170,11 +168,11 @@ body {
 }
 
 .shadow-glow {
-  box-shadow: 0 8px 32px 0 rgba(15, 76, 92, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(14, 59, 51, 0.08);
 }
 
 .shadow-glow-lg {
-  box-shadow: 0 16px 48px 0 rgba(15, 76, 92, 0.12);
+  box-shadow: 0 16px 48px 0 rgba(14, 59, 51, 0.12);
 }
 
 /* Animations */

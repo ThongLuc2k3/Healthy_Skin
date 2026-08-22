@@ -9,6 +9,22 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Thông tin cá nhân + liên kết ngân hàng (demo, KHÔNG phải tích hợp ngân hàng thật) — tách khỏi
+-- `profiles` vì `profiles` là hồ sơ DA (loại da/dị ứng/mục tiêu), còn đây là thông tin định danh
+-- tài khoản hiển thị ở trang "Tài khoản của tôi". bank_account_masked chỉ lưu 4 số cuối, không lưu
+-- số tài khoản đầy đủ dù là demo, tránh thói quen xấu nếu sau này cắm liên kết ngân hàng thật.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS date_of_birth DATE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS bank_name TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS bank_account_masked TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS bank_linked_at TIMESTAMPTZ;
+
+-- Địa chỉ tự khai của người dùng — dùng làm phương án dự phòng tính khoảng cách cho "Dịch Vụ Quanh
+-- Bạn" khi trình duyệt không cấp quyền vị trí (xem venueService.resolveApproxCoords, mô phỏng bằng
+-- cách khớp tên quận/huyện trong chuỗi địa chỉ, KHÔNG phải geocoding thật).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS address_vi TEXT;
+
 CREATE TABLE IF NOT EXISTS profiles (
   user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   skin_type TEXT NOT NULL DEFAULT '',
@@ -68,6 +84,27 @@ CREATE TABLE IF NOT EXISTS experts (
 );
 
 ALTER TABLE experts ADD COLUMN IF NOT EXISTS consultation_fee_vnd INTEGER NOT NULL DEFAULT 0;
+
+-- Đơn đăng ký trở thành chuyên gia trên nền tảng — người nộp đơn tự đề xuất mức phí tư vấn và
+-- khung giờ rảnh của mình (kể cả cao hơn giá thị trường), quản trị viên chỉ duyệt/từ chối chứ
+-- không chỉnh số liệu đề xuất. Duyệt xong tạo thẳng 1 dòng experts, giống venue_applications.
+CREATE TABLE IF NOT EXISTS expert_applications (
+  id BIGSERIAL PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  specialty TEXT NOT NULL,
+  clinic_name TEXT NOT NULL,
+  area_vi TEXT NOT NULL,
+  bio_vi TEXT NOT NULL,
+  contact_phone TEXT NOT NULL,
+  contact_email TEXT NOT NULL,
+  proposed_fee_vnd INTEGER NOT NULL,
+  proposed_slots TEXT NOT NULL DEFAULT '[]',
+  status TEXT NOT NULL DEFAULT 'pending',
+  admin_note TEXT,
+  created_expert_id TEXT REFERENCES experts(id),
+  submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  reviewed_at TIMESTAMPTZ
+);
 
 CREATE TABLE IF NOT EXISTS expert_bookings (
   id BIGSERIAL PRIMARY KEY,
@@ -139,6 +176,11 @@ CREATE TABLE IF NOT EXISTS sponsored_products (
   sponsor_name TEXT NOT NULL, active BOOLEAN NOT NULL DEFAULT TRUE
 );
 
+-- Vị trí trên web mà mỗi sản phẩm tài trợ được phép xuất hiện — mảng JSON các khoá cố định:
+-- 'trang_chu' (dải tài trợ trang chủ), 'ket_qua_quet' (gợi ý sau khi quét sản phẩm),
+-- 'tu_van_chuyen_gia' (chuyên gia gợi ý trong khung chat). Quản trị viên bật/tắt qua trang Admin.
+ALTER TABLE sponsored_products ADD COLUMN IF NOT EXISTS placements TEXT NOT NULL DEFAULT '[]';
+
 -- Dải quảng cáo "Nhà bán hàng uy tín" trên trang chủ (demo), luôn gắn nhãn Quảng cáo/Liên kết tiếp thị.
 CREATE TABLE IF NOT EXISTS homepage_ads (
   id BIGSERIAL PRIMARY KEY,
@@ -154,11 +196,29 @@ CREATE TABLE IF NOT EXISTS partner_venues (
   description_vi TEXT NOT NULL, cover_image_url TEXT
 );
 
+-- Toạ độ để tính khoảng cách tới người dùng (xem venueService.listVenues) — cho phép NULL vì các
+-- trung tâm được duyệt từ venue_applications (chưa nhập toạ độ) vẫn phải hiển thị được, chỉ là
+-- không có khoảng cách kèm theo.
+ALTER TABLE partner_venues ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION;
+ALTER TABLE partner_venues ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION;
+
 CREATE TABLE IF NOT EXISTS partner_services (
   id BIGSERIAL PRIMARY KEY,
   venue_id TEXT NOT NULL REFERENCES partner_venues(id) ON DELETE CASCADE,
   name_vi TEXT NOT NULL, price_vnd INTEGER NOT NULL, duration_minutes INTEGER
 );
+
+-- Đánh giá cho "Dịch Vụ Quanh Bạn" (mô phỏng lại kiểu đánh giá đã có ở chuyên gia), nhưng lưu thành
+-- bảng riêng thay vì JSON lồng trong partner_venues vì venue không có sẵn cột reviews như experts.
+CREATE TABLE IF NOT EXISTS venue_reviews (
+  id BIGSERIAL PRIMARY KEY,
+  venue_id TEXT NOT NULL REFERENCES partner_venues(id) ON DELETE CASCADE,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  comment_vi TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_venue_reviews_venue ON venue_reviews(venue_id);
 
 -- Kho voucher: mỗi voucher là một "mẫu" giảm giá; user_vouchers ghi nhận ai đang sở hữu bản nào,
 -- lấy được qua đổi điểm tích luỹ / chơi minigame Skin Lab / mua Gói Trợ Lý (xem obtained_via).
@@ -196,5 +256,157 @@ CREATE TABLE IF NOT EXISTS website_reviews (
   user_id BIGINT NOT NULL REFERENCES users(id),
   rating INTEGER CHECK(rating >= 1 AND rating <= 5) DEFAULT 5,
   title TEXT NOT NULL, content TEXT NOT NULL, image_path TEXT, image_mime TEXT,
+  author_name TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Tên hiển thị tuỳ chọn cho người đánh giá — nếu để trống, route GET /reviews sẽ hiển thị email
+-- người dùng thay thế. Thêm sau khi bảng đã tồn tại nên cần ALTER riêng cho DB dev cục bộ cũ.
+ALTER TABLE website_reviews ADD COLUMN IF NOT EXISTS author_name TEXT;
+
+-- website_reviews.user_id ban đầu không có ON DELETE CASCADE — nếu xoá tài khoản theo cách thông
+-- thường (DELETE FROM users) thì bất kỳ user nào có review sẽ làm request vỡ vì lỗi khoá ngoại.
+-- DROP luôn chạy trước ADD nên khối này idempotent mỗi lần khởi động (đúng kiểu file này đang dùng).
+ALTER TABLE website_reviews DROP CONSTRAINT IF EXISTS website_reviews_user_id_fkey;
+ALTER TABLE website_reviews ADD CONSTRAINT website_reviews_user_id_fkey
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- Nhật ký đồng ý (consent) — thay cho việc chỉ có 1 cờ profiles.consent_given_at bị ghi đè không
+-- lưu lịch sử. Mỗi lần người dùng đồng ý/thu hồi đồng ý dùng dữ liệu nhạy cảm, hoặc đồng ý gửi hồ sơ
+-- cho chuyên gia xem trước khi đặt lịch, đều ghi thành 1 dòng ở đây, không sửa/xoá dòng cũ.
+CREATE TABLE IF NOT EXISTS consent_events (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  consent_type TEXT NOT NULL,
+  booking_id BIGINT,
+  granted BOOLEAN NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_consent_events_user ON consent_events(user_id);
+
+-- Hạ tầng giá/hoa hồng + sổ đối soát (demo): ghi nhận minh bạch phần hoa hồng nền tảng tách khỏi
+-- phần trả đối tác trên MỖI booking, để có thể đối chiếu sau này khi có đối tác/thanh toán thật.
+-- KHÔNG thêm bước thu tiền mới ở luồng đặt lịch chuyên gia — đó là quyết định sản phẩm/UX riêng.
+ALTER TABLE expert_bookings ADD COLUMN IF NOT EXISTS consultation_fee_vnd INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE expert_bookings ADD COLUMN IF NOT EXISTS platform_commission_vnd INTEGER NOT NULL DEFAULT 0;
+
+ALTER TABLE venue_bookings ADD COLUMN IF NOT EXISTS platform_commission_vnd INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE venue_bookings ADD COLUMN IF NOT EXISTS partner_payout_vnd INTEGER NOT NULL DEFAULT 0;
+
+CREATE TABLE IF NOT EXISTS settlement_records (
+  id BIGSERIAL PRIMARY KEY,
+  booking_type TEXT NOT NULL, -- 'expert' | 'venue'
+  booking_id BIGINT NOT NULL,
+  gross_amount_vnd INTEGER NOT NULL,
+  commission_vnd INTEGER NOT NULL,
+  payout_vnd INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  settled_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_settlement_records_booking ON settlement_records(booking_type, booking_id);
+
+-- Tài khoản đăng nhập trang Quản trị (Admin) — quản lý doanh thu, thành viên, chuyên gia, đơn đăng
+-- ký đối tác và vị trí hiển thị sản phẩm tài trợ. Tách khỏi users/expert_accounts để không lẫn quyền.
+CREATE TABLE IF NOT EXISTS admin_accounts (
+  id BIGSERIAL PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  name TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Đơn đăng ký trở thành trung tâm đối tác (spa/phòng khám/gym...) gửi bởi chủ cửa hàng — quản trị
+-- viên duyệt (approved) sẽ tạo dòng tương ứng trong partner_venues, hoặc từ chối (rejected) kèm ghi
+-- chú lý do. 'pending' là trạng thái mặc định khi vừa nộp đơn, chưa được ai xử lý.
+CREATE TABLE IF NOT EXISTS venue_applications (
+  id BIGSERIAL PRIMARY KEY,
+  business_name TEXT NOT NULL,
+  category TEXT NOT NULL,
+  contact_name TEXT NOT NULL,
+  contact_phone TEXT NOT NULL,
+  contact_email TEXT NOT NULL,
+  area_vi TEXT NOT NULL,
+  address_vi TEXT NOT NULL,
+  description_vi TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  admin_note TEXT,
+  created_venue_id TEXT REFERENCES partner_venues(id),
+  submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  reviewed_at TIMESTAMPTZ
+);
+
+-- Payment intent — lớp trung gian giữa "hành động nạp tiền/đặt cọc" và ví/booking thật, để sau này
+-- cắm cổng thanh toán thật (VNPay/Momo/...) chỉ cần thêm 1 provider mới, không sửa route/service
+-- nghiệp vụ. Với provider 'mock' hiện tại, intent luôn được xác nhận thành công ngay lập tức.
+-- Đề xuất lịch hẹn từ khách hàng gửi đích danh 1 chuyên gia — khác với expert_applications (chuyên
+-- gia tự ứng tuyển vào nền tảng). Ở đây khách chọn 1 chuyên gia đã có sẵn rồi tự đề xuất ngày/giờ/
+-- mức phí khác với giá niêm yết, chuyên gia xem và bấm nhận/từ chối; nhận xong khách phải xác nhận
+-- lại (confirm) mới tạo expert_bookings thật, tránh việc chuyên gia bấm nhận thay luôn quyết định đặt
+-- lịch của khách.
+CREATE TABLE IF NOT EXISTS expert_booking_proposals (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  expert_id TEXT NOT NULL REFERENCES experts(id),
+  proposed_date DATE NOT NULL,
+  proposed_time TEXT NOT NULL,
+  proposed_fee_vnd INTEGER NOT NULL,
+  note_vi TEXT NOT NULL DEFAULT '',
+  status TEXT NOT NULL DEFAULT 'pending', -- pending | accepted | rejected | confirmed
+  expert_note TEXT,
+  booking_id BIGINT REFERENCES expert_bookings(id),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  responded_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_expert_booking_proposals_expert ON expert_booking_proposals(expert_id, status);
+CREATE INDEX IF NOT EXISTS idx_expert_booking_proposals_user ON expert_booking_proposals(user_id);
+
+-- Bài đăng video do người dùng tự đăng ở Góc truyền động lực — khác với MOTIVATION_CATEGORIES (nội
+-- dung tĩnh do đội ngũ chọn sẵn trong src/data/motivationContent.js). Đúng 1 trong 2 nguồn video:
+-- video_url (dán link YouTube/TikTok...) hoặc video_path (tự tải file lên), không cả hai/không thiếu
+-- cả hai (ràng buộc kiểm tra ở motivationPostService.createPost, không đặt CHECK ở DB cho đơn giản).
+CREATE TABLE IF NOT EXISTS motivation_posts (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  video_url TEXT,
+  video_path TEXT,
+  video_mime TEXT,
+  view_count INTEGER NOT NULL DEFAULT 0,
+  like_count INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_motivation_posts_user ON motivation_posts(user_id);
+
+-- Lượt xem đã tính điểm cho chủ bài — chặn 1 người dùng xem đi xem lại cùng 1 bài để cày điểm ảo
+-- (xem motivationPostService.recordView). Khách ẩn danh vẫn xem được nhưng không tính điểm.
+CREATE TABLE IF NOT EXISTS motivation_post_views (
+  post_id BIGINT NOT NULL REFERENCES motivation_posts(id) ON DELETE CASCADE,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (post_id, user_id)
+);
+
+-- Lượt tim — bật/tắt được (like/unlike), cộng/trừ điểm cho chủ bài đúng theo trạng thái hiện tại để
+-- tránh cày điểm bằng cách tim rồi bỏ tim lặp lại.
+CREATE TABLE IF NOT EXISTS motivation_post_likes (
+  post_id BIGINT NOT NULL REFERENCES motivation_posts(id) ON DELETE CASCADE,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (post_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS payment_intents (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+  purpose TEXT NOT NULL, -- 'wallet_topup' | 'plan_purchase' | 'venue_deposit'
+  reference_id TEXT,
+  amount_vnd INTEGER NOT NULL,
+  provider TEXT NOT NULL DEFAULT 'mock',
+  status TEXT NOT NULL DEFAULT 'pending',
+  provider_ref TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  completed_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS idx_payment_intents_user ON payment_intents(user_id);

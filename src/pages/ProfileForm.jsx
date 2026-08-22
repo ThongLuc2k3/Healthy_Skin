@@ -7,6 +7,7 @@ import ExtendedProfileSection from '../components/ExtendedProfileSection'
 import { useProfile } from '../context/ProfileContext'
 import { useAuth } from '../context/AuthContext'
 import { SKIN_TYPES, ALLERGIES, CONDITIONS, GOALS, OTHER_OPTION_ID } from '../data/profileOptions'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 function OtherNoteInput({ id, label, value, onChange }) {
   return (
@@ -17,7 +18,7 @@ function OtherNoteInput({ id, label, value, onChange }) {
       transition={{ duration: 0.35, ease: 'easeOut' }}
       className="mt-4 overflow-hidden"
     >
-      <label htmlFor={id} className="block text-sm font-semibold text-[#17353D]">
+      <label htmlFor={id} className="block text-sm font-semibold text-[#0e3b33]">
         {label}
       </label>
       <textarea
@@ -26,13 +27,14 @@ function OtherNoteInput({ id, label, value, onChange }) {
         onChange={(e) => onChange(e.target.value)}
         rows={3}
         placeholder="Mô tả bằng lời của bạn, AI sẽ dựa vào đây để hiểu rõ hơn..."
-        className="mt-2 w-full rounded-2xl border border-[#E9EEF1] bg-[#F5FAFC] p-4 text-base text-[#17353D] placeholder-[#5F7480]/60 transition-all duration-200 focus:border-[#2C8E92] focus:bg-white focus:ring-2 focus:ring-[#2C8E92]/20 focus:outline-none"
+        className="mt-2 w-full rounded-2xl border border-[#E9EEF1] bg-[#F5FAFC] p-4 text-base text-[#0e3b33] placeholder-[#5F7480]/60 transition-all duration-200 focus:border-[#2fa98c] focus:bg-white focus:ring-2 focus:ring-[#2fa98c]/20 focus:outline-none"
       />
     </motion.div>
   )
 }
 
 function ProfileForm() {
+  useDocumentTitle('Hồ sơ cá nhân')
   const { profile, setProfile } = useProfile()
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -66,7 +68,6 @@ function ProfileForm() {
       goalsNote: goals.includes(OTHER_OPTION_ID) ? goalsNote : '',
     }
     setProfile(nextProfile)
-    console.log('Hồ sơ cá nhân đã lưu:', nextProfile)
     navigate('/scan')
   }
 
@@ -74,9 +75,9 @@ function ProfileForm() {
     <div className="relative min-h-screen bg-gradient-to-b from-[#F5FAFC] via-[#FDFDFB] to-[#F5FAFC] py-16 px-4 sm:px-6 lg:px-8 mt-12">
       {/* Background Soft Radial Glowing Orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 h-[450px] w-[700px] rounded-full bg-gradient-to-tr from-[#67D6E8]/15 via-[#BFD8CF]/20 to-transparent blur-3xl opacity-60" />
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 h-[450px] w-[700px] rounded-full bg-gradient-to-tr from-[#70c4af]/15 via-[#BFD8CF]/20 to-transparent blur-3xl opacity-60" />
         <div className="absolute top-1/3 right-0 h-[400px] w-[400px] rounded-full bg-[#D8B27A]/10 blur-3xl opacity-40" />
-        <div className="absolute bottom-1/4 left-0 h-[450px] w-[450px] rounded-full bg-[#67D6E8]/12 blur-3xl opacity-50" />
+        <div className="absolute bottom-1/4 left-0 h-[450px] w-[450px] rounded-full bg-[#70c4af]/12 blur-3xl opacity-50" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-[1100px]">
@@ -88,7 +89,7 @@ function ProfileForm() {
           className="text-center space-y-4"
         >
         
-          <h1 className="font-display text-4xl sm:text-5xl font-black tracking-tight text-[#17353D]">
+          <h1 className="font-display text-4xl sm:text-5xl font-black tracking-tight text-[#0e3b33]">
             Hồ sơ cá nhân của bạn
           </h1>
 
@@ -106,10 +107,10 @@ function ProfileForm() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="rounded-[28px] border border-[#E9EEF1] bg-[#FDFDFB] p-7 sm:p-10 shadow-[0_10px_30px_rgba(44,142,146,0.04)]"
+            className="rounded-[28px] border border-[#E9EEF1] bg-[#FDFDFB] p-7 sm:p-10 shadow-[0_10px_30px_rgba(47, 169, 140,0.04)]"
           >
             <div className="space-y-1 mb-6">
-              <h2 className="text-2xl font-bold text-[#17353D]">
+              <h2 className="text-2xl font-bold text-[#0e3b33]">
                 Loại da <span className="text-rose-500">*</span>
               </h2>
               <p className="text-sm text-[#5F7480]">Chọn loại da chính xác nhất với bạn hiện tại</p>
@@ -141,10 +142,10 @@ function ProfileForm() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="rounded-[28px] border border-[#E9EEF1] bg-[#FDFDFB] p-7 sm:p-10 shadow-[0_10px_30px_rgba(44,142,146,0.04)]"
+            className="rounded-[28px] border border-[#E9EEF1] bg-[#FDFDFB] p-7 sm:p-10 shadow-[0_10px_30px_rgba(47, 169, 140,0.04)]"
           >
             <div className="space-y-1 mb-6">
-              <h2 className="text-2xl font-bold text-[#17353D]">Dị ứng thực phẩm</h2>
+              <h2 className="text-2xl font-bold text-[#0e3b33]">Dị ứng thực phẩm</h2>
               <p className="text-sm text-[#5F7480]">Chọn tất cả những gì phù hợp (không bắt buộc)</p>
             </div>
 
@@ -171,10 +172,10 @@ function ProfileForm() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="rounded-[28px] border border-[#E9EEF1] bg-[#FDFDFB] p-7 sm:p-10 shadow-[0_10px_30px_rgba(44,142,146,0.04)]"
+            className="rounded-[28px] border border-[#E9EEF1] bg-[#FDFDFB] p-7 sm:p-10 shadow-[0_10px_30px_rgba(47, 169, 140,0.04)]"
           >
             <div className="space-y-1 mb-6">
-              <h2 className="text-2xl font-bold text-[#17353D]">Bệnh lý nền liên quan dinh dưỡng</h2>
+              <h2 className="text-2xl font-bold text-[#0e3b33]">Bệnh lý nền liên quan dinh dưỡng</h2>
               <p className="text-sm text-[#5F7480]">Chọn tất cả những gì phù hợp (không bắt buộc)</p>
             </div>
 
@@ -201,10 +202,10 @@ function ProfileForm() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="rounded-[28px] border border-[#E9EEF1] bg-[#FDFDFB] p-7 sm:p-10 shadow-[0_10px_30px_rgba(44,142,146,0.04)]"
+            className="rounded-[28px] border border-[#E9EEF1] bg-[#FDFDFB] p-7 sm:p-10 shadow-[0_10px_30px_rgba(47, 169, 140,0.04)]"
           >
             <div className="space-y-1 mb-6">
-              <h2 className="text-2xl font-bold text-[#17353D]">Mục tiêu của bạn</h2>
+              <h2 className="text-2xl font-bold text-[#0e3b33]">Mục tiêu của bạn</h2>
               <p className="text-sm text-[#5F7480]">Chọn tất cả những gì phù hợp (không bắt buộc)</p>
             </div>
 
@@ -227,7 +228,7 @@ function ProfileForm() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.6, delay: 0.5 }}
-              className="rounded-[28px] border border-[#E9EEF1] bg-[#FDFDFB] p-7 sm:p-10 shadow-[0_10px_30px_rgba(44,142,146,0.04)]"
+              className="rounded-[28px] border border-[#E9EEF1] bg-[#FDFDFB] p-7 sm:p-10 shadow-[0_10px_30px_rgba(47, 169, 140,0.04)]"
             >
               <ExtendedProfileSection />
             </motion.div>
@@ -259,11 +260,11 @@ function ProfileForm() {
               style={{
                 padding: '16px 40px',
                 backgroundImage:
-                  'linear-gradient(to right, #2C8E92 0%, #67D6E8 51%, #2C8E92 100%)',
+                  'linear-gradient(to right, #2fa98c 0%, #70c4af 51%, #2fa98c 100%)',
                 backgroundSize: '200% auto',
                 border: 'none',
                 outline: 'none',
-                boxShadow: '0 10px 30px rgba(44,142,146,0.3)',
+                boxShadow: '0 10px 30px rgba(47, 169, 140,0.3)',
                 transition: '0.5s',
               }}
             >

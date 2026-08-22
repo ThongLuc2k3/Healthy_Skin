@@ -1,5 +1,7 @@
 import { Router } from 'express'
 import { createUser, findUserByEmail, findUserById, verifyPassword } from '../services/userService.js'
+import { deleteAccount } from '../services/accountDeletionService.js'
+import { grantWelcomePoints } from '../services/chatWalletService.js'
 import { requireAuth, signToken } from '../middleware/auth.js'
 import { authLimiter } from '../middleware/rateLimit.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
@@ -29,6 +31,10 @@ router.post(
     }
 
     const user = await createUser(email, password, new Date().toISOString())
+    // Điểm chào mừng — tặng 1 lần cho mọi tài khoản mới. Không để lỗi cấp điểm chặn đăng ký thành công.
+    await grantWelcomePoints(user.id).catch((err) => {
+      console.error('[auth] Không cấp được điểm chào mừng:', err)
+    })
     const token = signToken(user)
     res.status(201).json({ token, user: { id: user.id, email: user.email } })
   }),
@@ -57,6 +63,13 @@ router.get('/me', requireAuth, asyncHandler(async (req, res) => {
     return res.status(404).json({ error: 'Không tìm thấy người dùng.' })
   }
   res.json({ id: user.id, email: user.email })
+}))
+
+// Xoá tài khoản và toàn bộ dữ liệu liên quan (hồ sơ, lịch sử quét, lịch hẹn, ảnh, đánh giá...) —
+// không thể hoàn tác. Xem accountDeletionService.js để biết chính xác những gì bị xoá.
+router.delete('/me', requireAuth, asyncHandler(async (req, res) => {
+  await deleteAccount(req.userId)
+  res.json({ ok: true })
 }))
 
 export default router

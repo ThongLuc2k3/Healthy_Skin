@@ -1,6 +1,7 @@
 import { query } from '../db/connection.js'
 import { getExpertById } from './expertService.js'
 import { getExpertReportRawById } from './expertReportService.js'
+import { recordExpertBookingSettlement } from './settlementService.js'
 
 async function toShape(row) {
   if (!row) return null
@@ -23,12 +24,22 @@ async function toShape(row) {
 export async function createBooking(userId, expertId, slot) {
   const expert = await getExpertById(expertId)
   if (!expert?.available_slots.includes(slot)) return null
+  const feeVnd = expert.consultation_fee_vnd || 0
   const { rows } = await query(
-    `INSERT INTO expert_bookings (user_id,expert_id,slot,status)
-     VALUES ($1,$2,$3,'booked') RETURNING *`,
-    [userId, expertId, slot],
+    `INSERT INTO expert_bookings (user_id,expert_id,slot,status,consultation_fee_vnd)
+     VALUES ($1,$2,$3,'booked',$4) RETURNING *`,
+    [userId, expertId, slot, feeVnd],
   )
-  return toShape(rows[0])
+  const booking = rows[0]
+  // Ghi sổ đối soát ngay tại thời điểm đặt lịch — chỉ ghi nhận hoa hồng dự kiến trên phí niêm yết,
+  // KHÔNG thu tiền thật ở bước này (xem ghi chú trong kế hoạch: thu phí tư vấn là quyết định UX
+  // riêng, chưa nằm trong phạm vi đợt này). Bỏ qua lỗi ghi sổ để không chặn luồng đặt lịch chính.
+  if (feeVnd > 0) {
+    await recordExpertBookingSettlement(booking.id, feeVnd).catch((err) => {
+      console.error('[settlement] Không ghi được sổ đối soát cho expert booking:', err)
+    })
+  }
+  return toShape(booking)
 }
 
 export async function listBookingsForUser(userId) {

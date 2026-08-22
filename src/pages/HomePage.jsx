@@ -5,7 +5,6 @@ import Technology from '../components/Technology'
 import ServicesHighlight from '../components/ServicesHighlight'
 import SponsoredStrip from '../components/SponsoredStrip'
 import CTA from '../components/CTA'
-import Footer from '../components/Footer'
 import { SectionSeam } from '../components/SectionSeam'
 import { useGsapScroll } from '../hooks/useGsapScroll'
 
@@ -13,7 +12,7 @@ function HomePage() {
   useGsapScroll()
 
   return (
-    <div className="relative min-h-screen bg-[#F7FBFC] text-[#17353D] antialiased overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#eaf7f1] text-[#0e3b33] antialiased overflow-x-hidden">
       <main>
         <Hero />
         <SectionSeam />
@@ -26,7 +25,6 @@ function HomePage() {
         <SponsoredStrip />
         <CTA />
       </main>
-      <Footer />
     </div>
   )
 }

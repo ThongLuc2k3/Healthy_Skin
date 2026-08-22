@@ -16,13 +16,16 @@ import {
   getMessageRawById,
   getThreadOwnerUserId,
 } from '../services/consultationService.js'
+import { broadcastMessage } from '../ws/consultationHub.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
+import { createExpertApplication } from '../services/expertApplicationService.js'
+import {
+  createProposal,
+  listProposalsForUserAndExpert,
+  confirmProposal,
+} from '../services/expertProposalService.js'
 
 const router = Router()
-
-// --- 9D: Marketplace chuyên gia (DEMO) ---
-// Toàn bộ dữ liệu chuyên gia/đánh giá/chứng chỉ là dữ liệu mẫu, KHÔNG phải mạng lưới
-// đối tác đã ký kết thật — xem cờ "verified" trên từng chứng chỉ.
 
 router.get('/', asyncHandler(async (req, res) => {
   res.json(await listExperts(req.query.area))
@@ -30,6 +33,16 @@ router.get('/', asyncHandler(async (req, res) => {
 
 router.get('/areas', asyncHandler(async (req, res) => {
   res.json(await listAreas())
+}))
+
+// Công khai, không cần đăng nhập — chuyên gia tự ứng tuyển, vào 'pending' chờ Admin duyệt
+// (xem adminService/expertApplicationService.reviewExpertApplication).
+router.post('/apply', asyncHandler(async (req, res) => {
+  const application = await createExpertApplication(req.body ?? {})
+  if (!application) {
+    return res.status(400).json({ error: 'Vui lòng nhập đầy đủ thông tin bắt buộc và mức phí hợp lệ.' })
+  }
+  res.status(201).json(application)
 }))
 
 router.get('/bookings/mine', requireAuth, asyncHandler(async (req, res) => {
@@ -67,6 +80,30 @@ router.post('/:id/book', requireAuth, asyncHandler(async (req, res) => {
   res.status(201).json(booking)
 }))
 
+// Khách tự đề xuất ngày/giờ/mức phí khác với giá niêm yết, gửi đích danh chuyên gia này chờ nhận.
+router.post('/:id/proposals', requireAuth, asyncHandler(async (req, res) => {
+  const { date, time, feeVnd, note } = req.body ?? {}
+  const proposal = await createProposal(req.userId, req.params.id, { date, time, feeVnd, note })
+  if (!proposal) {
+    return res.status(400).json({ error: 'Vui lòng chọn ngày, khung giờ và nhập mức phí đề xuất hợp lệ.' })
+  }
+  res.status(201).json(proposal)
+}))
+
+router.get('/:id/proposals/mine', requireAuth, asyncHandler(async (req, res) => {
+  res.json(await listProposalsForUserAndExpert(req.userId, req.params.id))
+}))
+
+// Chuyên gia đã bấm nhận — khách xác nhận lại thì mới thật sự tạo lịch hẹn (expert_bookings).
+router.post('/proposals/:proposalId/confirm', requireAuth, asyncHandler(async (req, res) => {
+  const result = await confirmProposal(req.userId, Number(req.params.proposalId))
+  if (!result) {
+    return res.status(400).json({ error: 'Đề xuất không tồn tại hoặc chưa được chuyên gia nhận.' })
+  }
+  await createThreadForBooking(result.bookingId, req.userId)
+  res.status(201).json(result.proposal)
+}))
+
 router.get('/bookings/:bookingId/thread', requireAuth, asyncHandler(async (req, res) => {
   const result = await getThreadForUser(req.userId, Number(req.params.bookingId))
   if (!result) {
@@ -86,6 +123,7 @@ router.post('/bookings/:bookingId/thread/messages', requireAuth, asyncHandler(as
     return res.status(404).json({ error: 'Không tìm thấy cuộc trò chuyện tư vấn.' })
   }
   const message = await postUserMessage(result.thread.id, text)
+  broadcastMessage(result.thread.id, message)
   res.status(201).json(message)
 }))
 
@@ -115,7 +153,7 @@ router.patch('/bookings/:bookingId/link-report', requireAuth, asyncHandler(async
   const { reportId } = req.body ?? {}
   const booking = await linkReportToBooking(req.userId, Number(req.params.bookingId), Number(reportId))
   if (!booking) {
-    return res.status(400).json({ error: 'Không thể liên kết báo cáo — kiểm tra lại lịch hẹn hoặc báo cáo.' })
+    return res.status(400).json({ error: 'Không thể liên kết báo cáo, kiểm tra lại lịch hẹn hoặc báo cáo.' })
   }
   res.json(booking)
 }))

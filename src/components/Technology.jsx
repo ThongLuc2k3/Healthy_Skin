@@ -22,16 +22,16 @@ const tech = [
   {
     name: 'Gợi ý, không phán quyết',
     icon: <SparklesIcon className="h-5 w-5" />,
-    desc: 'Chỉ đưa ra gợi ý Phù hợp / Cần cân nhắc mang tính tham khảo — không thay thế chẩn đoán từ chuyên gia.',
+    desc: 'Chỉ đưa ra gợi ý Phù hợp / Cần cân nhắc mang tính tham khảo, không thay thế chẩn đoán từ chuyên gia.',
   },
 ]
 
 export default function Technology() {
   return (
-    <section id="technology" className="relative py-24 sm:py-32 bg-gradient-to-b from-[#F7FBFC] via-[#F0F6F8] to-[#F7FBFC] overflow-hidden">
+    <section id="technology" className="relative py-24 sm:py-32 bg-gradient-to-b from-[#eaf7f1] via-[#F0F6F8] to-[#eaf7f1] overflow-hidden">
       {/* Soft Ambient Radial Orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/3 right-10 h-96 w-96 rounded-full bg-[#67D6E8]/10 blur-3xl opacity-50" />
+        <div className="absolute top-1/3 right-10 h-96 w-96 rounded-full bg-[#70c4af]/10 blur-3xl opacity-50" />
       </div>
 
       {/* Floating Cosmetic Decorations */}
@@ -42,7 +42,7 @@ export default function Technology() {
         yRange={[-28, 28, -28]}
         duration={5.2}
         delay={0.2}
-        accent="#2C8E92"
+        accent="#2fa98c"
         parallaxOffset={65}
       />
       <FloatingCosmeticDecoration
@@ -52,7 +52,7 @@ export default function Technology() {
         yRange={[0, -30, 0]}
         duration={4.8}
         delay={0.5}
-        accent="#67D6E8"
+        accent="#70c4af"
         parallaxOffset={-55}
       />
       <FloatingCosmeticDecoration
@@ -81,23 +81,23 @@ export default function Technology() {
 
         <div className="mt-16 grid gap-8 lg:grid-cols-2 items-center">
           <Reveal className="lg:row-span-2 h-full">
-            <div className="relative h-full min-h-[400px] overflow-hidden rounded-[28px] bg-[#FCFDFC] p-3 border border-[#E7ECEE] shadow-[0_16px_45px_rgba(44,142,146,0.06)]">
+            <div className="relative h-full min-h-[400px] overflow-hidden rounded-[28px] bg-[#FCFDFC] p-3 border border-[#E7ECEE] shadow-[0_16px_45px_rgba(47, 169, 140,0.06)]">
               {/* SaaS Window Top Control Bar */}
-              <div className="flex items-center justify-between border-b border-[#E7ECEE] bg-[#F7FBFC] px-5 py-3 rounded-t-[22px]">
+              <div className="flex items-center justify-between border-b border-[#E7ECEE] bg-[#eaf7f1] px-5 py-3 rounded-t-[22px]">
                 <div className="flex items-center gap-2">
                   <span className="h-3 w-3 rounded-full bg-rose-400/80" />
                   <span className="h-3 w-3 rounded-full bg-amber-400/80" />
                   <span className="h-3 w-3 rounded-full bg-emerald-400/80" />
                 </div>
-                <div className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-[#2C8E92]">
+                <div className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-[#2fa98c]">
                   match_engine.active
                 </div>
               </div>
 
-              <div className="relative h-[340px] lg:h-[calc(100%-48px)] overflow-hidden rounded-b-[22px] bg-slate-950">
+              <div className="relative h-[340px] lg:h-[calc(100%-48px)] overflow-hidden rounded-b-[22px] bg-[#0e3b33]">
                 <NeuralNetCanvas />
-                <div className="pointer-events-none absolute right-4 bottom-4 flex items-center gap-2 rounded-full bg-[#17353D]/80 backdrop-blur-md px-3.5 py-1.5 border border-[#67D6E8]/30">
-                  <span className="h-2 w-2 rounded-full bg-[#67D6E8] animate-pulse" />
+                <div className="pointer-events-none absolute right-4 bottom-4 flex items-center gap-2 rounded-full bg-[#0e3b33]/80 backdrop-blur-md px-3.5 py-1.5 border border-[#2fa98c]/30">
+                  <span className="h-2 w-2 rounded-full bg-[#2fa98c] animate-pulse" />
                   <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-white">
                     rule-based + AI · online
                   </span>
@@ -109,13 +109,13 @@ export default function Technology() {
           <div className="grid gap-5">
             {tech.map((t, i) => (
               <Reveal key={t.name} delay={i * 0.08}>
-                <div className="group relative overflow-hidden rounded-[28px] bg-[#FCFDFC] p-7 transition-all duration-300 border border-[#E7ECEE] shadow-[0_8px_25px_rgba(44,142,146,0.04)] hover:shadow-[0_12px_35px_rgba(103,214,232,0.15)] hover:border-[#2C8E92] hover:-translate-y-1 text-left">
+                <div className="group relative overflow-hidden rounded-[28px] bg-[#FCFDFC] p-7 transition-all duration-300 border border-[#E7ECEE] shadow-[0_8px_25px_rgba(47, 169, 140,0.04)] hover:shadow-[0_12px_35px_rgba(112, 196, 175,0.15)] hover:border-[#2fa98c] hover:-translate-y-1 text-left">
                   <div className="flex items-start gap-4">
-                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#2C8E92]/10 text-[#2C8E92] border border-[#2C8E92]/20 shadow-xs transition-colors group-hover:bg-[#2C8E92] group-hover:text-white">
+                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-[#2fa98c]/10 text-[#2fa98c] border border-[#2fa98c]/20 shadow-xs transition-colors group-hover:bg-[#2fa98c] group-hover:text-white">
                       {t.icon}
                     </span>
                     <div>
-                      <h3 className="font-display text-lg font-extrabold text-[#17353D] group-hover:text-[#2C8E92] transition-colors">
+                      <h3 className="font-display text-lg font-extrabold text-[#0e3b33] group-hover:text-[#2fa98c] transition-colors">
                         {t.name}
                       </h3>
                       <p className="mt-1.5 text-sm leading-relaxed text-[#64748B] font-normal">

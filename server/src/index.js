@@ -1,4 +1,5 @@
 import express from 'express'
+import http from 'node:http'
 import cors from 'cors'
 import helmet from 'helmet'
 import bcrypt from 'bcrypt'
@@ -6,17 +7,18 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import config from './config/env.js'
-import { initDatabase } from './db/connection.js'
-import { seed, seedExperts, seedSponsoredContent, seedVenuesAndVouchers } from './db/seed.js'
+import { initDatabase, query } from './db/connection.js'
+import { attachConsultationHub } from './ws/consultationHub.js'
+import { seed, seedExperts, seedSponsoredContent, seedVenuesAndVouchers, seedWebsiteReviews, seedVenueApplications, seedExpertApplications, seedHistoricalActivity, seedUserVouchers, seedVenueReviews } from './db/seed.js'
 import { listSkincareItems } from './services/itemService.js'
 import { listExperts } from './services/expertService.js'
-import { listHomepageAds } from './services/sponsoredContentService.js'
 import { seedExpertAccounts } from './services/expertAccountService.js'
-import { listVenues } from './services/venueService.js'
+import { seedAdminAccount, DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_PASSWORD } from './services/adminAccountService.js'
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js'
 import { generalLimiter } from './middleware/rateLimit.js'
 import authRoutes from './routes/auth.routes.js'
 import profileRoutes from './routes/profile.routes.js'
+import accountRoutes from './routes/account.routes.js'
 import itemsRoutes from './routes/items.routes.js'
 import scanRoutes from './routes/scan.routes.js'
 import explainRoutes from './routes/explain.routes.js'
@@ -26,7 +28,10 @@ import expertPortalRoutes from './routes/expertPortal.routes.js'
 import reviewRoutes from './routes/review.routes.js'
 import sponsoredRoutes from './routes/sponsored.routes.js'
 import venuesRoutes from './routes/venues.routes.js'
+import motivationRoutes from './routes/motivation.routes.js'
 import vouchersRoutes from './routes/vouchers.routes.js'
+import settlementRoutes from './routes/settlement.routes.js'
+import adminRoutes from './routes/admin.routes.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const clientDistPath = path.resolve(__dirname, '../../dist')
@@ -40,26 +45,56 @@ if ((await listSkincareItems()).length === 0) {
   console.log(`[db] Đã tự động seed dữ liệu ban đầu: ${skincareCount} skincare, ${foodCount} food.`)
 }
 
-let experts = await listExperts()
-if (experts.length === 0) {
-  const { expertsCount } = await seedExperts()
-  console.log(`[db] Đã tự động seed dữ liệu chuyên gia mẫu (demo): ${expertsCount} chuyên gia.`)
-  experts = await listExperts()
-}
+// seedExperts/seedSponsoredContent/seedVenuesAndVouchers dùng ON CONFLICT DO UPDATE trên id, nên
+// chạy lại mỗi lần khởi động là an toàn — đảm bảo khi sửa file data/*.json (thêm chuyên gia, đổi
+// tên đối tác...) thì DB dev cục bộ luôn đồng bộ mà không cần xoá bảng thủ công.
+const { expertsCount } = await seedExperts()
+console.log(`[db] Đã đồng bộ dữ liệu chuyên gia: ${expertsCount} chuyên gia.`)
+const experts = await listExperts()
 if (experts.length > 0) {
   await seedExpertAccounts(experts.map((e) => e.id))
-  console.log(`[db] Đã tự động seed tài khoản đăng nhập demo cho ${experts.length} chuyên gia (mật khẩu: demo1234).`)
+  console.log(`[db] Đã đồng bộ tài khoản đăng nhập cho ${experts.length} chuyên gia.`)
 }
 
-if ((await listHomepageAds()).length === 0) {
-  const { productsCount, adsCount } = await seedSponsoredContent()
-  console.log(`[db] Đã tự động seed dữ liệu tiếp thị liên kết mẫu (demo): ${productsCount} sản phẩm, ${adsCount} quảng cáo.`)
+const { productsCount, adsCount } = await seedSponsoredContent()
+console.log(`[db] Đã đồng bộ dữ liệu tiếp thị liên kết: ${productsCount} sản phẩm, ${adsCount} quảng cáo.`)
+
+const { venuesCount, servicesCount, vouchersCount } = await seedVenuesAndVouchers()
+console.log(`[db] Đã đồng bộ dữ liệu Dịch Vụ Quanh Bạn: ${venuesCount} trung tâm, ${servicesCount} dịch vụ, ${vouchersCount} voucher.`)
+
+const { reviewsCount: venueReviewsCount } = await seedVenueReviews()
+if (venueReviewsCount > 0) {
+  console.log(`[db] Đã tự động seed đánh giá Dịch Vụ Quanh Bạn: ${venueReviewsCount} đánh giá.`)
 }
 
-if ((await listVenues()).length === 0) {
-  const { venuesCount, servicesCount, vouchersCount } = await seedVenuesAndVouchers()
-  console.log(`[db] Đã tự động seed dữ liệu Dịch Vụ Quanh Bạn (demo): ${venuesCount} trung tâm, ${servicesCount} dịch vụ, ${vouchersCount} voucher.`)
+const { rows: reviewCountRows } = await query('SELECT COUNT(*)::int AS count FROM website_reviews')
+if (reviewCountRows[0].count === 0) {
+  const { reviewsCount } = await seedWebsiteReviews()
+  console.log(`[db] Đã tự động seed đánh giá website: ${reviewsCount} đánh giá.`)
 }
+
+const { applicationsCount } = await seedVenueApplications()
+if (applicationsCount > 0) {
+  console.log(`[db] Đã tự động seed đơn đăng ký đối tác: ${applicationsCount} đơn.`)
+}
+
+const { applicationsCount: expertApplicationsCount } = await seedExpertApplications()
+if (expertApplicationsCount > 0) {
+  console.log(`[db] Đã tự động seed đơn ứng tuyển chuyên gia: ${expertApplicationsCount} đơn.`)
+}
+
+const { seeded: historicalSeeded } = await seedHistoricalActivity()
+if (historicalSeeded) {
+  console.log('[db] Đã tự động seed lịch sử giao dịch/lịch hẹn mẫu.')
+}
+
+const { grantedCount } = await seedUserVouchers()
+if (grantedCount > 0) {
+  console.log(`[db] Đã cấp thêm ${grantedCount} voucher cho các thành viên chưa đủ ${10} voucher.`)
+}
+
+await seedAdminAccount()
+console.log(`[db] Tài khoản Admin: ${DEFAULT_ADMIN_EMAIL} / ${DEFAULT_ADMIN_PASSWORD}`)
 
 const app = express()
 app.set('trust proxy', 1)
@@ -106,6 +141,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes)
 app.use('/api/profile', profileRoutes)
+app.use('/api/account', accountRoutes)
 app.use('/api/items', itemsRoutes)
 app.use('/api/scan', scanRoutes)
 app.use('/api/explain', explainRoutes)
@@ -115,7 +151,10 @@ app.use('/api/expert-portal', expertPortalRoutes)
 app.use('/api/reviews', reviewRoutes)
 app.use('/api/sponsored', sponsoredRoutes)
 app.use('/api/venues', venuesRoutes)
+app.use('/api/motivation', motivationRoutes)
 app.use('/api/vouchers', vouchersRoutes)
+app.use('/api/settlement', settlementRoutes)
+app.use('/api/admin', adminRoutes)
 app.use(express.static(path.join(process.cwd(), 'public')))
 app.use('/uploads', express.static(path.join(process.cwd(), 'public/uploads')))
 app.use(cors())
@@ -147,7 +186,10 @@ if (hasClientBuild) {
 app.use(notFoundHandler)
 app.use(errorHandler)
 
-app.listen(config.port, () => {
+const server = http.createServer(app)
+attachConsultationHub(server)
+
+server.listen(config.port, () => {
   console.log(`[server] HEALTHY SKIN backend đang chạy tại http://localhost:${config.port}`)
 
   // "Làm nóng" bcrypt native (threadpool libuv) để request đăng ký/đăng nhập đầu tiên

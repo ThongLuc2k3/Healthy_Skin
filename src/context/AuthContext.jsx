@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { apiClient, getToken, setToken } from '../lib/apiClient'
+import { apiClient, getToken, setToken, onAuthExpired, TOKEN_KEY } from '../lib/apiClient'
 
 const AuthContext = createContext(null)
 
@@ -17,9 +17,14 @@ export function AuthProvider({ children }) {
     apiClient
       .get('/auth/me', { auth: true })
       .then(setUser)
-      .catch(() => {
-        setToken(null)
-        setSessionExpired(true)
+      .catch((err) => {
+        // Chỉ coi là hết phiên khi backend thật sự trả 401 (token sai/hết hạn). Lỗi mất kết nối/
+        // timeout (backend chưa chạy, đang restart...) không có nghĩa token đã hỏng — giữ nguyên
+        // token, không xoá, để lần tải trang sau vẫn đăng nhập được ngay khi backend sẵn sàng.
+        if (err.status === 401) {
+          setToken(null)
+          setSessionExpired(true)
+        }
       })
       .finally(() => setReady(true))
   }, [])
@@ -45,6 +50,11 @@ export function AuthProvider({ children }) {
     setUser(null)
     setSessionExpired(false)
   }
+
+  useEffect(() => onAuthExpired(TOKEN_KEY, () => {
+    setUser(null)
+    setSessionExpired(true)
+  }), [])
 
   return (
     <AuthContext.Provider value={{ user, ready, sessionExpired, register, login, logout }}>

@@ -1,10 +1,25 @@
 import { query } from '../db/connection.js'
+import { getProvider } from '../payments/provider.js'
 
 // Số câu hỏi Trợ Lý miễn phí mỗi ngày cho tài khoản chưa mua thêm gói.
 export const FREE_DAILY_QUESTIONS = 5
 
 // Nạp ví theo demo: quy đổi 10% số tiền nạp thành điểm tích luỹ (dùng đổi voucher ở Kho Voucher).
+// Mua Gói Trợ Lý cũng quy đổi theo cùng tỷ lệ này (xem purchasePlan) — trước đây chỉ nạp ví mới có
+// điểm, khiến người mua gói tưởng nhầm là lỗi vì "thanh toán xong mà không thấy gì đổi khác".
 const POINTS_PER_VND = 0.1
+
+// Điểm tặng chào mừng — cấp 1 lần cho mọi tài khoản (user mới lúc đăng ký, xem auth.routes.js; user
+// cũ được cấp bù 1 lần qua script backfill, xem server/scripts/grantWelcomePoints.js).
+export const WELCOME_POINTS = 1000
+
+export async function grantWelcomePoints(userId, points = WELCOME_POINTS) {
+  await query(
+    `INSERT INTO user_wallets (user_id, loyalty_points) VALUES ($1, $2)
+     ON CONFLICT (user_id) DO UPDATE SET loyalty_points = user_wallets.loyalty_points + $2, updated_at = NOW()`,
+    [userId, points],
+  )
+}
 
 // Các gói Trợ Lý demo — mua xong cộng thẳng số câu vào "kho câu hỏi đã mua", trừ dần khi hết
 // quota miễn phí trong ngày. Giá/số câu chỉ mang tính minh hoạ, chưa chốt công thức tính phí thật.
@@ -29,6 +44,17 @@ async function getOrCreateWallet(userId) {
     [userId],
   )
   return inserted.rows[0]
+}
+
+// Cộng/trừ điểm tích luỹ trực tiếp, không qua nạp ví — dùng cho các nguồn điểm khác, ví dụ điểm
+// thưởng từ lượt xem/tim bài đăng ở Góc truyền động lực (xem motivationPostService.js). GREATEST
+// chặn điểm âm khi trừ (bỏ tim) vượt quá số điểm đang có.
+export async function addLoyaltyPoints(userId, delta) {
+  await getOrCreateWallet(userId)
+  await query(
+    `UPDATE user_wallets SET loyalty_points = GREATEST(loyalty_points + $2, 0), updated_at = NOW() WHERE user_id = $1`,
+    [userId, delta],
+  )
 }
 
 async function getOrCreateUsageToday(userId) {
@@ -99,6 +125,16 @@ export async function topupWallet(userId, amountVnd) {
   if (amount <= 0) {
     throw new Error('Số tiền nạp không hợp lệ.')
   }
+
+  // Đi qua payment_intents thay vì cộng thẳng ví — với provider mock thì vẫn xác nhận tức thì như
+  // trước, nhưng khi cắm cổng thật sau này chỉ cần provider trả status khác 'succeeded' để chặn ở đây.
+  const intent = await getProvider().createIntent({
+    userId, purpose: 'wallet_topup', referenceId: null, amountVnd: amount,
+  })
+  if (intent.status !== 'succeeded') {
+    throw new Error('Giao dịch nạp ví đang chờ xác nhận từ cổng thanh toán.')
+  }
+
   const points = Math.floor(amount * POINTS_PER_VND)
 
   await getOrCreateWallet(userId)
@@ -110,7 +146,12 @@ export async function topupWallet(userId, amountVnd) {
   )
 
   const usage = await getOrCreateUsageToday(userId)
-  return toWalletShape(rows[0], usage)
+  return {
+    ...toWalletShape(rows[0], usage),
+    transactionRef: intent.providerRef,
+    paidAt: intent.completedAt,
+    pointsEarned: points,
+  }
 }
 
 export async function purchasePlan(userId, planId) {
@@ -119,14 +160,28 @@ export async function purchasePlan(userId, planId) {
     throw new Error('Gói Trợ Lý không hợp lệ.')
   }
 
+  const intent = await getProvider().createIntent({
+    userId, purpose: 'plan_purchase', referenceId: plan.id, amountVnd: plan.priceVnd,
+  })
+  if (intent.status !== 'succeeded') {
+    throw new Error('Giao dịch mua gói đang chờ xác nhận từ cổng thanh toán.')
+  }
+
+  const points = Math.floor(plan.priceVnd * POINTS_PER_VND)
+
   await getOrCreateWallet(userId)
   const { rows } = await query(
     `UPDATE user_wallets
      SET plan_id = $2, purchased_questions_remaining = purchased_questions_remaining + $3,
-     updated_at = NOW() WHERE user_id = $1 RETURNING *`,
-    [userId, plan.id, plan.questionQuota],
+     loyalty_points = loyalty_points + $4, updated_at = NOW() WHERE user_id = $1 RETURNING *`,
+    [userId, plan.id, plan.questionQuota, points],
   )
 
   const usage = await getOrCreateUsageToday(userId)
-  return toWalletShape(rows[0], usage)
+  return {
+    ...toWalletShape(rows[0], usage),
+    transactionRef: intent.providerRef,
+    paidAt: intent.completedAt,
+    pointsEarned: points,
+  }
 }

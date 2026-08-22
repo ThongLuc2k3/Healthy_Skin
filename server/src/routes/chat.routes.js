@@ -12,6 +12,7 @@ import {
   purchasePlan,
 } from '../services/chatWalletService.js'
 import { awardVoucher } from '../services/voucherService.js'
+import { listTransactionsForUser } from '../services/paymentIntentService.js'
 
 const PACKAGE_BONUS_VOUCHER_ID = 'voucher_goi_tro_ly'
 
@@ -58,7 +59,7 @@ router.post(
     } catch (err) {
       if (err instanceof GeminiNotConfiguredError) {
         return res.status(503).json({
-          error: 'Trợ lý chưa sẵn sàng — thiếu cấu hình Gemini API key.',
+          error: 'Trợ lý chưa sẵn sàng, thiếu cấu hình Gemini API key.',
         })
       }
       if (err instanceof GeminiRequestError) {
@@ -73,6 +74,10 @@ router.post(
 
 router.get('/wallet', requireAuth, asyncHandler(async (req, res) => {
   res.json(await getWalletStatus(req.userId))
+}))
+
+router.get('/wallet/transactions', requireAuth, asyncHandler(async (req, res) => {
+  res.json(await listTransactionsForUser(req.userId))
 }))
 
 router.get('/plans', (req, res) => {
@@ -95,9 +100,11 @@ router.post('/upgrade', requireAuth, asyncHandler(async (req, res) => {
     return res.status(400).json({ error: 'Gói Trợ Lý không hợp lệ.' })
   }
   const status = await purchasePlan(req.userId, planId)
-  // Tặng kèm voucher khi mua gói — không để lỗi cấp voucher làm hỏng giao dịch mua gói chính.
-  await awardVoucher(req.userId, PACKAGE_BONUS_VOUCHER_ID, 'package_bonus').catch(() => {})
-  res.json(status)
+  // Tặng kèm voucher khi mua gói — không để lỗi cấp voucher làm hỏng giao dịch mua gói chính. Trả
+  // kèm tên voucher trong response để frontend thông báo rõ ràng, tránh người dùng tưởng nhầm là
+  // "thanh toán xong mà chẳng thấy gì" (voucher trước đây vẫn được cấp đúng, chỉ là không hiện ra).
+  const bonusVoucher = await awardVoucher(req.userId, PACKAGE_BONUS_VOUCHER_ID, 'package_bonus').catch(() => null)
+  res.json({ ...status, bonusVoucherTitle: bonusVoucher?.voucherTitle ?? null })
 }))
 
 export default router

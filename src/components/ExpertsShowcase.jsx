@@ -20,7 +20,7 @@ export default function ExpertsShowcase() {
   if (experts.length === 0) return null
 
   return (
-    <section id="experts-showcase" className="relative py-24 sm:py-28 bg-gradient-to-b from-[#F7FBFC] via-white to-[#F7FBFC]">
+    <section id="experts-showcase" className="relative py-24 sm:py-28 bg-gradient-to-b from-[#eaf7f1] via-white to-[#eaf7f1]">
       <div className="relative mx-auto max-w-[1200px] px-6 text-center">
         <SectionTitle
           eyebrow="KẾT NỐI CHUYÊN GIA"
@@ -45,21 +45,21 @@ export default function ExpertsShowcase() {
             >
               <Link
                 to={`/experts/${expert.id}`}
-                className="group flex h-full flex-col rounded-[26px] border border-[#E7ECEE] bg-white p-6 text-left shadow-[0_10px_30px_rgba(44,142,146,0.05)] transition hover:border-[#2C8E92] hover:shadow-[0_16px_40px_rgba(44,142,146,0.12)]"
+                className="group flex h-full flex-col rounded-[26px] border border-[#E7ECEE] bg-white p-6 text-left shadow-[0_10px_30px_rgba(47, 169, 140,0.05)] transition hover:border-[#2fa98c] hover:shadow-[0_16px_40px_rgba(47, 169, 140,0.12)]"
               >
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#2C8E92] via-[#67D6E8] to-[#6F9D8D] text-white">
+                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#2fa98c] via-[#70c4af] to-[#6F9D8D] text-white">
                   <StethoscopeIcon className="h-6 w-6" />
                 </span>
-                <h3 className="mt-4 font-display text-lg font-bold text-[#17353D] group-hover:text-[#2C8E92]">
+                <h3 className="mt-4 font-display text-lg font-bold text-[#0e3b33] group-hover:text-[#2fa98c]">
                   {expert.name}
                 </h3>
                 <p className="mt-1 text-sm text-[#64748B]">{expert.specialty} · {expert.clinic_name}</p>
                 <div className="mt-3 flex items-center gap-1.5 text-amber-500">
                   <StarIcon className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  <span className="text-sm font-bold text-[#17353D]">{expert.rating_avg.toFixed(1)}</span>
+                  <span className="text-sm font-bold text-[#0e3b33]">{expert.rating_avg.toFixed(1)}</span>
                 </div>
-                <p className="mt-2 text-sm font-bold text-[#2C8E92]">{formatFee(expert.consultation_fee_vnd)}</p>
-                <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-[#2C8E92]">
+                <p className="mt-2 text-sm font-bold text-[#2fa98c]">{formatFee(expert.consultation_fee_vnd)}</p>
+                <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-[#2fa98c]">
                   Xem hồ sơ &amp; đặt lịch
                   <ArrowLeftIcon className="h-3.5 w-3.5 rotate-180 transition-transform group-hover:translate-x-1" />
                 </span>
@@ -70,7 +70,7 @@ export default function ExpertsShowcase() {
 
         <Link
           to="/experts"
-          className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#17353D] px-7 py-3 text-sm font-bold text-white transition hover:bg-[#2C8E92]"
+          className="mt-10 inline-flex items-center gap-2 rounded-full bg-[#0e3b33] px-7 py-3 text-sm font-bold text-white transition hover:bg-[#2fa98c]"
         >
           Xem tất cả chuyên gia
         </Link>

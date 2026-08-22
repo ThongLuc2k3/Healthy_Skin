@@ -15,20 +15,57 @@ import {
   ChatBubbleIcon,
   ShieldIcon,
   MapIcon,
+  WalletIcon,
+  ChevronDownIcon,
 } from './Icons'
 import { useAuth } from '../context/AuthContext'
 import { apiClient } from '../lib/apiClient'
 
+function initialsFor(fullName, email) {
+  const source = fullName?.trim() || email || ''
+  if (!source) return '?'
+  const parts = source.trim().split(/\s+/)
+  if (fullName?.trim() && parts.length > 1) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+  }
+  return source[0].toUpperCase()
+}
+
+function AccountAvatar({ fullName, email, className = 'h-8 w-8 text-xs' }) {
+  return (
+    <span
+      className={`flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2fa98c] to-[#126b59] font-bold text-white ${className}`}
+    >
+      {initialsFor(fullName, email)}
+    </span>
+  )
+}
+
+// Sắp theo nhóm chức năng thay vì thứ tự tuỳ tiện: (1) trang chủ, (2) luồng cốt lõi cá nhân
+// (quét → lịch sử, đúng thứ tự người dùng thật sự đi qua), (3) nhóm kết nối/nguồn thu
+// (chuyên gia, dịch vụ quanh bạn, Gói Trợ Lý — trước đây /pricing hoàn toàn vắng mặt khỏi menu
+// chính, chỉ nằm khuất ở Footer), (4) nhóm giữ chân/nội dung, (5) thông tin/pháp lý luôn ở cuối.
+// "Hồ sơ cá nhân" (/profile) KHÔNG lặp lại ở đây nữa — đã có sẵn dưới tên "Hồ sơ da" trong dropdown
+// tài khoản (cạnh "Tài khoản của tôi"/"Đăng xuất"), để tránh 2 lối vào cùng 1 trang trên nav chính.
 const LINKS = [
   { to: '/', label: 'Trang chủ', end: true, icon: HomeIcon },
-  { to: '/profile', label: 'Hồ sơ cá nhân', icon: UserIcon },
   { to: '/scan', label: 'Quét thử', icon: CameraIcon },
-  { to: '/motivation', label: 'Động lực', icon: FlameIcon },
+  { to: '/history', label: 'Lịch sử', icon: HistoryIcon },
   { to: '/experts', label: 'Chuyên gia', icon: StethoscopeIcon },
   { to: '/dich-vu', label: 'Dịch Vụ Quanh Bạn', icon: MapIcon },
-  { to: '/history', label: 'Lịch sử', icon: HistoryIcon },
+  { to: '/pricing', label: 'Gói Trợ Lý', icon: WalletIcon },
+]
+
+// Skin Lab, Góc truyền động lực, Diễn đàn đều là nội dung/giải trí (không thuộc luồng nghiệp vụ cốt
+// lõi đặt lịch/thanh toán) nên gộp chung 1 dropdown "Cộng đồng" trên nav chính thay vì 3 tab rời,
+// đỡ rối mắt — xem dropdown render riêng bên dưới, không nằm trong LINKS.
+const COMMUNITY_LINKS = [
   { to: '/skin-lab', label: 'Skin Lab', icon: SparklesIcon },
+  { to: '/motivation', label: 'Góc truyền động lực', icon: FlameIcon },
   { to: '/reviews', label: 'Diễn đàn', icon: ChatBubbleIcon },
+]
+
+const TAIL_LINKS = [
   { to: '/about', label: 'Về chúng tôi', icon: ShieldIcon },
 ]
 
@@ -39,7 +76,13 @@ function NavBar() {
   const [scrolled, setScrolled] = useState(false)
   const [voucherCount, setVoucherCount] = useState(0)
   const [open, setOpen] = useState(false)
+  const [accountInfo, setAccountInfo] = useState(null)
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false)
+  const [communityMenuOpen, setCommunityMenuOpen] = useState(false)
   const timeoutRef = useRef(null)
+  const accountMenuRef = useRef(null)
+  const communityMenuRef = useRef(null)
+  const communityActive = COMMUNITY_LINKS.some((l) => location.pathname.startsWith(l.to))
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
@@ -51,8 +94,6 @@ function NavBar() {
       setOpen(false)
     }, 250)
   }
-
-  const isHome = location.pathname === '/'
 
   const { scrollYProgress } = useScroll()
   const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 30 })
@@ -67,17 +108,36 @@ function NavBar() {
   useEffect(() => {
     if (!user) {
       setVoucherCount(0)
+      setAccountInfo(null)
       return
     }
     apiClient
       .get('/vouchers/mine?onlyUnused=true', { auth: true })
       .then((vouchers) => setVoucherCount(vouchers.length))
       .catch(() => {})
+    apiClient
+      .get('/account', { auth: true })
+      .then(setAccountInfo)
+      .catch(() => {})
   }, [user])
+
+  useEffect(() => {
+    function onClickOutside(e) {
+      if (accountMenuRef.current && !accountMenuRef.current.contains(e.target)) {
+        setAccountMenuOpen(false)
+      }
+      if (communityMenuRef.current && !communityMenuRef.current.contains(e.target)) {
+        setCommunityMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [])
 
   function handleLogout() {
     logout()
     setOpen(false)
+    setAccountMenuOpen(false)
     navigate('/')
   }
 
@@ -87,10 +147,8 @@ function NavBar() {
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          !isHome || scrolled
-            ? 'bg-[#02040b]/85 backdrop-blur-xl border-b border-cyan-400/20 shadow-glow-lg'
-            : 'bg-transparent'
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 bg-white/90 backdrop-blur-xl ${
+          scrolled ? 'border-b border-[#c5e7dd] shadow-glow' : 'border-b border-transparent'
         }`}
       >
 
@@ -108,8 +166,8 @@ function NavBar() {
                 className="h-full w-auto object-contain"
               />
             </div>
-            <span className="font-display text-sm sm:text-lg font-extrabold tracking-tight text-white truncate">
-              HEALTHY<span className="text-cyan-300"> SKIN</span>
+            <span className="font-display text-sm sm:text-lg font-extrabold tracking-tight text-[#0e3b33] truncate">
+              HEALTHY<span className="text-[#2fa98c]"> SKIN</span>
             </span>
           </NavLink>
 
@@ -122,7 +180,7 @@ function NavBar() {
                 end={l.end}
                 className={({ isActive }) =>
                   `px-3.5 py-2 text-sm transition-colors relative group ${
-                    isActive ? 'text-cyan-300 font-semibold' : 'text-slate-100 hover:text-cyan-200'
+                    isActive ? 'text-[#126b59] font-semibold' : 'text-[#0e3b33]/70 hover:text-[#2fa98c]'
                   }`
                 }
               >
@@ -130,13 +188,81 @@ function NavBar() {
                   <>
                     {l.label}
                     {l.to === '/dich-vu' && voucherCount > 0 && (
-                      <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-cyan-400 px-1 text-[10px] font-bold text-slate-950">
+                      <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[#2fa98c] px-1 text-[10px] font-bold text-white">
                         {voucherCount}
                       </span>
                     )}
                     <span
-                      className={`absolute left-3.5 right-3.5 -bottom-0.5 h-px bg-cyan-400 transition-transform origin-left ${
-                        isActive ? 'scale-x-100 shadow-glow' : 'scale-x-0 group-hover:scale-x-100'
+                      className={`absolute left-3.5 right-3.5 -bottom-0.5 h-px bg-[#2fa98c] transition-transform origin-left ${
+                        isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                      }`}
+                    />
+                  </>
+                )}
+              </NavLink>
+            ))}
+
+            <div className="relative" ref={communityMenuRef}>
+              <button
+                type="button"
+                onClick={() => setCommunityMenuOpen((v) => !v)}
+                className={`flex items-center gap-1 px-3.5 py-2 text-sm transition-colors relative group ${
+                  communityActive ? 'text-[#126b59] font-semibold' : 'text-[#0e3b33]/70 hover:text-[#2fa98c]'
+                }`}
+              >
+                Cộng đồng
+                <ChevronDownIcon className={`h-3.5 w-3.5 transition-transform ${communityMenuOpen ? 'rotate-180' : ''}`} />
+                <span
+                  className={`absolute left-3.5 right-3.5 -bottom-0.5 h-px bg-[#2fa98c] transition-transform origin-left ${
+                    communityActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                  }`}
+                />
+              </button>
+              <AnimatePresence>
+                {communityMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    className="absolute left-0 top-full mt-2 w-56 rounded-2xl border border-[#c5e7dd] bg-white shadow-glow-lg p-2 text-sm"
+                  >
+                    {COMMUNITY_LINKS.map((l) => (
+                      <NavLink
+                        key={l.to}
+                        to={l.to}
+                        onClick={() => setCommunityMenuOpen(false)}
+                        className={({ isActive }) =>
+                          `flex items-center gap-2 rounded-xl px-3 py-2 ${
+                            isActive ? 'bg-[#eaf7f1] text-[#126b59] font-semibold' : 'text-[#0e3b33] hover:bg-[#eaf7f1]'
+                          }`
+                        }
+                      >
+                        <l.icon className="h-4 w-4 text-[#2fa98c]" />
+                        {l.label}
+                      </NavLink>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {TAIL_LINKS.map((l) => (
+              <NavLink
+                key={l.to}
+                to={l.to}
+                end={l.end}
+                className={({ isActive }) =>
+                  `px-3.5 py-2 text-sm transition-colors relative group ${
+                    isActive ? 'text-[#126b59] font-semibold' : 'text-[#0e3b33]/70 hover:text-[#2fa98c]'
+                  }`
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    {l.label}
+                    <span
+                      className={`absolute left-3.5 right-3.5 -bottom-0.5 h-px bg-[#2fa98c] transition-transform origin-left ${
+                        isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
                       }`}
                     />
                   </>
@@ -148,24 +274,63 @@ function NavBar() {
           {/* Right Action & Auth Section */}
           <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {user ? (
-              <div className="flex items-center gap-2.5">
-                <span className="hidden sm:flex items-center gap-2 rounded-xl bg-sky-900 border border-cyan-700/60 px-3.5 py-2 text-xs text-white font-semibold shadow-md">
-                  <UserIcon className="h-4 w-4 text-cyan-300" />
-                  <span className="truncate max-w-[150px] text-white">{user.email}</span>
-                </span>
+              <div className="relative hidden sm:block" ref={accountMenuRef}>
                 <button
                   type="button"
-                  onClick={handleLogout}
-                  className="flex items-center gap-1.5 rounded-xl bg-cyan-400/15 border border-cyan-400/30 px-2.5 py-2 sm:px-3.5 text-xs font-bold text-cyan-200 transition-all hover:bg-cyan-400 hover:text-slate-950 shadow-glow"
+                  onClick={() => setAccountMenuOpen((v) => !v)}
+                  className="flex items-center gap-2 rounded-xl bg-[#eaf7f1] border border-[#c5e7dd] px-2.5 py-1.5 text-xs text-[#0e3b33] font-semibold hover:border-[#2fa98c]/50"
                 >
-                  <LogOutIcon className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Đăng xuất</span>
+                  <AccountAvatar fullName={accountInfo?.fullName} email={user.email} />
+                  <span className="truncate max-w-[130px] text-[#0e3b33]">
+                    {accountInfo?.fullName || user.email}
+                  </span>
+                  <ChevronDownIcon className={`h-3.5 w-3.5 text-[#64748B] transition-transform ${accountMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
+
+                <AnimatePresence>
+                  {accountMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      className="absolute right-0 top-full mt-2 w-56 rounded-2xl border border-[#c5e7dd] bg-white shadow-glow-lg p-2 text-sm"
+                    >
+                      <div className="px-3 py-2 border-b border-[#eaf7f1] mb-1">
+                        <p className="font-bold text-[#0e3b33] truncate">{accountInfo?.fullName || 'Chưa đặt tên'}</p>
+                        <p className="text-xs text-[#64748B] truncate">{user.email}</p>
+                      </div>
+                      <NavLink
+                        to="/tai-khoan"
+                        onClick={() => setAccountMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-[#0e3b33] hover:bg-[#eaf7f1]"
+                      >
+                        <UserIcon className="h-4 w-4 text-[#2fa98c]" />
+                        Tài khoản của tôi
+                      </NavLink>
+                      <NavLink
+                        to="/profile"
+                        onClick={() => setAccountMenuOpen(false)}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2 text-[#0e3b33] hover:bg-[#eaf7f1]"
+                      >
+                        <SparklesIcon className="h-4 w-4 text-[#2fa98c]" />
+                        Hồ sơ da
+                      </NavLink>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-rose-600 hover:bg-rose-50"
+                      >
+                        <LogOutIcon className="h-4 w-4" />
+                        Đăng xuất
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
               <NavLink
                 to="/login"
-                className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-3 py-2 sm:px-5 sm:py-2.5 text-xs font-bold text-slate-950 hover:bg-cyan-300 transition-colors shadow-glow whitespace-nowrap"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#2fa98c] px-3 py-2 sm:px-5 sm:py-2.5 text-xs font-bold text-white hover:bg-[#126b59] transition-colors whitespace-nowrap"
               >
                 Đăng nhập
               </NavLink>
@@ -173,13 +338,13 @@ function NavBar() {
 
             {/* Mobile Menu Trigger button */}
             <button
-              className="lg:hidden grid h-9 w-9 sm:h-10 sm:w-10 shrink-0 place-items-center text-cyan-300"
+              className="lg:hidden grid h-9 w-9 sm:h-10 sm:w-10 shrink-0 place-items-center text-[#126b59]"
               onClick={() => setOpen((v) => !v)}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
-              aria-label="Toggle menu"
+              aria-label={open ? 'Đóng menu' : 'Mở menu'}
             >
-              {open ? <XIcon className="h-5 w-5 text-cyan-300" /> : <MenuIcon className="h-5 w-5 text-cyan-300" />}
+              {open ? <XIcon className="h-5 w-5 text-[#126b59]" /> : <MenuIcon className="h-5 w-5 text-[#126b59]" />}
             </button>
           </div>
         </div>
@@ -187,7 +352,7 @@ function NavBar() {
         {/* Scroll Progress Bar */}
         <motion.div
           style={{ scaleX }}
-          className="absolute bottom-0 left-0 right-0 h-px origin-left bg-gradient-to-r from-cyan-400 via-blue-500 to-teal-300"
+          className="absolute bottom-0 left-0 right-0 h-px origin-left bg-gradient-to-r from-[#2fa98c] via-[#126b59] to-[#9fd8c9]"
         />
       </motion.header>
 
@@ -200,7 +365,7 @@ function NavBar() {
             exit={{ opacity: 0, y: -10 }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            className="fixed top-20 left-4 right-4 z-40 lg:hidden bg-[#050c1e]/95 backdrop-blur-2xl rounded-3xl p-4 border border-cyan-400/30 shadow-glow-lg text-white"
+            className="fixed top-20 left-4 right-4 z-40 lg:hidden bg-white/95 backdrop-blur-2xl rounded-3xl p-4 border border-[#c5e7dd] shadow-glow-lg text-[#0e3b33]"
           >
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-sm">
               {LINKS.map((l) => {
@@ -214,15 +379,15 @@ function NavBar() {
                     className={({ isActive }) =>
                       `flex items-center gap-3 px-4 py-3 text-sm rounded-2xl transition-all border ${
                         isActive
-                          ? 'bg-gradient-to-r from-cyan-500/30 to-teal-500/30 text-cyan-300 font-bold border-cyan-400/60 shadow-glow'
-                          : 'bg-[#0b172a]/70 text-slate-100 hover:text-cyan-300 hover:bg-cyan-500/20 border-cyan-500/20 hover:border-cyan-400/40'
+                          ? 'bg-[#eaf7f1] text-[#126b59] font-bold border-[#2fa98c]/60'
+                          : 'bg-white text-[#0e3b33]/80 hover:text-[#126b59] hover:bg-[#eaf7f1] border-[#c5e7dd]'
                       }`
                     }
                   >
-                    {Icon && <Icon className="h-5 w-5 shrink-0 text-cyan-400" />}
+                    {Icon && <Icon className="h-5 w-5 shrink-0 text-[#2fa98c]" />}
                     <span className="truncate">{l.label}</span>
                     {l.to === '/dich-vu' && voucherCount > 0 && (
-                      <span className="ml-auto inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-cyan-400 px-1 text-[10px] font-bold text-slate-950">
+                      <span className="ml-auto inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-[#2fa98c] px-1 text-[10px] font-bold text-white">
                         {voucherCount}
                       </span>
                     )}
@@ -231,13 +396,41 @@ function NavBar() {
               })}
             </div>
 
+            <p className="mt-4 px-1 text-[11px] font-bold uppercase tracking-wider text-[#64748B]">Cộng đồng</p>
+            <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-sm">
+              {[...COMMUNITY_LINKS, ...TAIL_LINKS].map((l) => (
+                <NavLink
+                  key={l.to}
+                  to={l.to}
+                  onClick={() => setOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-4 py-3 text-sm rounded-2xl transition-all border ${
+                      isActive
+                        ? 'bg-[#eaf7f1] text-[#126b59] font-bold border-[#2fa98c]/60'
+                        : 'bg-white text-[#0e3b33]/80 hover:text-[#126b59] hover:bg-[#eaf7f1] border-[#c5e7dd]'
+                    }`
+                  }
+                >
+                  <l.icon className="h-5 w-5 shrink-0 text-[#2fa98c]" />
+                  <span className="truncate">{l.label}</span>
+                </NavLink>
+              ))}
+            </div>
+
             {user && (
-              <div className="mt-4 pt-4 border-t border-cyan-400/20 flex items-center justify-between text-xs">
-                <span className="truncate max-w-[200px] rounded-xl bg-sky-900 border border-cyan-700/60 px-3 py-1.5 text-white font-semibold">{user.email}</span>
+              <div className="mt-4 pt-4 border-t border-[#c5e7dd] space-y-2">
+                <NavLink
+                  to="/tai-khoan"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 rounded-xl bg-[#eaf7f1] border border-[#c5e7dd] px-3 py-2 text-xs"
+                >
+                  <AccountAvatar fullName={accountInfo?.fullName} email={user.email} className="h-8 w-8 text-[11px]" />
+                  <span className="truncate text-[#0e3b33] font-semibold">{accountInfo?.fullName || user.email}</span>
+                </NavLink>
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="text-rose-400 font-semibold hover:underline"
+                  className="w-full text-left text-rose-500 font-semibold text-xs hover:underline"
                 >
                   Đăng xuất
                 </button>
@@ -251,6 +444,3 @@ function NavBar() {
 }
 
 export default NavBar
-
-
-

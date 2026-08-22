@@ -29,12 +29,19 @@ function toMessageShape(row) {
 
 // Gọi khi người dùng xác nhận đặt lịch VÀ đồng ý gửi hồ sơ cá nhân cho chuyên gia xem trước.
 // profile_snapshot chụp lại đúng thời điểm đồng ý, không tự đồng bộ theo hồ sơ mới hơn về sau.
+// Route gọi hàm này chỉ sau khi đã kiểm tra `consent === true` trong body — ghi lại thành 1 sự kiện
+// có dấu thời gian trong consent_events, thay vì chỉ ngầm hiểu qua việc thread tồn tại.
 export async function createThreadForBooking(bookingId, userId) {
   const profile = await getProfile(userId)
   const { rows } = await query(
     `INSERT INTO consultation_threads (booking_id, profile_snapshot)
      VALUES ($1, $2) RETURNING *`,
     [bookingId, JSON.stringify(profile)],
+  )
+  await query(
+    `INSERT INTO consent_events (user_id, consent_type, booking_id, granted)
+     VALUES ($1,'profile_share_with_expert',$2,true)`,
+    [userId, bookingId],
   )
   return rows[0]
 }

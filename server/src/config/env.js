@@ -31,6 +31,12 @@ const config = {
   cloudinaryApiKey: process.env.CLOUDINARY_API_KEY || '',
   cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET || '',
   corsOrigins,
+  // Provider thanh toán đang dùng — 'mock' cho tới khi có tài khoản merchant thật (xem
+  // server/src/payments/). Đổi PAYMENT_PROVIDER trong .env khi cắm cổng thật.
+  paymentProvider: process.env.PAYMENT_PROVIDER || 'mock',
+  // Bảo vệ tạm cho route báo cáo đối soát nội bộ (/api/settlement) — chưa có hệ vai trò admin thật,
+  // dùng shared secret đơn giản. Để trống thì route từ chối mọi request, không mở public mặc định.
+  adminToken: process.env.ADMIN_TOKEN || '',
 }
 
 if (!process.env.JWT_SECRET) {

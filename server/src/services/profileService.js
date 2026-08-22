@@ -75,12 +75,47 @@ export async function hasGivenConsent(userId) {
   return Boolean(rows[0]?.consent_given_at)
 }
 
+async function logConsentEvent(userId, consentType, granted, bookingId = null) {
+  await query(
+    `INSERT INTO consent_events (user_id, consent_type, booking_id, granted) VALUES ($1,$2,$3,$4)`,
+    [userId, consentType, bookingId, granted],
+  )
+}
+
 export async function giveConsent(userId) {
   await query(
     `INSERT INTO profiles (user_id, consent_given_at) VALUES ($1, NOW())
      ON CONFLICT(user_id) DO UPDATE SET consent_given_at=NOW()`,
     [userId],
   )
+  await logConsentEvent(userId, 'sensitive_data_usage', true)
+  return getProfile(userId)
+}
+
+// Thu hồi đồng ý dùng dữ liệu nhạy cảm — CHỈ tắt cờ consent (chặn upload ảnh/bệnh lý mới), KHÔNG tự
+// xoá dữ liệu đã có. Xoá hẳn dữ liệu là hành động riêng, xem deleteSensitiveData().
+export async function revokeConsent(userId) {
+  await query('UPDATE profiles SET consent_given_at = NULL WHERE user_id = $1', [userId])
+  await logConsentEvent(userId, 'sensitive_data_usage', false)
+  return getProfile(userId)
+}
+
+// Xoá toàn bộ dữ liệu nhạy cảm đã khai báo (ảnh khuôn mặt, bệnh lý đã chẩn đoán, báo cáo khám) —
+// đúng cam kết "người dùng có quyền yêu cầu xoá" trong tài liệu chính sách. Không xoá tài khoản.
+export async function deleteSensitiveData(userId) {
+  await deleteFacePhoto(userId)
+
+  const { rows } = await query('SELECT id, file_path FROM expert_reports WHERE user_id = $1', [userId])
+  for (const report of rows) {
+    fs.unlink(report.file_path, () => {})
+  }
+  await query('DELETE FROM expert_reports WHERE user_id = $1', [userId])
+
+  await query(
+    `UPDATE profiles SET diagnosed_conditions = '[]', consent_given_at = NULL WHERE user_id = $1`,
+    [userId],
+  )
+  await logConsentEvent(userId, 'sensitive_data_usage', false)
   return getProfile(userId)
 }
 

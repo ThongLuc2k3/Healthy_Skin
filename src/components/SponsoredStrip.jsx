@@ -3,22 +3,22 @@ import { apiClient } from '../lib/apiClient'
 import { SerumDropper, SunscreenTube, LotionPumpBottle, CreamJar } from '../CosmeticDecoration'
 
 const PRODUCT_ICONS = {
-  sp_serum_niacinamide_demo: SerumDropper,
-  sp_kem_chong_nang_demo: SunscreenTube,
-  sp_sua_rua_mat_diu_nhe_demo: LotionPumpBottle,
+  sp_serum_niacinamide: SerumDropper,
+  sp_kem_chong_nang: SunscreenTube,
+  sp_sua_rua_mat_diu_nhe: LotionPumpBottle,
 }
 
 export default function SponsoredStrip() {
   const [products, setProducts] = useState([])
 
   useEffect(() => {
-    apiClient.get('/sponsored/products').then(setProducts).catch(() => {})
+    apiClient.get('/sponsored/products?placement=trang_chu').then(setProducts).catch(() => {})
   }, [])
 
   if (products.length === 0) return null
 
   return (
-    <section className="relative py-16 bg-[#F7FBFC] border-t border-[#E7ECEE]">
+    <section className="relative py-16 bg-[#eaf7f1] border-t border-[#E7ECEE]">
       <div className="mx-auto max-w-[1200px] px-6 text-center">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#A87A45]">
           Sản phẩm gợi ý · Quảng cáo / Liên kết tiếp thị
@@ -35,7 +35,7 @@ export default function SponsoredStrip() {
                 className="group flex flex-col items-center rounded-2xl border border-[#D8B27A]/30 bg-white px-5 py-6 text-center transition hover:border-[#D8B27A] hover:shadow-md"
               >
                 <Icon className="h-20 w-20 transition-transform duration-300 group-hover:scale-105" />
-                <p className="mt-3 text-sm font-bold text-[#17353D]">{p.name}</p>
+                <p className="mt-3 text-sm font-bold text-[#0e3b33]">{p.name}</p>
                 {p.priceVnd && (
                   <p className="mt-1 text-xs font-bold text-[#A87A45]">
                     {p.priceVnd.toLocaleString('vi-VN')}đ

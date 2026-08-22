@@ -10,6 +10,8 @@ import {
   postExpertMessage,
   getMessageRawById,
 } from '../services/consultationService.js'
+import { broadcastMessage } from '../ws/consultationHub.js'
+import { listProposalsForExpert, respondToProposal } from '../services/expertProposalService.js'
 
 const router = Router()
 
@@ -34,6 +36,19 @@ router.post('/login', asyncHandler(async (req, res) => {
 
 router.get('/bookings', requireExpertAuth, asyncHandler(async (req, res) => {
   res.json(await listThreadsForExpert(req.expertId))
+}))
+
+router.get('/proposals', requireExpertAuth, asyncHandler(async (req, res) => {
+  res.json(await listProposalsForExpert(req.expertId))
+}))
+
+router.post('/proposals/:proposalId/respond', requireExpertAuth, asyncHandler(async (req, res) => {
+  const { accept, note } = req.body ?? {}
+  const proposal = await respondToProposal(req.expertId, Number(req.params.proposalId), Boolean(accept), note)
+  if (!proposal) {
+    return res.status(400).json({ error: 'Không tìm thấy đề xuất đang chờ xử lý.' })
+  }
+  res.json(proposal)
 }))
 
 router.get('/bookings/:bookingId/thread', requireExpertAuth, asyncHandler(async (req, res) => {
@@ -73,6 +88,7 @@ router.post(
       file: req.file,
       recommendedProductId,
     })
+    broadcastMessage(result.thread.id, message)
     res.status(201).json(message)
   }),
 )

@@ -1,7 +1,21 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 const TOKEN_KEY = 'da_duong_token'
 const EXPERT_TOKEN_KEY = 'da_duong_expert_token'
+const ADMIN_TOKEN_KEY = 'da_duong_admin_token'
 const REQUEST_TIMEOUT_MS = 15000
+
+export { TOKEN_KEY, EXPERT_TOKEN_KEY, ADMIN_TOKEN_KEY }
+
+// Lắng nghe sự kiện phiên hết hạn cho đúng 1 loại token (user/expert/admin) — trả về hàm huỷ đăng ký
+// để gọi trong cleanup của useEffect, tránh phải nhớ tự viết addEventListener/removeEventListener
+// với so sánh e.detail.tokenKey ở từng trang.
+export function onAuthExpired(tokenKey, callback) {
+  function handler(e) {
+    if (e.detail?.tokenKey === tokenKey) callback()
+  }
+  window.addEventListener('auth:expired', handler)
+  return () => window.removeEventListener('auth:expired', handler)
+}
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY)
@@ -26,6 +40,19 @@ export function setExpertToken(token) {
     localStorage.setItem(EXPERT_TOKEN_KEY, token)
   } else {
     localStorage.removeItem(EXPERT_TOKEN_KEY)
+  }
+}
+
+// Token riêng cho trang Admin — tách khỏi token người dùng/chuyên gia, cùng lý do với EXPERT_TOKEN_KEY.
+export function getAdminToken() {
+  return localStorage.getItem(ADMIN_TOKEN_KEY)
+}
+
+export function setAdminToken(token) {
+  if (token) {
+    localStorage.setItem(ADMIN_TOKEN_KEY, token)
+  } else {
+    localStorage.removeItem(ADMIN_TOKEN_KEY)
   }
 }
 
@@ -65,6 +92,13 @@ async function request(path, { method = 'GET', body, isFormData = false, auth = 
   const data = contentType.includes('application/json') ? await response.json() : null
 
   if (!response.ok) {
+    // Token hết hạn/không hợp lệ trên 1 request có auth — xoá token cũ và báo cho phần UI đang
+    // hiển thị (AdminDashboardPage, ExpertDashboardPage, AuthContext...) tự quay về màn hình đăng
+    // nhập NGAY, thay vì phải người dùng tự bấm "Đăng xuất" khi thấy lỗi "phiên hết hạn" đứng im.
+    if (auth && response.status === 401) {
+      localStorage.removeItem(tokenKey)
+      window.dispatchEvent(new CustomEvent('auth:expired', { detail: { tokenKey } }))
+    }
     const err = new Error(data?.error || 'Đã có lỗi xảy ra, vui lòng thử lại.')
     err.status = response.status
     throw err
@@ -117,4 +151,12 @@ export const apiClient = {
 export const expertApiClient = {
   get: (path, opts) => request(path, { ...opts, method: 'GET', auth: true, tokenKey: EXPERT_TOKEN_KEY }),
   post: (path, body, opts) => request(path, { ...opts, method: 'POST', body, auth: true, tokenKey: EXPERT_TOKEN_KEY }),
+}
+
+// Dùng cho trang Admin — luôn gắn token quản trị (ADMIN_TOKEN_KEY), cùng cách expertApiClient hoạt động.
+export const adminApiClient = {
+  get: (path, opts) => request(path, { ...opts, method: 'GET', auth: true, tokenKey: ADMIN_TOKEN_KEY }),
+  post: (path, body, opts) => request(path, { ...opts, method: 'POST', body, auth: true, tokenKey: ADMIN_TOKEN_KEY }),
+  put: (path, body, opts) => request(path, { ...opts, method: 'PUT', body, auth: true, tokenKey: ADMIN_TOKEN_KEY }),
+  delete: (path, opts) => request(path, { ...opts, method: 'DELETE', auth: true, tokenKey: ADMIN_TOKEN_KEY }),
 }

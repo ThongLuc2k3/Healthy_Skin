@@ -8,10 +8,17 @@ import { asyncHandler } from '../middleware/asyncHandler.js'
 
 const router = express.Router()
 
+// multer.diskStorage không tự tạo thư mục đích — nếu server/public/uploads/reviews chưa tồn tại
+// (ví dụ lần đầu chạy, hoặc uploads/ bị .gitignore nên không có sẵn khi clone), mọi lần ghi file sẽ
+// ném ENOENT và route trả lỗi 500 dù dữ liệu gửi lên hợp lệ. Tạo trước ngay khi module load, cùng
+// cách profileService.js/consultationService.js đang làm cho các thư mục upload khác.
+const REVIEW_UPLOAD_DIR = 'public/uploads/reviews'
+fs.mkdirSync(REVIEW_UPLOAD_DIR, { recursive: true })
+
 // Cấu hình Multer để lưu ảnh upload vào thư mục public/uploads/reviews
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'public/uploads/reviews')
+    cb(null, REVIEW_UPLOAD_DIR)
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname)
@@ -34,9 +41,9 @@ const upload = multer({
 // 1. GET: Lấy danh sách đánh giá
 router.get('/', asyncHandler(async (req, res) => {
   const { rows: reviews } = await query(`
-      SELECT 
+      SELECT
         r.id, r.rating, r.title, r.content, r.image_path, r.created_at,
-        u.email as author_name 
+        COALESCE(r.author_name, u.email) as author_name
       FROM website_reviews r
       LEFT JOIN users u ON r.user_id = u.id
       ORDER BY r.created_at DESC
@@ -47,8 +54,8 @@ router.get('/', asyncHandler(async (req, res) => {
 // 2. POST: Gửi đánh giá kèm ảnh (upload.single('image'))
 router.post('/', requireAuth, upload.single('image'), asyncHandler(async (req, res) => {
   try {
-    const { title, content, rating = 5 } = req.body
-    
+    const { title, content, rating = 5, authorName } = req.body
+
     // Đường dẫn ảnh lưu trong DB
     const image_path = req.file ? `/uploads/reviews/${req.file.filename}` : null
     const image_mime = req.file ? req.file.mimetype : null
@@ -58,9 +65,9 @@ router.post('/', requireAuth, upload.single('image'), asyncHandler(async (req, r
     }
 
     const { rows } = await query(`
-      INSERT INTO website_reviews (user_id, rating, title, content, image_path, image_mime)
-      VALUES ($1, $2, $3, $4, $5, $6) RETURNING id
-    `, [req.userId, Number(rating), title.trim(), content.trim(), image_path, image_mime])
+      INSERT INTO website_reviews (user_id, rating, title, content, image_path, image_mime, author_name)
+      VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id
+    `, [req.userId, Number(rating), title.trim(), content.trim(), image_path, image_mime, authorName?.trim() || null])
 
     res.json({
       success: true,

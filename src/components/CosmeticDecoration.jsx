@@ -18,24 +18,24 @@ export function CreamJarIllustration({ className = "h-8 w-8" }) {
           <linearGradient id="cream_glass_bg" x1="10" y1="20" x2="54" y2="56" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
             <stop offset="60%" stopColor="#e0f2fe" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#9fd8c9" stopOpacity="0.4" />
           </linearGradient>
           <linearGradient id="cream_lid_grad" x1="14" y1="12" x2="50" y2="24" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#0F4C5C" />
+            <stop offset="0%" stopColor="#0e3b33" />
             <stop offset="50%" stopColor="#135c70" />
-            <stop offset="100%" stopColor="#00b4d8" />
+            <stop offset="100%" stopColor="#2fa98c" />
           </linearGradient>
           <linearGradient id="cream_swirl_grad" x1="20" y1="20" x2="44" y2="30" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#ffffff" />
             <stop offset="100%" stopColor="#bae6fd" />
           </linearGradient>
           <filter id="cream_shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="4" stdDeviation="3" floodColor="#0F4C5C" floodOpacity="0.15" />
+            <feDropShadow dx="0" dy="4" stdDeviation="3" floodColor="#0e3b33" floodOpacity="0.15" />
           </filter>
         </defs>
 
         {/* Jar Base Shadow */}
-        <ellipse cx="32" cy="54" rx="20" ry="4" fill="#0F4C5C" opacity="0.18" />
+        <ellipse cx="32" cy="54" rx="20" ry="4" fill="#0e3b33" opacity="0.18" />
 
         {/* Jar Glass Body */}
         <path
@@ -103,18 +103,18 @@ export function LotionPumpIllustration({ className = "h-8 w-8" }) {
       <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
         <defs>
           <linearGradient id="lotion_bottle_grad" x1="16" y1="24" x2="48" y2="58" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#38bdf8" />
-            <stop offset="50%" stopColor="#0284c7" />
-            <stop offset="100%" stopColor="#0F4C5C" />
+            <stop offset="0%" stopColor="#9fd8c9" />
+            <stop offset="50%" stopColor="#126b59" />
+            <stop offset="100%" stopColor="#0e3b33" />
           </linearGradient>
           <linearGradient id="lotion_pump_head" x1="20" y1="8" x2="38" y2="18" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#0F4C5C" />
-            <stop offset="100%" stopColor="#00b4d8" />
+            <stop offset="0%" stopColor="#0e3b33" />
+            <stop offset="100%" stopColor="#2fa98c" />
           </linearGradient>
         </defs>
 
         {/* Shadow */}
-        <ellipse cx="32" cy="58" rx="16" ry="3.5" fill="#0F4C5C" opacity="0.2" />
+        <ellipse cx="32" cy="58" rx="16" ry="3.5" fill="#0e3b33" opacity="0.2" />
 
         {/* Bottle Body */}
         <path
@@ -126,8 +126,8 @@ export function LotionPumpIllustration({ className = "h-8 w-8" }) {
 
         {/* Front Label Plate */}
         <rect x="22" y="32" width="20" height="20" rx="4" fill="#ffffff" fillOpacity="0.9" />
-        <rect x="25" y="36" width="14" height="2" rx="1" fill="#0F4C5C" />
-        <circle cx="32" cy="44" r="3" fill="#38bdf8" />
+        <rect x="25" y="36" width="14" height="2" rx="1" fill="#0e3b33" />
+        <circle cx="32" cy="44" r="3" fill="#9fd8c9" />
 
         {/* Specular Highlight */}
         <path d="M19 28V52" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
@@ -146,13 +146,13 @@ export function LotionPumpIllustration({ className = "h-8 w-8" }) {
           }}
         >
           <path d="M22 10H38V14H34V20H30V14H22V10Z" fill="url(#lotion_pump_head)" />
-          <path d="M14 12H24V14H14V12Z" fill="#38bdf8" />
+          <path d="M14 12H24V14H14V12Z" fill="#9fd8c9" />
           {/* Droplet from Spout */}
           <motion.circle
             cx="15"
             cy="17"
             r="1.5"
-            fill="#38bdf8"
+            fill="#9fd8c9"
             animate={{ opacity: [0, 1, 0], y: [0, 5, 10] }}
             transition={{ duration: 2.8, repeat: Infinity, ease: 'easeOut' }}
           />
@@ -173,18 +173,18 @@ export function MoisturizerTubeIllustration({ className = "h-8 w-8" }) {
           <linearGradient id="moist_body_grad" x1="16" y1="12" x2="48" y2="58" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#10B981" />
             <stop offset="50%" stopColor="#059669" />
-            <stop offset="100%" stopColor="#0F4C5C" />
+            <stop offset="100%" stopColor="#0e3b33" />
           </linearGradient>
           <linearGradient id="moist_drop_grad" x1="26" y1="24" x2="38" y2="46" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#ffffff" />
-            <stop offset="100%" stopColor="#38bdf8" />
+            <stop offset="100%" stopColor="#9fd8c9" />
           </linearGradient>
         </defs>
 
-        <ellipse cx="32" cy="58" rx="14" ry="3" fill="#0F4C5C" opacity="0.2" />
+        <ellipse cx="32" cy="58" rx="14" ry="3" fill="#0e3b33" opacity="0.2" />
 
         {/* Tube Cap */}
-        <path d="M24 6H40V12H24V6Z" fill="#0F4C5C" />
+        <path d="M24 6H40V12H24V6Z" fill="#0e3b33" />
 
         {/* Tube Body */}
         <path
@@ -221,11 +221,11 @@ export function SunscreenTubeIllustration({ className = "h-8 w-8" }) {
           <linearGradient id="sun_tube_grad" x1="16" y1="14" x2="48" y2="60" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#F59E0B" />
             <stop offset="50%" stopColor="#D97706" />
-            <stop offset="100%" stopColor="#0F4C5C" />
+            <stop offset="100%" stopColor="#0e3b33" />
           </linearGradient>
         </defs>
 
-        <ellipse cx="32" cy="58" rx="14" ry="3" fill="#0F4C5C" opacity="0.2" />
+        <ellipse cx="32" cy="58" rx="14" ry="3" fill="#0e3b33" opacity="0.2" />
 
         {/* Cap */}
         <rect x="24" y="6" width="16" height="8" rx="2" fill="#D97706" />
@@ -272,12 +272,12 @@ export function SerumDropperIllustration({ className = "h-8 w-8" }) {
             <stop offset="100%" stopColor="#e0f2fe" stopOpacity="0.5" />
           </linearGradient>
           <linearGradient id="serum_fill" x1="26" y1="26" x2="38" y2="52" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#38bdf8" />
+            <stop offset="0%" stopColor="#9fd8c9" />
             <stop offset="100%" stopColor="#0077b6" />
           </linearGradient>
         </defs>
 
-        <ellipse cx="32" cy="58" rx="12" ry="3" fill="#0F4C5C" opacity="0.2" />
+        <ellipse cx="32" cy="58" rx="12" ry="3" fill="#0e3b33" opacity="0.2" />
 
         {/* Serum Bottle Base */}
         <path
@@ -290,8 +290,8 @@ export function SerumDropperIllustration({ className = "h-8 w-8" }) {
         <path d="M26 28H38V48C38 50.2 36.2 52 34 52H30C27.8 52 26 50.2 26 48V28Z" fill="url(#serum_fill)" opacity="0.85" />
 
         {/* Rubber Bulb Top */}
-        <rect x="26" y="6" width="12" height="8" rx="3" fill="#0F4C5C" />
-        <rect x="28" y="14" width="8" height="4" fill="#00b4d8" />
+        <rect x="26" y="6" width="12" height="8" rx="3" fill="#0e3b33" />
+        <rect x="28" y="14" width="8" height="4" fill="#2fa98c" />
 
         {/* Animated Dropper Drop Falling Micro-Animation */}
         <motion.circle
@@ -324,7 +324,7 @@ export function AlcoholFreeIllustration({ className = "h-8 w-8" }) {
       <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
         <defs>
           <linearGradient id="alc_drop_grad" x1="16" y1="8" x2="48" y2="58" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#38bdf8" />
+            <stop offset="0%" stopColor="#9fd8c9" />
             <stop offset="100%" stopColor="#10B981" />
           </linearGradient>
         </defs>
@@ -347,7 +347,7 @@ export function AlcoholFreeIllustration({ className = "h-8 w-8" }) {
 
           {/* 0% Text Plate */}
           <circle cx="32" cy="44" r="9" fill="#ffffff" opacity="0.95" />
-          <text x="32" y="47.5" fill="#0F4C5C" fontSize="9.5" fontWeight="900" textAnchor="middle">
+          <text x="32" y="47.5" fill="#0e3b33" fontSize="9.5" fontWeight="900" textAnchor="middle">
             0%
           </text>
         </motion.g>
@@ -374,15 +374,15 @@ export function SkinCheckIllustration({ className = "h-8 w-8" }) {
         <rect x="12" y="12" width="40" height="40" rx="12" fill="url(#skin_bg_grad)" stroke="rgba(255,255,255,0.9)" strokeWidth="1.5" />
 
         {/* Skin Mesh Texture Grid */}
-        <path d="M20 24H44M20 32H44M20 40H44" stroke="#00b4d8" strokeWidth="1" strokeDasharray="2 2" opacity="0.4" />
+        <path d="M20 24H44M20 32H44M20 40H44" stroke="#2fa98c" strokeWidth="1" strokeDasharray="2 2" opacity="0.4" />
 
         {/* Animated Scanning Magnifying Glass */}
         <motion.g
           animate={{ x: [-4, 4, -4] }}
           transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <circle cx="30" cy="30" r="13" fill="none" stroke="#00b4d8" strokeWidth="3.5" />
-          <line x1="40" y1="40" x2="52" y2="52" stroke="#0F4C5C" strokeWidth="4.5" strokeLinecap="round" />
+          <circle cx="30" cy="30" r="13" fill="none" stroke="#2fa98c" strokeWidth="3.5" />
+          <line x1="40" y1="40" x2="52" y2="52" stroke="#0e3b33" strokeWidth="4.5" strokeLinecap="round" />
           <path d="M24 30L28 34L36 24" stroke="#10B981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
         </motion.g>
       </svg>
@@ -398,12 +398,12 @@ export function CosmeticSetIllustration({ className = "h-8 w-8" }) {
     <div className={`relative flex items-center justify-center ${className}`}>
       <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
         {/* Foundation Bottle Base */}
-        <rect x="12" y="24" width="14" height="28" rx="4" fill="#38bdf8" stroke="rgba(255,255,255,0.8)" strokeWidth="1.2" />
-        <rect x="15" y="16" width="8" height="8" rx="2" fill="#0F4C5C" />
+        <rect x="12" y="24" width="14" height="28" rx="4" fill="#9fd8c9" stroke="rgba(255,255,255,0.8)" strokeWidth="1.2" />
+        <rect x="15" y="16" width="8" height="8" rx="2" fill="#0e3b33" />
 
         {/* Animated Rising Lipstick Bullet */}
         <g>
-          <rect x="32" y="32" width="10" height="20" rx="3" fill="#0F4C5C" stroke="rgba(255,255,255,0.8)" strokeWidth="1.2" />
+          <rect x="32" y="32" width="10" height="20" rx="3" fill="#0e3b33" stroke="rgba(255,255,255,0.8)" strokeWidth="1.2" />
           <motion.path
             d="M34 18L40 22V32H34V18Z"
             fill="#F43F5E"
@@ -443,7 +443,7 @@ export function ProductDurabilityIllustration({ className = "h-8 w-8" }) {
           </linearGradient>
         </defs>
 
-        <ellipse cx="32" cy="54" rx="14" ry="3" fill="#0F4C5C" opacity="0.2" />
+        <ellipse cx="32" cy="54" rx="14" ry="3" fill="#0e3b33" opacity="0.2" />
 
         {/* Jar Base */}
         <path
@@ -452,7 +452,7 @@ export function ProductDurabilityIllustration({ className = "h-8 w-8" }) {
           stroke="rgba(255,255,255,0.9)"
           strokeWidth="1.5"
         />
-        <path d="M18 16L32 10L46 16V22H18V16Z" fill="#0F4C5C" />
+        <path d="M18 16L32 10L46 16V22H18V16Z" fill="#0e3b33" />
 
         {/* Animated 12M Durability Badge */}
         <motion.g
@@ -463,7 +463,7 @@ export function ProductDurabilityIllustration({ className = "h-8 w-8" }) {
           <circle cx="44" cy="42" r="11" fill="#10B981" stroke="#ffffff" strokeWidth="2" />
           <path d="M38 42L41 45L49 37" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
         </motion.g>
-        <text x="32" y="38" fill="#0F4C5C" fontSize="11" fontWeight="900" textAnchor="middle">12M</text>
+        <text x="32" y="38" fill="#0e3b33" fontSize="11" fontWeight="900" textAnchor="middle">12M</text>
       </svg>
     </div>
   )
@@ -508,7 +508,7 @@ export function FloatingCosmeticItem({
   category,
   badgeText = 'Phù hợp 98%',
   badgeColor = 'bg-[#10B981]/20 text-[#10B981] border-[#10B981]/40',
-  glowColor = 'from-[#00b4d8]/20 to-[#10B981]/20',
+  glowColor = 'from-[#2fa98c]/20 to-[#10B981]/20',
   duration = 6,
   delay = 0,
   className = '',
@@ -570,7 +570,7 @@ export function FloatingCosmeticItem({
               {badgeText}
             </span>
           </div>
-          <p className="mt-0.5 text-[10px] font-bold text-[#0F4C5C]/80">{category}</p>
+          <p className="mt-0.5 text-[10px] font-bold text-[#0e3b33]/80">{category}</p>
         </div>
       </motion.div>
     </motion.div>

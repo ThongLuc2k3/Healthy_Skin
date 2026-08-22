@@ -1,26 +1,25 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Mail,
   Lock,
-  User,
   ArrowRight,
   ShieldCheck,
   Sparkles,
   AlertCircle,
   CheckCircle2,
-  Scan,
 } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { FloatingInput, GlassButton } from './AuthFields'
-import { blur } from 'three/tsl'
 import TermsModal from '../TermsModal'
+import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 
 export default function AuthPageContainer({ initialMode = 'login' }) {
   const { login, register, sessionExpired } = useAuth()
   const navigate = useNavigate()
   const [mode, setMode] = useState(initialMode)
+  useDocumentTitle(mode === 'login' ? 'Đăng nhập' : 'Đăng ký')
 
   // Form states
   const [loginEmail, setLoginEmail] = useState('')
@@ -78,12 +77,11 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
   }
 
   return (
-    <section className="relative min-h-[calc(100vh-4rem)] w-full overflow-hidden bg-gradient-to-br from-[#06182e] via-[#0b2a4a] to-[#041224] py-10 flex flex-col items-center justify-center pt-28">
+    <section className="relative min-h-[calc(100vh-4rem)] w-full overflow-hidden bg-gradient-to-br from-[#f6fbf9] via-white to-[#eaf7f1] py-10 flex flex-col items-center justify-center pt-28">
       {/* Floating animated ambient background blobs */}
-      <div className="absolute -left-20 top-10 h-80 w-80 rounded-full bg-[#67D6E8]/20 blur-[90px] animate-blob1" />
-      <div className="absolute right-0 top-1/3 h-96 w-96 rounded-full bg-[#0284c7]/20 blur-[100px] animate-blob2" />
-      <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-[#2C8E92]/20 blur-[90px] animate-blob3" />
-      <div className="absolute right-1/4 bottom-10 h-64 w-64 rounded-full bg-[#38bdf8]/20 blur-[80px] animate-blob1" />
+      <div className="absolute -left-20 top-10 h-80 w-80 rounded-full bg-[#c5e7dd]/60 blur-[90px] animate-blob1" />
+      <div className="absolute right-0 top-1/3 h-96 w-96 rounded-full bg-[#f4eddf]/60 blur-[100px] animate-blob2" />
+      <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-[#9fd8c9]/50 blur-[90px] animate-blob3" />
 
       {/* Moving grid */}
       <div className="absolute inset-0 grid-bg animate-gridPan opacity-25 pointer-events-none" />
@@ -94,7 +92,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
           initial={{ opacity: 0, y: 30, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="relative w-full overflow-hidden rounded-[28px] bg-gradient-to-br from-[#0c2847]/95 via-[#081e36]/95 to-[#051527]/95 backdrop-blur-2xl border border-[#67D6E8]/40 shadow-[0_20px_60px_rgba(2,132,199,0.35)] text-white"
+          className="relative w-full overflow-hidden rounded-[28px] bg-white/95 backdrop-blur-2xl border border-[#c5e7dd] shadow-glow-lg text-[#0e3b33]"
           style={{ minHeight: 540 }}
         >
           {/* DESKTOP LAYOUT (>= md screens): 2-track grid with sliding overlay */}
@@ -102,15 +100,15 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
             {/* LOGIN FORM (Left 50%) */}
             <div className="w-1/2 p-10 flex flex-col justify-center">
               <div className="mb-6">
-                <h2 className="text-2xl font-black tracking-tight text-white">Chào mừng trở lại</h2>
-                <p className="mt-2 text-sm text-[#cbd5e1] font-medium">
+                <h2 className="text-2xl font-black tracking-tight text-[#0e3b33]">Chào mừng trở lại</h2>
+                <p className="mt-2 text-sm text-[#0e3b33]/70 font-medium">
                   Đăng nhập để xem hồ sơ cá nhân và hành trình cải thiện da của bạn.
                 </p>
               </div>
 
               <form onSubmit={handleLoginSubmit} className="space-y-4">
                 {sessionExpired && (
-                  <div className="flex items-start gap-2 rounded-xl bg-amber-500/15 border border-amber-400/40 px-3.5 py-2.5 text-xs text-amber-200">
+                  <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3.5 py-2.5 text-xs text-amber-800">
                     <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                     <span>Phiên làm việc hết hạn, vui lòng đăng nhập lại.</span>
                   </div>
@@ -140,7 +138,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                 />
 
                 {loginError && (
-                  <div className="flex items-start gap-2 rounded-xl bg-rose-500/15 border border-rose-400/40 px-3.5 py-2.5 text-xs text-rose-200">
+                  <div className="flex items-start gap-2 rounded-xl bg-rose-50 border border-rose-200 px-3.5 py-2.5 text-xs text-rose-700">
                     <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                     <span>{loginError}</span>
                   </div>
@@ -158,8 +156,8 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
             {/* REGISTER FORM (Right 50%) */}
             <div className="w-1/2 p-10 flex flex-col justify-center">
               <div className="mb-6 text-right">
-                <h2 className="text-2xl font-black tracking-tight text-white">Tạo tài khoản mới</h2>
-                <p className="mt-2 text-sm text-[#cbd5e1] font-medium">
+                <h2 className="text-2xl font-black tracking-tight text-[#0e3b33]">Tạo tài khoản mới</h2>
+                <p className="mt-2 text-sm text-[#0e3b33]/70 font-medium">
                   Lưu trữ kết quả kiểm tra da và thiết lập lộ trình dài hạn.
                 </p>
               </div>
@@ -188,7 +186,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                   required
                 />
 
-                <label className="flex cursor-pointer items-start gap-2 text-xs font-medium text-[#cbd5e1]">
+                <label className="flex cursor-pointer items-start gap-2 text-xs font-medium text-[#0e3b33]/70">
                   <input
                     type="checkbox"
                     required
@@ -198,7 +196,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                   />
                   <span
                     className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-md border transition-colors ${
-                      acceptedTerms ? 'border-[#67D6E8] bg-[#2C8E92]' : 'border-[#67D6E8]/40 bg-transparent'
+                      acceptedTerms ? 'border-[#2fa98c] bg-[#2fa98c]' : 'border-[#c5e7dd] bg-transparent'
                     }`}
                   >
                     <CheckCircle2
@@ -210,7 +208,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                     <button
                       type="button"
                       onClick={() => setShowTerms(true)}
-                      className="font-bold text-[#67D6E8] hover:underline"
+                      className="font-bold text-[#126b59] hover:underline"
                     >
                       Điều khoản sử dụng
                     </button>{' '}
@@ -219,7 +217,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                 </label>
 
                 {regError && (
-                  <div className="flex items-start gap-2 rounded-xl bg-rose-500/15 border border-rose-400/40 px-3.5 py-2.5 text-xs text-rose-200">
+                  <div className="flex items-start gap-2 rounded-xl bg-rose-50 border border-rose-200 px-3.5 py-2.5 text-xs text-rose-700">
                     <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                     <span>{regError}</span>
                   </div>
@@ -260,11 +258,11 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                 />
               </AnimatePresence>
 
-              <div className="absolute inset-0 bg-[#06182e]/50 border-x border-[#67D6E8]/40" />
+              <div className="absolute inset-0 bg-[#0e3b33]/50 border-x border-[#2fa98c]/40" />
 
               {/* Decorative background blobs inside overlay */}
-              <div className="absolute -left-10 top-10 h-44 w-44 rounded-full bg-[#67D6E8]/30 blur-3xl animate-blob1" />
-              <div className="absolute -right-10 bottom-10 h-48 w-48 rounded-full bg-[#0284c7]/30 blur-3xl animate-blob2" />
+              <div className="absolute -left-10 top-10 h-44 w-44 rounded-full bg-[#2fa98c]/30 blur-3xl animate-blob1" />
+              <div className="absolute -right-10 bottom-10 h-48 w-48 rounded-full bg-[#126b59]/30 blur-3xl animate-blob2" />
 
               {/* Content tracks */}
               <div className="relative flex h-full items-center justify-center p-8 text-center">
@@ -278,8 +276,8 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                       className="flex flex-col items-center"
                     >
-                      <span className="inline-flex items-center gap-2 rounded-full bg-[#0b2a4a]/90 border border-[#67D6E8]/40 px-3.5 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-white backdrop-blur-md">
-                        <Sparkles className="h-3.5 w-3.5 text-[#67D6E8]" />
+                      <span className="inline-flex items-center gap-2 rounded-full bg-[#126b59]/90 border border-[#2fa98c]/40 px-3.5 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-white backdrop-blur-md">
+                        <Sparkles className="h-3.5 w-3.5 text-[#2fa98c]" />
                         Chưa có tài khoản?
                       </span>
                       <h3 className="mt-4 text-2xl font-black text-white tracking-tight drop-shadow-md">
@@ -293,7 +291,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                         onClick={() => switchMode('register')}
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
-                        className="group mt-6 inline-flex items-center gap-2 rounded-xl border border-[#67D6E8]/60 bg-[#2C8E92] px-5 py-2.5 text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-[#67D6E8] hover:text-[#06182e] shadow-md cursor-pointer"
+                        className="group mt-6 inline-flex items-center gap-2 rounded-xl border border-[#2fa98c]/60 bg-[#2fa98c] px-5 py-2.5 text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-[#126b59] shadow-md cursor-pointer"
                       >
                         Đăng ký tài khoản
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -308,8 +306,8 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                       className="flex flex-col items-center"
                     >
-                      <span className="inline-flex items-center gap-2 rounded-full bg-[#0b2a4a]/90 border border-[#67D6E8]/40 px-3.5 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-white backdrop-blur-md">
-                        <ShieldCheck className="h-3.5 w-3.5 text-[#67D6E8]" />
+                      <span className="inline-flex items-center gap-2 rounded-full bg-[#126b59]/90 border border-[#2fa98c]/40 px-3.5 py-1 text-xs font-mono font-semibold uppercase tracking-wider text-white backdrop-blur-md">
+                        <ShieldCheck className="h-3.5 w-3.5 text-[#2fa98c]" />
                         Đã có tài khoản?
                       </span>
                       <h3 className="mt-4 text-2xl font-black text-white tracking-tight drop-shadow-md">
@@ -323,7 +321,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                         onClick={() => switchMode('login')}
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
-                        className="group mt-6 inline-flex items-center gap-2 rounded-xl border border-[#67D6E8]/60 bg-[#2C8E92] px-5 py-2.5 text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-[#67D6E8] hover:text-[#06182e] shadow-md cursor-pointer"
+                        className="group mt-6 inline-flex items-center gap-2 rounded-xl border border-[#2fa98c]/60 bg-[#2fa98c] px-5 py-2.5 text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-[#126b59] shadow-md cursor-pointer"
                       >
                         Đăng nhập ngay
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -354,18 +352,18 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
             </AnimatePresence>
 
             {/* Dark scrim so text stays readable over the background photo */}
-            <div className="absolute inset-0 bg-[#06182e]/55" />
+            <div className="absolute inset-0 bg-[#0e3b33]/55" />
 
             <div className="relative z-10">
               <div className="text-center mb-6">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0b2a4a]/80 border border-[#67D6E8]/40 px-3.5 py-1 text-xs font-mono font-semibold text-cyan-200 uppercase tracking-wider backdrop-blur-md">
-                  <Sparkles className="h-3.5 w-3.5 text-[#67D6E8]" />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#126b59]/80 border border-[#9fd8c9]/40 px-3.5 py-1 text-xs font-mono font-semibold text-white uppercase tracking-wider backdrop-blur-md">
+                  <Sparkles className="h-3.5 w-3.5 text-[#9fd8c9]" />
                   {isRegister ? 'Đăng ký tài khoản' : 'Đăng nhập hệ thống'}
                 </span>
                 <h2 className="mt-3 text-2xl font-black tracking-tight text-white">
                   {isRegister ? 'Tạo tài khoản' : 'Đăng nhập'}
                 </h2>
-                <p className="mt-1.5 text-xs text-[#cbd5e1] font-medium">
+                <p className="mt-1.5 text-xs text-white/80 font-medium">
                   {isRegister
                     ? 'Lưu trữ hồ sơ cá nhân và hành trình cải thiện làn da.'
                     : 'Đăng nhập để lưu hồ sơ và xem lịch sử quét.'}
@@ -383,7 +381,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                   className="space-y-4"
                 >
                   {sessionExpired && (
-                    <div className="flex items-start gap-2 rounded-xl bg-amber-500/15 border border-amber-400/40 px-3.5 py-2.5 text-xs text-amber-200">
+                    <div className="flex items-start gap-2 rounded-xl bg-amber-50 border border-amber-200 px-3.5 py-2.5 text-xs text-amber-800">
                       <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                       <span>Phiên làm việc hết hạn, vui lòng đăng nhập lại.</span>
                     </div>
@@ -413,7 +411,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                   />
 
                   {loginError && (
-                    <div className="flex items-start gap-2 rounded-xl bg-rose-500/15 border border-rose-400/40 px-3.5 py-2.5 text-xs text-rose-200">
+                    <div className="flex items-start gap-2 rounded-xl bg-rose-50 border border-rose-200 px-3.5 py-2.5 text-xs text-rose-700">
                       <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                       <span>{loginError}</span>
                     </div>
@@ -426,12 +424,12 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                     </GlassButton>
                   </div>
 
-                  <p className="text-center text-xs text-[#cbd5e1] mt-4 font-medium">
+                  <p className="text-center text-xs text-white/80 mt-4 font-medium">
                     Chưa có tài khoản?{' '}
                     <button
                       type="button"
                       onClick={() => switchMode('register')}
-                      className="font-bold text-[#67D6E8] hover:underline ml-1"
+                      className="font-bold text-[#9fd8c9] hover:underline ml-1"
                     >
                       Đăng ký ngay
                     </button>
@@ -469,7 +467,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                     required
                   />
 
-                  <label className="flex cursor-pointer items-start gap-2 text-xs font-medium text-[#cbd5e1]">
+                  <label className="flex cursor-pointer items-start gap-2 text-xs font-medium text-[#0e3b33]/70">
                     <input
                       type="checkbox"
                       required
@@ -479,7 +477,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                     />
                     <span
                       className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-md border transition-colors ${
-                        acceptedTerms ? 'border-[#67D6E8] bg-[#2C8E92]' : 'border-[#67D6E8]/40 bg-transparent'
+                        acceptedTerms ? 'border-[#9fd8c9] bg-[#2fa98c]' : 'border-[#9fd8c9]/40 bg-transparent'
                       }`}
                     >
                       <CheckCircle2
@@ -491,7 +489,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                       <button
                         type="button"
                         onClick={() => setShowTerms(true)}
-                        className="font-bold text-[#67D6E8] hover:underline"
+                        className="font-bold text-[#9fd8c9] hover:underline"
                       >
                         Điều khoản sử dụng
                       </button>{' '}
@@ -500,7 +498,7 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                   </label>
 
                   {regError && (
-                    <div className="flex items-start gap-2 rounded-xl bg-rose-500/15 border border-rose-400/40 px-3.5 py-2.5 text-xs text-rose-200">
+                    <div className="flex items-start gap-2 rounded-xl bg-rose-50 border border-rose-200 px-3.5 py-2.5 text-xs text-rose-700">
                       <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                       <span>{regError}</span>
                     </div>
@@ -513,12 +511,12 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
                     </GlassButton>
                   </div>
 
-                  <p className="text-center text-xs text-[#cbd5e1] mt-4 font-medium">
+                  <p className="text-center text-xs text-white/80 mt-4 font-medium">
                     Đã có tài khoản?{' '}
                     <button
                       type="button"
                       onClick={() => switchMode('login')}
-                      className="font-bold text-[#67D6E8] hover:underline ml-1"
+                      className="font-bold text-[#9fd8c9] hover:underline ml-1"
                     >
                       Đăng nhập ngay
                     </button>
@@ -539,17 +537,17 @@ export default function AuthPageContainer({ initialMode = 'login' }) {
         className="relative z-10 mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 px-4 text-xs font-semibold text-[#94a3b8]"
       >
         <span className="inline-flex items-center gap-1.5">
-          <ShieldCheck className="h-3.5 w-3.5 text-[#67D6E8]" />
+          <ShieldCheck className="h-3.5 w-3.5 text-[#2fa98c]" />
           Bảo mật thông tin
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <Sparkles className="h-3.5 w-3.5 text-[#67D6E8]" />
-          AI-Powered Skin Intelligence
+          <Sparkles className="h-3.5 w-3.5 text-[#2fa98c]" />
+          Công nghệ AI phân tích da
         </span>
         <span className="inline-flex items-center gap-1.5">
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#67D6E8]/60" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-[#67D6E8]" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#2fa98c]/60" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-[#2fa98c]" />
           </span>
           Phiên kết nối an toàn
         </span>

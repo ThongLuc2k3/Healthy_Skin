@@ -13,8 +13,8 @@ function RadioGroup({ name, options, value, onChange }) {
             transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             className={`relative flex cursor-pointer items-center justify-between rounded-2xl border px-5 py-4 text-left transition-all duration-300 ${
               checked
-                ? 'border-[#2C8E92] bg-gradient-to-r from-[#67D6E8]/12 via-[#67D6E8]/8 to-[#2C8E92]/6 text-[#17353D] shadow-[0_8px_20px_rgba(44,142,146,0.12)] ring-1 ring-[#2C8E92]/40'
-                : 'border-[#E9EEF1] bg-[#FDFDFB] text-[#17353D] shadow-[0_2px_8px_rgba(23,53,61,0.03)] hover:border-[#67D6E8]/60 hover:bg-white hover:shadow-[0_6px_16px_rgba(23,53,61,0.06)]'
+                ? 'border-[#2fa98c] bg-gradient-to-r from-[#70c4af]/12 via-[#70c4af]/8 to-[#2fa98c]/6 text-[#0e3b33] shadow-[0_8px_20px_rgba(47, 169, 140,0.12)] ring-1 ring-[#2fa98c]/40'
+                : 'border-[#E9EEF1] bg-[#FDFDFB] text-[#0e3b33] shadow-[0_2px_8px_rgba(14, 59, 51,0.03)] hover:border-[#70c4af]/60 hover:bg-white hover:shadow-[0_6px_16px_rgba(14, 59, 51,0.06)]'
             }`}
           >
             <input
@@ -25,13 +25,13 @@ function RadioGroup({ name, options, value, onChange }) {
               onChange={() => onChange(option.id)}
               className="sr-only"
             />
-            <span className="text-base font-semibold tracking-tight text-[#17353D]">
+            <span className="text-base font-semibold tracking-tight text-[#0e3b33]">
               {option.label}
             </span>
             <span
               className={`flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${
                 checked
-                  ? 'border-[#2C8E92] bg-[#2C8E92] shadow-[0_0_8px_rgba(103,214,232,0.5)]'
+                  ? 'border-[#2fa98c] bg-[#2fa98c] shadow-[0_0_8px_rgba(112, 196, 175,0.5)]'
                   : 'border-[#BFD8CF] bg-transparent'
               }`}
             >

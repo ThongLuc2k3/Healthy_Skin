@@ -35,7 +35,7 @@ router.post(
     } catch (err) {
       if (err instanceof GeminiNotConfiguredError) {
         return res.status(503).json({
-          error: 'Tính năng giải thích bằng AI chưa sẵn sàng — thiếu cấu hình Gemini API key.',
+          error: 'Tính năng giải thích bằng AI chưa sẵn sàng, thiếu cấu hình Gemini API key.',
         })
       }
       if (err instanceof GeminiRequestError) {

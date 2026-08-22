@@ -15,7 +15,7 @@ export default function ServicesHighlight() {
   if (venues.length === 0) return null
 
   return (
-    <section id="services-highlight" className="relative py-24 sm:py-28 bg-[#F7FBFC]">
+    <section id="services-highlight" className="relative py-24 sm:py-28 bg-[#eaf7f1]">
       <div className="relative mx-auto max-w-[1200px] px-6 text-center">
         <SectionTitle
           eyebrow="DỊCH VỤ QUANH BẠN"
@@ -26,7 +26,7 @@ export default function ServicesHighlight() {
               đặt chỗ ngay, có voucher giảm giá.
             </>
           }
-          description="Trung tâm đối tác với giá cố định do chính họ niêm yết. Web chỉ là trung gian đặt chỗ, dữ liệu bên dưới hiện là minh hoạ demo."
+          description="Trung tâm đối tác với giá cố định do chính họ niêm yết. Web chỉ là trung gian đặt chỗ và ăn hoa hồng."
         />
 
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -40,12 +40,12 @@ export default function ServicesHighlight() {
             >
               <Link
                 to={`/dich-vu/${venue.id}`}
-                className="group flex h-full flex-col rounded-2xl border border-[#E7ECEE] bg-white p-5 text-left transition hover:border-[#2C8E92] hover:shadow-md"
+                className="group flex h-full flex-col rounded-2xl border border-[#E7ECEE] bg-white p-5 text-left transition hover:border-[#2fa98c] hover:shadow-md"
               >
-                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#2C8E92]/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#2C8E92]">
+                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-[#2fa98c]/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#2fa98c]">
                   {venue.category}
                 </span>
-                <h3 className="mt-3 font-bold text-[#17353D] group-hover:text-[#2C8E92]">{venue.name}</h3>
+                <h3 className="mt-3 font-bold text-[#0e3b33] group-hover:text-[#2fa98c]">{venue.name}</h3>
                 <p className="mt-1 text-xs text-[#64748B]">{venue.areaVi}</p>
               </Link>
             </motion.div>
@@ -55,14 +55,14 @@ export default function ServicesHighlight() {
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           <Link
             to="/dich-vu"
-            className="inline-flex items-center gap-2 rounded-full bg-[#2C8E92] px-7 py-3 text-sm font-bold text-white transition hover:bg-[#17353D]"
+            className="inline-flex items-center gap-2 rounded-full bg-[#2fa98c] px-7 py-3 text-sm font-bold text-white transition hover:bg-[#0e3b33]"
           >
             <MapIcon className="h-4 w-4" />
             Khám phá Dịch Vụ Quanh Bạn
           </Link>
           <Link
             to="/dich-vu/voucher"
-            className="inline-flex items-center gap-2 rounded-full border border-[#2C8E92]/30 px-7 py-3 text-sm font-bold text-[#2C8E92] transition hover:bg-[#2C8E92]/10"
+            className="inline-flex items-center gap-2 rounded-full border border-[#2fa98c]/30 px-7 py-3 text-sm font-bold text-[#2fa98c] transition hover:bg-[#2fa98c]/10"
           >
             Xem Kho Voucher
           </Link>

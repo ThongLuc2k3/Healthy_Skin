@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeftIcon, SearchIcon, ShieldIcon } from './Icons'
+import { ArrowLeftIcon, ShieldIcon } from './Icons'
 import { Reveal } from './ui'
 import {
   FloatingCosmeticDecoration,
@@ -12,10 +12,10 @@ import {
 
 export default function CTA() {
   return (
-    <section id="cta" className="relative py-24 sm:py-32 bg-gradient-to-b from-[#F7FBFC] via-[#FCFDFC] to-[#F7FBFC] overflow-hidden">
+    <section id="cta" className="relative py-24 sm:py-32 bg-gradient-to-b from-[#eaf7f1] via-[#FCFDFC] to-[#eaf7f1] overflow-hidden">
       {/* Soft Ambient Radial Orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[800px] rounded-full bg-gradient-to-tr from-[#67D6E8]/12 via-[#BFD8CF]/20 to-transparent blur-3xl opacity-60" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[800px] rounded-full bg-gradient-to-tr from-[#70c4af]/12 via-[#BFD8CF]/20 to-transparent blur-3xl opacity-60" />
       </div>
 
       {/* Floating Cosmetic Decorations */}
@@ -26,7 +26,7 @@ export default function CTA() {
         yRange={[-28, 28, -28]}
         duration={5.0}
         delay={0.2}
-        accent="#67D6E8"
+        accent="#70c4af"
         parallaxOffset={-70}
       />
       <FloatingCosmeticDecoration
@@ -36,7 +36,7 @@ export default function CTA() {
         yRange={[22, -22, 22]}
         duration={4.6}
         delay={0.4}
-        accent="#2C8E92"
+        accent="#2fa98c"
         parallaxOffset={60}
       />
       <FloatingCosmeticDecoration
@@ -62,11 +62,11 @@ export default function CTA() {
 
       <div className="relative mx-auto max-w-[1000px] px-6 text-center">
         <Reveal delay={0.08}>
-          <div className="rounded-[36px] border border-[#E7ECEE] bg-[#FCFDFC]/90 p-10 sm:p-16 backdrop-blur-xl shadow-[0_16px_50px_rgba(44,142,146,0.06)]">
-            <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight text-[#17353D]">
+          <div className="rounded-[36px] border border-[#E7ECEE] bg-[#FCFDFC]/90 p-10 sm:p-16 backdrop-blur-xl shadow-[0_16px_50px_rgba(47, 169, 140,0.06)]">
+            <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight text-[#0e3b33]">
               Đúng da, đúng dưỡng chất.
               <br />
-              <span className="text-[#2C8E92]">Từ trong ra ngoài.</span>
+              <span className="text-[#2fa98c]">Từ trong ra ngoài.</span>
             </h2>
 
             <p className="mx-auto mt-6 max-w-2xl text-base sm:text-lg text-[#64748B] leading-relaxed font-normal">
@@ -77,7 +77,7 @@ export default function CTA() {
               <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 <Link
                   to="/profile"
-                  className="group inline-flex items-center gap-2.5 rounded-full bg-gradient-to-r from-[#2C8E92] via-[#67D6E8] to-[#6F9D8D] px-9 py-4 text-sm font-bold text-white shadow-[0_8px_25px_rgba(103,214,232,0.35)] transition-all"
+                  className="group inline-flex items-center gap-2.5 rounded-full bg-gradient-to-r from-[#2fa98c] via-[#70c4af] to-[#6F9D8D] px-9 py-4 text-sm font-bold text-white shadow-[0_8px_25px_rgba(112, 196, 175,0.35)] transition-all"
                 >
                   Bắt đầu khai báo hồ sơ
                   <ArrowLeftIcon className="h-4 w-4 rotate-180 transition-transform group-hover:translate-x-1" />
@@ -85,7 +85,7 @@ export default function CTA() {
               </motion.div>
               <Link
                 to="/scan"
-                className="inline-flex items-center gap-2 rounded-full bg-white border border-[#E7ECEE] px-8 py-4 text-sm font-bold text-[#17353D] shadow-xs transition-all hover:bg-[#F7FBFC] hover:border-[#2C8E92]"
+                className="inline-flex items-center gap-2 rounded-full bg-white border border-[#E7ECEE] px-8 py-4 text-sm font-bold text-[#0e3b33] shadow-xs transition-all hover:bg-[#eaf7f1] hover:border-[#2fa98c]"
               >
                 Thử quét sản phẩm
               </Link>

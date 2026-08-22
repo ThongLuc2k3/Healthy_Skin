@@ -109,7 +109,21 @@ function isLoopbackOrigin(origin) {
   }
 }
 
-app.use(helmet())
+// Ảnh/video người dùng tự tải lên (đánh giá, bình luận, Góc truyền động lực) giờ nhúng thẳng URL
+// Cloudinary vào <img>/<video> trên trang — Content-Security-Policy mặc định của helmet() chỉ cho
+// phép img-src/media-src 'self' nên sẽ ÂM THẦM CHẶN trình duyệt hiển thị ảnh dù URL trả về 200 OK
+// bình thường (mở thẳng URL ở tab mới thì không bị chặn vì CSP chỉ áp dụng cho tài nguyên NHÚNG
+// trong trang, không áp dụng khi điều hướng trực tiếp — đúng triệu chứng đã gặp: ảnh vỡ trên trang
+// nhưng mở link ảnh ở tab riêng lại được).
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+      'img-src': ["'self'", 'data:', 'https://res.cloudinary.com'],
+      'media-src': ["'self'", 'https://res.cloudinary.com'],
+    },
+  },
+}))
 const corsMiddleware = cors({
   origin(origin, callback) {
     // Cho phép request không có Origin (curl, healthcheck, server-to-server)

@@ -498,3 +498,7 @@ CREATE INDEX IF NOT EXISTS idx_payment_intents_user ON payment_intents(user_id);
 ALTER TABLE users ADD COLUMN IF NOT EXISTS is_locked BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS locked_reason TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS locked_at TIMESTAMPTZ;
+
+-- Ảnh đại diện tự tải lên — lưu Cloudinary (URL tuyệt đối), cùng cách với ảnh đánh giá/bình luận/
+-- Góc truyền động lực, KHÔNG ghi ổ đĩa local (xem accountService.js).
+ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;

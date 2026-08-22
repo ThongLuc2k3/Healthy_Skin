@@ -31,7 +31,10 @@ function initialsFor(fullName, email) {
   return source[0].toUpperCase()
 }
 
-function AccountAvatar({ fullName, email, className = 'h-8 w-8 text-xs' }) {
+export function AccountAvatar({ fullName, email, avatarUrl, className = 'h-8 w-8 text-xs' }) {
+  if (avatarUrl) {
+    return <img src={avatarUrl} alt="" className={`shrink-0 rounded-full object-cover ${className}`} />
+  }
   return (
     <span
       className={`flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2fa98c] to-[#126b59] font-bold text-white ${className}`}
@@ -288,7 +291,7 @@ function NavBar() {
                   onClick={() => setAccountMenuOpen((v) => !v)}
                   className="flex items-center gap-2 rounded-xl bg-[#eaf7f1] border border-[#c5e7dd] px-2.5 py-1.5 text-xs text-[#0e3b33] font-semibold hover:border-[#2fa98c]/50"
                 >
-                  <AccountAvatar fullName={accountInfo?.fullName} email={user.email} />
+                  <AccountAvatar fullName={accountInfo?.fullName} email={user.email} avatarUrl={accountInfo?.avatarUrl} />
                   <span className="truncate max-w-[130px] text-[#0e3b33]">
                     {accountInfo?.fullName || user.email}
                   </span>
@@ -432,7 +435,7 @@ function NavBar() {
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-2.5 rounded-xl bg-[#eaf7f1] border border-[#c5e7dd] px-3 py-2 text-xs"
                 >
-                  <AccountAvatar fullName={accountInfo?.fullName} email={user.email} className="h-8 w-8 text-[11px]" />
+                  <AccountAvatar fullName={accountInfo?.fullName} email={user.email} avatarUrl={accountInfo?.avatarUrl} className="h-8 w-8 text-[11px]" />
                   <span className="truncate text-[#0e3b33] font-semibold">{accountInfo?.fullName || user.email}</span>
                 </NavLink>
                 <button

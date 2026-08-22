@@ -7,6 +7,74 @@ import { formatVnd, formatDateTime, formatDate, formatCompactNumber } from '../l
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { UserIcon, WalletIcon, ShieldIcon, CheckCircleIcon, StarIcon, SparklesIcon } from '../components/Icons'
 import { BadgeTierIcon } from './MotivationPage'
+import { AccountAvatar } from '../components/NavBar'
+
+function AvatarCard({ account, onSaved }) {
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState('')
+
+  async function handleFileChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    setError('')
+    try {
+      const formData = new FormData()
+      formData.append('avatar', file)
+      const updated = await apiClient.post('/account/avatar', formData, { auth: true, isFormData: true })
+      onSaved(updated)
+      notifyAccountUpdated()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
+  }
+
+  async function handleRemove() {
+    setUploading(true)
+    setError('')
+    try {
+      const updated = await apiClient.delete('/account/avatar', { auth: true })
+      onSaved(updated)
+      notifyAccountUpdated()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className="rounded-[28px] border border-[#c5e7dd] bg-white p-7 shadow-xs">
+      <div className="mb-4 flex items-center gap-2">
+        <UserIcon className="h-5 w-5 text-[#2fa98c]" />
+        <h2 className="text-lg font-bold text-[#0e3b33]">Ảnh đại diện</h2>
+      </div>
+      <div className="flex items-center gap-4">
+        <AccountAvatar fullName={account.fullName} email={account.email} avatarUrl={account.avatarUrl} className="h-20 w-20 text-2xl" />
+        <div className="space-y-2">
+          <label className="inline-flex cursor-pointer items-center rounded-xl bg-[#2fa98c] px-4 py-2 text-xs font-bold text-white hover:bg-[#0e3b33]">
+            {uploading ? 'Đang tải lên...' : 'Đổi ảnh đại diện'}
+            <input type="file" accept="image/*" className="hidden" disabled={uploading} onChange={handleFileChange} />
+          </label>
+          {account.avatarUrl && (
+            <button
+              type="button"
+              disabled={uploading}
+              onClick={handleRemove}
+              className="block text-xs font-bold text-rose-600 hover:underline disabled:opacity-60"
+            >
+              Xoá ảnh đại diện
+            </button>
+          )}
+        </div>
+      </div>
+      {error && <p className="mt-3 text-sm font-medium text-rose-600">{error}</p>}
+    </div>
+  )
+}
 
 function PersonalInfoCard({ account, onSaved }) {
   const [fullName, setFullName] = useState(account.fullName)
@@ -392,6 +460,7 @@ function AccountSettingsPage() {
         </motion.div>
 
         {user && <ActivityCard userId={user.id} />}
+        <AvatarCard account={account} onSaved={setAccount} />
         <PersonalInfoCard account={account} onSaved={setAccount} />
         <WalletCard wallet={wallet} />
         <BankLinkCard account={account} bankOptions={bankOptions} onChanged={setAccount} />

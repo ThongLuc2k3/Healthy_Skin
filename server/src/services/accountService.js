@@ -1,4 +1,5 @@
 import { query } from '../db/connection.js'
+import { uploadBuffer, deleteFile, extractPublicId } from './cloudinaryService.js'
 
 const BANK_NAMES = ['Vietcombank', 'Techcombank', 'MB Bank', 'BIDV', 'ACB', 'VPBank', 'TPBank', 'Sacombank']
 
@@ -10,6 +11,7 @@ function toShape(row) {
     dateOfBirth: row.date_of_birth ? row.date_of_birth.toISOString().slice(0, 10) : '',
     addressVi: row.address_vi || '',
     socialLink: row.social_link || '',
+    avatarUrl: row.avatar_url || null,
     bankName: row.bank_name || null,
     bankAccountMasked: row.bank_account_masked || null,
     bankLinkedAt: row.bank_linked_at || null,
@@ -57,6 +59,34 @@ export async function unlinkBankAccount(userId) {
      WHERE id = $1 RETURNING *`,
     [userId],
   )
+  return rows[0] ? toShape(rows[0]) : null
+}
+
+// Ảnh mới thay thế hoàn toàn ảnh cũ — xoá ảnh cũ trên Cloudinary trước khi lưu ảnh mới (nếu có).
+export async function setAvatar(userId, file) {
+  const { rows: existing } = await query('SELECT avatar_url FROM users WHERE id = $1', [userId])
+  const oldUrl = existing[0]?.avatar_url
+  if (oldUrl) {
+    const publicId = extractPublicId(oldUrl)
+    if (publicId) deleteFile(publicId)
+  }
+
+  const uploaded = await uploadBuffer(file.buffer, file.mimetype, { folder: 'healthyskin/avatars' })
+  const { rows } = await query(
+    'UPDATE users SET avatar_url = $2 WHERE id = $1 RETURNING *',
+    [userId, uploaded.url],
+  )
+  return rows[0] ? toShape(rows[0]) : null
+}
+
+export async function removeAvatar(userId) {
+  const { rows: existing } = await query('SELECT avatar_url FROM users WHERE id = $1', [userId])
+  const oldUrl = existing[0]?.avatar_url
+  if (oldUrl) {
+    const publicId = extractPublicId(oldUrl)
+    if (publicId) deleteFile(publicId)
+  }
+  const { rows } = await query('UPDATE users SET avatar_url = NULL WHERE id = $1 RETURNING *', [userId])
   return rows[0] ? toShape(rows[0]) : null
 }
 

@@ -65,7 +65,7 @@ export async function toggleFollow(followerId, followedId) {
 }
 
 export async function getPublicProfile(userId, viewerId) {
-  const { rows } = await query('SELECT id, full_name, social_link FROM users WHERE id=$1', [userId])
+  const { rows } = await query('SELECT id, full_name, social_link, avatar_url FROM users WHERE id=$1', [userId])
   const user = rows[0]
   if (!user) return null
 
@@ -77,6 +77,7 @@ export async function getPublicProfile(userId, viewerId) {
     id: user.id,
     fullName: user.full_name || 'Người dùng HEALTHY SKIN',
     socialLink: user.social_link || null,
+    avatarUrl: user.avatar_url || null,
     followerCount,
     followingCount,
     badgeTier: getBadgeTier(followerCount),

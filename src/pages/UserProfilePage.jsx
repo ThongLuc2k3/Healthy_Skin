@@ -4,9 +4,10 @@ import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { apiClient } from '../lib/apiClient'
 import { formatCompactNumber } from '../lib/format'
-import { UserIcon, ArrowLeftIcon } from '../components/Icons'
+import { ArrowLeftIcon } from '../components/Icons'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { CommunityPostCard, BadgeTierIcon } from './MotivationPage'
+import { AccountAvatar } from '../components/NavBar'
 
 function UserProfilePage() {
   const { id } = useParams()
@@ -107,9 +108,7 @@ function UserProfilePage() {
         >
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#2fa98c] via-[#70c4af] to-[#6F9D8D] text-white shrink-0">
-                <UserIcon className="h-8 w-8" />
-              </span>
+              <AccountAvatar fullName={profile.fullName} avatarUrl={profile.avatarUrl} className="h-16 w-16 text-xl" />
               <div>
                 <h1 className="flex items-center gap-1.5 font-display text-2xl font-black text-[#0e3b33]">
                   {profile.fullName}

@@ -3,7 +3,7 @@ import { adminApiClient, getAdminToken, setAdminToken, onAuthExpired, ADMIN_TOKE
 import { formatVnd, formatDate, formatDateTime } from '../../lib/format'
 import {
   ShieldIcon, WalletIcon, UserIcon, StethoscopeIcon, MapIcon, SparklesIcon,
-  CheckCircleIcon, XCircleIcon, LogOutIcon, TrashIcon, HistoryIcon,
+  CheckCircleIcon, XCircleIcon, LogOutIcon, TrashIcon, HistoryIcon, LockIcon,
 } from '../../components/Icons'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 
@@ -11,6 +11,17 @@ const TRANSACTION_PURPOSE_LABELS = {
   wallet_topup: 'Nạp ví',
   plan_purchase: 'Mua gói Trợ Lý',
   venue_deposit: 'Đặt cọc dịch vụ',
+}
+
+const ACTIVITY_TYPE_LABELS = {
+  deposit: 'Nạp ví',
+  plan_purchase: 'Mua gói',
+  venue_deposit: 'Đặt cọc dịch vụ',
+  expert_booking: 'Đặt lịch chuyên gia',
+  venue_booking: 'Đặt dịch vụ đối tác',
+  review_post: 'Đăng đánh giá (Diễn đàn)',
+  motivation_post: 'Đăng bài (Truyền động lực)',
+  expert_chat: 'Mở tư vấn chuyên gia',
 }
 
 const PLACEMENT_OPTIONS = [
@@ -108,7 +119,8 @@ function OverviewTab() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard icon={WalletIcon} label="Tổng doanh thu (gross)" value={formatVnd(data.grossTotalVnd)} />
+        <StatCard icon={WalletIcon} label="Doanh thu nạp ví & mua gói" value={formatVnd(data.paymentRevenueTotalVnd)} />
+        <StatCard icon={WalletIcon} label="Tổng doanh thu booking (gross)" value={formatVnd(data.grossTotalVnd)} />
         <StatCard icon={WalletIcon} label="Hoa hồng nền tảng" value={formatVnd(data.commissionTotalVnd)} />
         <StatCard icon={UserIcon} label="Thành viên" value={data.memberCount} />
         <StatCard icon={StethoscopeIcon} label="Chuyên gia" value={data.expertCount} />
@@ -116,6 +128,31 @@ function OverviewTab() {
         <StatCard icon={MapIcon} label="Đơn đối tác chờ duyệt" value={data.pendingVenueApplications} />
         <StatCard icon={CheckCircleIcon} label="Lịch hẹn chuyên gia" value={data.expertBookingCount} />
         <StatCard icon={CheckCircleIcon} label="Lượt đặt dịch vụ" value={data.venueBookingCount} />
+      </div>
+
+      <div className="rounded-2xl border border-[#c5e7dd] bg-white p-5 shadow-xs overflow-x-auto">
+        <h3 className="text-sm font-bold text-[#0e3b33]">Doanh thu theo loại thanh toán (ví &amp; gói)</h3>
+        <table className="mt-3 w-full text-left text-sm">
+          <thead>
+            <tr className="text-xs uppercase tracking-wider text-[#64748B]">
+              <th className="py-2 pr-4">Loại</th>
+              <th className="py-2 pr-4">Số giao dịch</th>
+              <th className="py-2 pr-4">Tổng tiền</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(data.paymentByPurpose || {}).map(([purpose, stat]) => (
+              <tr key={purpose} className="border-t border-[#eaf7f1]">
+                <td className="py-2 pr-4 font-semibold text-[#0e3b33]">{TRANSACTION_PURPOSE_LABELS[purpose] || purpose}</td>
+                <td className="py-2 pr-4">{stat.count}</td>
+                <td className="py-2 pr-4 font-bold text-[#2fa98c]">{formatVnd(stat.totalVnd)}</td>
+              </tr>
+            ))}
+            {Object.keys(data.paymentByPurpose || {}).length === 0 && (
+              <tr><td colSpan={3} className="py-4 text-center text-[#64748B]">Chưa có giao dịch nào.</td></tr>
+            )}
+          </tbody>
+        </table>
       </div>
 
       <div className="rounded-2xl border border-[#c5e7dd] bg-white p-5 shadow-xs overflow-x-auto">
@@ -152,35 +189,115 @@ function OverviewTab() {
   )
 }
 
-function MemberTransactionsRow({ member }) {
+// Chi tiết 1 thành viên — thông tin định danh (SĐT, ngày sinh, địa chỉ, ngân hàng, MXH) mà bảng
+// chính không đủ chỗ hiển thị, lịch sử giao dịch, và nút khoá/mở khoá tài khoản (nghi rửa tiền/gian
+// lận...). bank_account_masked chỉ có 4 số cuối theo thiết kế (xem schema.sql), không phải lỗi hiển thị.
+function MemberDetailRow({ member, onLockChanged }) {
   const [transactions, setTransactions] = useState(null)
   const [error, setError] = useState('')
+  const [lockBusy, setLockBusy] = useState(false)
+  const [lockError, setLockError] = useState('')
 
   useEffect(() => {
     adminApiClient.get(`/admin/members/${member.id}/transactions`).then(setTransactions).catch((err) => setError(err.message))
   }, [member.id])
 
+  async function handleLock() {
+    const reason = window.prompt('Lý do khoá tài khoản (hiện cho người dùng thấy khi họ đăng nhập):', '')
+    if (reason === null) return
+    setLockBusy(true)
+    setLockError('')
+    try {
+      const result = await adminApiClient.post(`/admin/members/${member.id}/lock`, { reason })
+      onLockChanged(member.id, result)
+    } catch (err) {
+      setLockError(err.message)
+    } finally {
+      setLockBusy(false)
+    }
+  }
+
+  async function handleUnlock() {
+    setLockBusy(true)
+    setLockError('')
+    try {
+      const result = await adminApiClient.post(`/admin/members/${member.id}/unlock`)
+      onLockChanged(member.id, result)
+    } catch (err) {
+      setLockError(err.message)
+    } finally {
+      setLockBusy(false)
+    }
+  }
+
   return (
     <tr className="border-t border-[#eaf7f1] bg-[#eaf7f1]/40">
-      <td colSpan={11} className="py-3 px-4">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#2fa98c]">Lịch sử giao dịch của {member.email}</p>
-        {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
-        {!transactions && !error && <p className="mt-2 text-xs text-[#64748B]">Đang tải...</p>}
-        {transactions && transactions.length === 0 && (
-          <p className="mt-2 text-xs text-[#64748B]">Chưa có giao dịch nào.</p>
-        )}
-        {transactions && transactions.length > 0 && (
-          <div className="mt-2 space-y-1.5">
-            {transactions.map((t) => (
-              <div key={t.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-white border border-[#c5e7dd] px-3 py-2 text-xs">
-                <span className="font-semibold text-[#0e3b33]">{TRANSACTION_PURPOSE_LABELS[t.purpose] || t.purpose}</span>
-                <span className="text-[#64748B]">{formatDateTime(t.completedAt || t.createdAt)}</span>
-                <span className="font-mono text-[#64748B]">{t.providerRef}</span>
-                <span className="font-bold text-[#2fa98c]">{formatVnd(t.amountVnd)}</span>
-              </div>
-            ))}
+      <td colSpan={12} className="py-3 px-4 space-y-4">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-[#2fa98c]">Thông tin thành viên</p>
+          <div className="mt-2 grid gap-x-6 gap-y-1.5 text-xs sm:grid-cols-2 lg:grid-cols-3">
+            <p><span className="text-[#64748B]">Ngày sinh:</span> <span className="font-semibold text-[#0e3b33]">{member.dateOfBirth ? formatDate(member.dateOfBirth) : 'Chưa có'}</span></p>
+            <p><span className="text-[#64748B]">Địa chỉ:</span> <span className="font-semibold text-[#0e3b33]">{member.addressVi || 'Chưa có'}</span></p>
+            <p>
+              <span className="text-[#64748B]">Mạng xã hội:</span>{' '}
+              {member.socialLink ? (
+                <a href={member.socialLink} target="_blank" rel="noopener noreferrer" className="font-semibold text-[#2fa98c] hover:underline">{member.socialLink}</a>
+              ) : <span className="font-semibold text-[#0e3b33]">Chưa có</span>}
+            </p>
+            <p><span className="text-[#64748B]">Ngân hàng liên kết:</span> <span className="font-semibold text-[#0e3b33]">{member.bankName || 'Chưa có'}</span></p>
+            <p><span className="text-[#64748B]">Số TK (4 số cuối):</span> <span className="font-mono font-semibold text-[#0e3b33]">{member.bankAccountMasked || 'Chưa có'}</span></p>
+            <p><span className="text-[#64748B]">Liên kết ngân hàng lúc:</span> <span className="font-semibold text-[#0e3b33]">{member.bankLinkedAt ? formatDateTime(member.bankLinkedAt) : 'Chưa có'}</span></p>
           </div>
-        )}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {member.isLocked ? (
+              <>
+                <span className="rounded-full bg-rose-50 border border-rose-200 px-3 py-1 text-[11px] font-bold text-rose-600">
+                  Đã khoá{member.lockedReason ? `: ${member.lockedReason}` : ''}
+                </span>
+                <button
+                  type="button"
+                  disabled={lockBusy}
+                  onClick={handleUnlock}
+                  className="rounded-lg border border-[#c5e7dd] px-3 py-1.5 text-[11px] font-bold text-[#2fa98c] hover:border-[#2fa98c] disabled:opacity-60"
+                >
+                  Mở khoá
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                disabled={lockBusy}
+                onClick={handleLock}
+                className="flex items-center gap-1 rounded-lg border border-rose-200 px-3 py-1.5 text-[11px] font-bold text-rose-600 hover:bg-rose-50 disabled:opacity-60"
+              >
+                <LockIcon className="h-3 w-3" />
+                Khoá tài khoản
+              </button>
+            )}
+            {lockError && <span className="text-[11px] font-medium text-rose-600">{lockError}</span>}
+          </div>
+        </div>
+
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wider text-[#2fa98c]">Lịch sử giao dịch của {member.email}</p>
+          {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
+          {!transactions && !error && <p className="mt-2 text-xs text-[#64748B]">Đang tải...</p>}
+          {transactions && transactions.length === 0 && (
+            <p className="mt-2 text-xs text-[#64748B]">Chưa có giao dịch nào.</p>
+          )}
+          {transactions && transactions.length > 0 && (
+            <div className="mt-2 space-y-1.5">
+              {transactions.map((t) => (
+                <div key={t.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-white border border-[#c5e7dd] px-3 py-2 text-xs">
+                  <span className="font-semibold text-[#0e3b33]">{TRANSACTION_PURPOSE_LABELS[t.purpose] || t.purpose}</span>
+                  <span className="text-[#64748B]">{formatDateTime(t.completedAt || t.createdAt)}</span>
+                  <span className="font-mono text-[#64748B]">{t.providerRef}</span>
+                  <span className="font-bold text-[#2fa98c]">{formatVnd(t.amountVnd)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </td>
     </tr>
   )
@@ -194,6 +311,12 @@ function MembersTab() {
   useEffect(() => {
     adminApiClient.get('/admin/members').then(setMembers).catch((err) => setError(err.message))
   }, [])
+
+  function handleLockChanged(memberId, result) {
+    setMembers((prev) => prev.map((m) => (m.id === memberId
+      ? { ...m, isLocked: result.isLocked, lockedReason: result.lockedReason, lockedAt: result.lockedAt }
+      : m)))
+  }
 
   if (error) return <p className="text-sm text-rose-600">{error}</p>
   if (!members) return <p className="text-sm text-[#64748B]">Đang tải...</p>
@@ -213,6 +336,7 @@ function MembersTab() {
             <th className="py-2 pr-4">Lịch hẹn CG</th>
             <th className="py-2 pr-4">Đặt dịch vụ</th>
             <th className="py-2 pr-4">Đánh giá</th>
+            <th className="py-2 pr-4">Trạng thái</th>
             <th className="py-2 pr-4"></th>
           </tr>
         </thead>
@@ -231,21 +355,28 @@ function MembersTab() {
                 <td className="py-2 pr-4">{m.venueBookingCount}</td>
                 <td className="py-2 pr-4">{m.reviewCount}</td>
                 <td className="py-2 pr-4">
+                  {m.isLocked ? (
+                    <span className="rounded-full bg-rose-50 border border-rose-200 px-2.5 py-0.5 text-[11px] font-bold text-rose-600">Đã khoá</span>
+                  ) : (
+                    <span className="rounded-full bg-[#6F9D8D]/15 border border-[#6F9D8D]/30 px-2.5 py-0.5 text-[11px] font-bold text-[#2fa98c]">Hoạt động</span>
+                  )}
+                </td>
+                <td className="py-2 pr-4">
                   <button
                     type="button"
                     onClick={() => setExpandedId(expandedId === m.id ? null : m.id)}
                     className="flex items-center gap-1 rounded-lg border border-[#c5e7dd] px-2.5 py-1 text-[11px] font-bold text-[#2fa98c] hover:border-[#2fa98c]"
                   >
                     <HistoryIcon className="h-3 w-3" />
-                    {expandedId === m.id ? 'Ẩn' : 'Giao dịch'}
+                    {expandedId === m.id ? 'Ẩn' : 'Chi tiết'}
                   </button>
                 </td>
               </tr>
-              {expandedId === m.id && <MemberTransactionsRow member={m} />}
+              {expandedId === m.id && <MemberDetailRow member={m} onLockChanged={handleLockChanged} />}
             </Fragment>
           ))}
           {members.length === 0 && (
-            <tr><td colSpan={11} className="py-4 text-center text-[#64748B]">Chưa có thành viên nào.</td></tr>
+            <tr><td colSpan={12} className="py-4 text-center text-[#64748B]">Chưa có thành viên nào.</td></tr>
           )}
         </tbody>
       </table>
@@ -734,9 +865,125 @@ function SponsoredPlacementsTab() {
   )
 }
 
+// Nhật ký hoạt động trang web — chỉ thao tác quan trọng (nạp tiền, mua gói, đặt lịch/dịch vụ, đăng
+// bài, mở tư vấn chuyên gia...), KHÔNG log việc chuyển tab. Lọc theo loại + tìm theo tên/email, phân
+// trang kiểu "Tải thêm" (offset cộng dồn) thay vì số trang cho đơn giản.
+const ACTIVITY_PAGE_SIZE = 30
+
+function ActivityTab() {
+  const [items, setItems] = useState([])
+  const [total, setTotal] = useState(0)
+  const [type, setType] = useState('')
+  const [q, setQ] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  function load(offset, replace) {
+    setLoading(true)
+    setError('')
+    const params = new URLSearchParams({ limit: String(ACTIVITY_PAGE_SIZE), offset: String(offset) })
+    if (type) params.set('type', type)
+    if (q.trim()) params.set('q', q.trim())
+    adminApiClient
+      .get(`/admin/activity?${params.toString()}`)
+      .then((data) => {
+        setItems((prev) => (replace ? data.items : [...prev, ...data.items]))
+        setTotal(data.total)
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => { load(0, true) }, [type])
+
+  function handleSearchSubmit(e) {
+    e.preventDefault()
+    load(0, true)
+  }
+
+  return (
+    <div className="space-y-4">
+      <form onSubmit={handleSearchSubmit} className="flex flex-wrap items-center gap-2">
+        <select
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          className="rounded-xl border border-[#c5e7dd] bg-white px-3 py-2 text-xs font-semibold text-[#0e3b33] focus:border-[#2fa98c] focus:outline-none"
+        >
+          <option value="">Tất cả loại hoạt động</option>
+          {Object.entries(ACTIVITY_TYPE_LABELS).map(([key, label]) => (
+            <option key={key} value={key}>{label}</option>
+          ))}
+        </select>
+        <input
+          type="text"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Tìm theo tên hoặc email..."
+          className="min-w-[220px] flex-1 rounded-xl border border-[#c5e7dd] bg-white px-3.5 py-2 text-xs text-[#0e3b33] focus:border-[#2fa98c] focus:outline-none"
+        />
+        <button type="submit" className="rounded-xl bg-[#2fa98c] px-4 py-2 text-xs font-bold text-white hover:bg-[#0e3b33]">
+          Tìm
+        </button>
+      </form>
+
+      {error && <p className="text-sm text-rose-600">{error}</p>}
+
+      <div className="rounded-2xl border border-[#c5e7dd] bg-white p-5 shadow-xs overflow-x-auto">
+        <table className="w-full text-left text-sm">
+          <thead>
+            <tr className="text-xs uppercase tracking-wider text-[#64748B]">
+              <th className="py-2 pr-4">Thời gian</th>
+              <th className="py-2 pr-4">Thành viên</th>
+              <th className="py-2 pr-4">Loại</th>
+              <th className="py-2 pr-4">Nội dung</th>
+              <th className="py-2 pr-4">Số tiền</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((it) => (
+              <tr key={it.id} className="border-t border-[#eaf7f1]">
+                <td className="py-2 pr-4 whitespace-nowrap text-xs text-[#64748B]">{formatDateTime(it.createdAt)}</td>
+                <td className="py-2 pr-4">
+                  <p className="font-semibold text-[#0e3b33]">{it.userName}</p>
+                  <p className="text-[11px] text-[#64748B]">{it.userEmail}</p>
+                </td>
+                <td className="py-2 pr-4">
+                  <span className="rounded-full bg-[#6F9D8D]/15 border border-[#6F9D8D]/30 px-2.5 py-0.5 text-[11px] font-bold text-[#2fa98c]">
+                    {ACTIVITY_TYPE_LABELS[it.type] || it.type}
+                  </span>
+                </td>
+                <td className="py-2 pr-4 text-[#0e3b33]">{it.description}</td>
+                <td className="py-2 pr-4 font-bold text-[#2fa98c]">{it.amountVnd != null ? formatVnd(it.amountVnd) : '—'}</td>
+              </tr>
+            ))}
+            {items.length === 0 && !loading && (
+              <tr><td colSpan={5} className="py-4 text-center text-[#64748B]">Không có hoạt động nào khớp bộ lọc.</td></tr>
+            )}
+          </tbody>
+        </table>
+
+        {loading && <p className="mt-3 text-center text-xs text-[#64748B]">Đang tải...</p>}
+
+        {!loading && items.length < total && (
+          <div className="mt-3 flex justify-center">
+            <button
+              type="button"
+              onClick={() => load(items.length, false)}
+              className="rounded-xl border border-[#c5e7dd] px-4 py-2 text-xs font-bold text-[#2fa98c] hover:border-[#2fa98c]"
+            >
+              Tải thêm ({items.length}/{total})
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 const TABS = [
   { key: 'overview', label: 'Tổng quan', icon: WalletIcon, Component: OverviewTab },
   { key: 'members', label: 'Thành viên', icon: UserIcon, Component: MembersTab },
+  { key: 'activity', label: 'Lịch sử', icon: HistoryIcon, Component: ActivityTab },
   { key: 'experts', label: 'Chuyên gia', icon: StethoscopeIcon, Component: ExpertsTab },
   { key: 'venues', label: 'Đăng ký đối tác', icon: MapIcon, Component: VenueApplicationsTab },
   { key: 'expert-applications', label: 'Ứng tuyển chuyên gia', icon: StethoscopeIcon, Component: ExpertApplicationsTab },

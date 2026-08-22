@@ -1,16 +1,22 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 import { apiClient } from '../lib/apiClient'
-import { CheckCircleIcon, WarningIcon, SparklesIcon, SearchIcon, HistoryIcon, StethoscopeIcon, MapIcon } from '../components/Icons'
+import { CheckCircleIcon, WarningIcon, SparklesIcon, SearchIcon, HistoryIcon, StethoscopeIcon, MapIcon, WalletIcon } from '../components/Icons'
 import { RESULT } from '../logic/matchEngine'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { formatVnd, formatDateTime } from '../lib/format'
 
-const TABS = [
+// Tất cả loại hoạt động gộp chung 1 dòng thời gian, sắp mới nhất trước — bấm nút lọc bên dưới để
+// thu hẹp về đúng 1 loại, mặc định ('all') hiện hết. Trước đây mỗi loại là 1 tab tách biệt, vào
+// trang chỉ thấy đúng tab "Quét sản phẩm", các hoạt động khác (giao dịch, lịch hẹn...) bị ẩn hoàn
+// toàn cho tới khi tự bấm qua tab khác.
+const FILTERS = [
+  { key: 'all', label: 'Tất cả', icon: HistoryIcon },
   { key: 'scan', label: 'Quét sản phẩm', icon: SparklesIcon },
-  { key: 'transactions', label: 'Giao dịch', icon: HistoryIcon },
+  { key: 'transactions', label: 'Giao dịch', icon: WalletIcon },
+  { key: 'vouchers', label: 'Voucher', icon: HistoryIcon },
   { key: 'expert-bookings', label: 'Lịch hẹn chuyên gia', icon: StethoscopeIcon },
   { key: 'venue-bookings', label: 'Đặt dịch vụ', icon: MapIcon },
 ]
@@ -21,95 +27,14 @@ const TRANSACTION_PURPOSE_LABELS = {
   venue_deposit: 'Đặt cọc dịch vụ',
 }
 
-function TransactionsTab() {
-  const [transactions, setTransactions] = useState(null)
-
-  useEffect(() => {
-    apiClient.get('/chat/wallet/transactions', { auth: true }).then(setTransactions).catch(() => setTransactions([]))
-  }, [])
-
-  if (transactions === null) return <p className="text-center text-sm text-[#64748B] py-10">Đang tải...</p>
-  if (transactions.length === 0) return <p className="text-center text-sm text-[#64748B] py-10">Chưa có giao dịch nào.</p>
-
-  return (
-    <div className="space-y-3">
-      {transactions.map((t) => (
-        <div key={t.id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-[#E8ECEE] bg-white px-5 py-4 shadow-xs">
-          <div>
-            <p className="font-bold text-[#0e3b33]">{TRANSACTION_PURPOSE_LABELS[t.purpose] || t.purpose}</p>
-            <p className="text-xs text-[#64748B]">
-              {formatDateTime(t.completedAt || t.createdAt)} · Mã: <span className="font-mono">{t.providerRef}</span>
-            </p>
-          </div>
-          <span className="font-bold text-[#2fa98c]">{formatVnd(t.amountVnd)}</span>
-        </div>
-      ))}
-    </div>
-  )
+const VOUCHER_SOURCE_LABELS = {
+  points_redeem: 'Đổi điểm tích luỹ',
+  game_reward: 'Thưởng minigame Skin Lab',
+  package_bonus: 'Tặng kèm mua Gói Trợ Lý',
+  welcome_gift: 'Quà chào mừng',
 }
 
-function ExpertBookingsTab() {
-  const [bookings, setBookings] = useState(null)
-
-  useEffect(() => {
-    apiClient.get('/experts/bookings/mine', { auth: true }).then(setBookings).catch(() => setBookings([]))
-  }, [])
-
-  if (bookings === null) return <p className="text-center text-sm text-[#64748B] py-10">Đang tải...</p>
-  if (bookings.length === 0) return <p className="text-center text-sm text-[#64748B] py-10">Chưa có lịch hẹn chuyên gia nào.</p>
-
-  return (
-    <div className="space-y-3">
-      {bookings.map((b) => (
-        <Link
-          key={b.id}
-          to={`/my-bookings/${b.id}`}
-          className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-[#E8ECEE] bg-white px-5 py-4 shadow-xs hover:border-[#2fa98c] transition"
-        >
-          <div>
-            <p className="font-bold text-[#0e3b33]">{b.expert?.name} <span className="font-normal text-[#64748B]">· {b.expert?.specialty}</span></p>
-            <p className="text-xs text-[#64748B]">Khung giờ: {b.slot} · Đặt lúc {formatDateTime(b.createdAt)}</p>
-          </div>
-          <span className={`rounded-full px-3 py-1 text-xs font-bold ${
-            b.status === 'completed' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-[#2fa98c]/10 text-[#2fa98c]'
-          }`}>
-            {b.status === 'completed' ? 'Đã hoàn tất' : 'Đã đặt lịch'}
-          </span>
-        </Link>
-      ))}
-    </div>
-  )
-}
-
-function VenueBookingsTab() {
-  const [bookings, setBookings] = useState(null)
-
-  useEffect(() => {
-    apiClient.get('/venues/bookings/mine', { auth: true }).then(setBookings).catch(() => setBookings([]))
-  }, [])
-
-  if (bookings === null) return <p className="text-center text-sm text-[#64748B] py-10">Đang tải...</p>
-  if (bookings.length === 0) return <p className="text-center text-sm text-[#64748B] py-10">Chưa có lượt đặt dịch vụ nào.</p>
-
-  return (
-    <div className="space-y-3">
-      {bookings.map((b) => (
-        <div key={b.id} className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-[#E8ECEE] bg-white px-5 py-4 shadow-xs">
-          <div>
-            <p className="font-bold text-[#0e3b33]">Mã hoá đơn: <span className="font-mono">{b.invoiceCode}</span></p>
-            <p className="text-xs text-[#64748B]">Đặt lúc {formatDateTime(b.createdAt)}</p>
-          </div>
-          <div className="text-right">
-            <span className="font-bold text-[#2fa98c]">{formatVnd(b.finalPriceVnd)}</span>
-            <p className="text-[11px] text-[#64748B] capitalize">{b.status.replace('_', ' ')}</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-const THEME = {
+const SCAN_THEME = {
   [RESULT.SUITABLE]: {
     badge: 'bg-[#6F9D8D]/15 text-[#2fa98c] border border-[#6F9D8D]/30',
     label: 'Phù hợp hoàn toàn',
@@ -131,20 +56,161 @@ function formatDate(timestamp) {
   return date.toLocaleString('vi-VN', { dateStyle: 'medium', timeStyle: 'short' })
 }
 
+// Khung thẻ dùng chung cho mọi loại hoạt động — badge loại + thời gian ở trên, tiêu đề + nội dung
+// riêng của từng loại ở dưới (children).
+function ActivityCard({ icon: Icon, typeLabel, createdAt, children }) {
+  return (
+    <div className="rounded-[24px] border border-[#E8ECEE] bg-[#FCFDFC] p-6 shadow-xs hover:border-[#2fa98c] transition-all space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#2fa98c]/10 px-3 py-1 text-[11px] font-bold text-[#2fa98c]">
+          <Icon className="h-3.5 w-3.5" />
+          {typeLabel}
+        </span>
+        <span className="font-mono text-xs text-[#64748B]">{formatDate(createdAt)}</span>
+      </div>
+      {children}
+    </div>
+  )
+}
+
+function ScanCard({ entry }) {
+  const theme = entry.result ? SCAN_THEME[entry.result] : null
+  return (
+    <ActivityCard icon={SparklesIcon} typeLabel="Quét sản phẩm" createdAt={entry.createdAt}>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <h3 className="font-display text-lg font-black text-[#0e3b33] leading-snug">
+          {entry.matchedItemName || entry.productName || 'Không nhận diện được sản phẩm'}
+        </h3>
+        {theme && (
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-extrabold shrink-0 ${theme.badge}`}>
+            <theme.icon className="h-3.5 w-3.5" />
+            {theme.label}
+          </span>
+        )}
+      </div>
+      {entry.reason && (
+        <div className="rounded-2xl bg-white border border-[#c5e7dd] p-4 space-y-1">
+          <p className="text-xs font-bold text-[#2fa98c] uppercase tracking-wider">Phân tích từ AI Assistant</p>
+          <p className="text-sm leading-relaxed text-[#0e3b33] font-normal">{entry.reason}</p>
+        </div>
+      )}
+    </ActivityCard>
+  )
+}
+
+function TransactionCard({ t }) {
+  return (
+    <ActivityCard icon={WalletIcon} typeLabel="Giao dịch" createdAt={t.completedAt || t.createdAt}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="font-bold text-[#0e3b33]">{TRANSACTION_PURPOSE_LABELS[t.purpose] || t.purpose}</p>
+        <span className="font-bold text-[#2fa98c]">{formatVnd(t.amountVnd)}</span>
+      </div>
+      <p className="text-xs text-[#64748B]">Mã: <span className="font-mono">{t.providerRef}</span></p>
+    </ActivityCard>
+  )
+}
+
+function VoucherCard({ v }) {
+  return (
+    <ActivityCard icon={HistoryIcon} typeLabel="Voucher" createdAt={v.obtainedAt}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="font-bold text-[#0e3b33]">{v.titleVi}</p>
+        <span className={`rounded-full px-3 py-1 text-xs font-bold ${
+          v.usedAt ? 'bg-[#eaf7f1] text-[#64748B]' : 'bg-[#2fa98c]/10 text-[#2fa98c]'
+        }`}>
+          {v.usedAt ? 'Đã dùng' : 'Chưa dùng'}
+        </span>
+      </div>
+      <p className="text-xs text-[#64748B]">{VOUCHER_SOURCE_LABELS[v.obtainedVia] || v.obtainedVia}</p>
+      {v.obtainedVia === 'points_redeem' && v.pointsSpent != null && (
+        <p className="text-xs text-[#64748B]">
+          Đã đổi <span className="font-bold text-[#A87A45]">-{v.pointsSpent} điểm</span>
+          {v.pointsBalanceAfter != null && <> · còn lại <span className="font-bold text-[#0e3b33]">{v.pointsBalanceAfter} điểm</span></>}
+        </p>
+      )}
+    </ActivityCard>
+  )
+}
+
+function ExpertBookingCard({ b }) {
+  return (
+    <ActivityCard icon={StethoscopeIcon} typeLabel="Lịch hẹn chuyên gia" createdAt={b.createdAt}>
+      <Link to={`/my-bookings/${b.id}`} className="flex flex-wrap items-center justify-between gap-2 hover:text-[#2fa98c]">
+        <div>
+          <p className="font-bold text-[#0e3b33]">{b.expert?.name} <span className="font-normal text-[#64748B]">· {b.expert?.specialty}</span></p>
+          <p className="text-xs text-[#64748B]">Khung giờ: {b.slot}</p>
+        </div>
+        <span className={`rounded-full px-3 py-1 text-xs font-bold shrink-0 ${
+          b.status === 'completed' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-[#2fa98c]/10 text-[#2fa98c]'
+        }`}>
+          {b.status === 'completed' ? 'Đã hoàn tất' : 'Đã đặt lịch'}
+        </span>
+      </Link>
+    </ActivityCard>
+  )
+}
+
+function VenueBookingCard({ b }) {
+  return (
+    <ActivityCard icon={MapIcon} typeLabel="Đặt dịch vụ" createdAt={b.createdAt}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="font-bold text-[#0e3b33]">Mã hoá đơn: <span className="font-mono">{b.invoiceCode}</span></p>
+        <div className="text-right">
+          <span className="font-bold text-[#2fa98c]">{formatVnd(b.finalPriceVnd)}</span>
+          <p className="text-[11px] text-[#64748B] capitalize">{b.status.replace('_', ' ')}</p>
+        </div>
+      </div>
+    </ActivityCard>
+  )
+}
+
 function ScanHistoryPage() {
   useDocumentTitle('Lịch sử')
   const { user, ready } = useAuth()
-  const [history, setHistory] = useState(null)
+  const [scanHistory, setScanHistory] = useState(null)
+  const [transactions, setTransactions] = useState(null)
+  const [vouchers, setVouchers] = useState(null)
+  const [expertBookings, setExpertBookings] = useState(null)
+  const [venueBookings, setVenueBookings] = useState(null)
   const [error, setError] = useState('')
-  const [activeTab, setActiveTab] = useState('scan')
+  const [filter, setFilter] = useState('all')
 
   useEffect(() => {
     if (!user) return
-    apiClient
-      .get('/scan/history', { auth: true })
-      .then(setHistory)
-      .catch((err) => setError(err.message))
+    apiClient.get('/scan/history', { auth: true }).then(setScanHistory).catch((err) => setError(err.message))
+    apiClient.get('/chat/wallet/transactions', { auth: true }).then(setTransactions).catch(() => setTransactions([]))
+    apiClient.get('/vouchers/mine', { auth: true }).then(setVouchers).catch(() => setVouchers([]))
+    apiClient.get('/experts/bookings/mine', { auth: true }).then(setExpertBookings).catch(() => setExpertBookings([]))
+    apiClient.get('/venues/bookings/mine', { auth: true }).then(setVenueBookings).catch(() => setVenueBookings([]))
   }, [user])
+
+  const loading = scanHistory === null || transactions === null || vouchers === null
+    || expertBookings === null || venueBookings === null
+
+  // Gộp 5 nguồn thành 1 danh sách chung, mỗi phần tử gắn `type` để lọc và `createdAt` để sắp xếp,
+  // sắp mới nhất trước. Chỉ tính khi đủ dữ liệu (tránh gộp lại mỗi lần 1 nguồn riêng lẻ trả về).
+  const items = useMemo(() => {
+    if (loading) return []
+    const all = [
+      ...(scanHistory || []).map((e) => ({ type: 'scan', createdAt: e.createdAt, key: `scan-${e.id}`, data: e })),
+      ...(transactions || []).map((t) => ({ type: 'transactions', createdAt: t.completedAt || t.createdAt, key: `tx-${t.id}`, data: t })),
+      ...(vouchers || []).map((v) => ({ type: 'vouchers', createdAt: v.obtainedAt, key: `voucher-${v.id}`, data: v })),
+      ...(expertBookings || []).map((b) => ({ type: 'expert-bookings', createdAt: b.createdAt, key: `expert-${b.id}`, data: b })),
+      ...(venueBookings || []).map((b) => ({ type: 'venue-bookings', createdAt: b.createdAt, key: `venue-${b.id}`, data: b })),
+    ]
+    return all.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  }, [loading, scanHistory, transactions, vouchers, expertBookings, venueBookings])
+
+  const filteredItems = filter === 'all' ? items : items.filter((i) => i.type === filter)
+
+  const countsByType = useMemo(() => {
+    const counts = { all: items.length }
+    for (const f of FILTERS) {
+      if (f.key === 'all') continue
+      counts[f.key] = items.filter((i) => i.type === f.key).length
+    }
+    return counts
+  }, [items])
 
   // UNAUTHENTICATED STATE
   if (ready && !user) {
@@ -200,11 +266,6 @@ function ScanHistoryPage() {
     )
   }
 
-  // Calculate Summary Stats from History
-  const totalScans = history?.length || 0
-  const suitableCount = history?.filter((e) => e.result === RESULT.SUITABLE).length || 0
-  const cautionCount = history?.filter((e) => e.result === RESULT.CAUTION).length || 0
-
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-[#eaf7f1] via-[#FCFDFC] to-[#eaf7f1] py-16 px-4 sm:px-6 lg:px-8 mt-12 overflow-hidden">
       {/* Soft Ambient Radial Lighting Circles */}
@@ -234,85 +295,57 @@ function ScanHistoryPage() {
           </h1>
 
           <p className="mx-auto max-w-2xl text-base sm:text-lg leading-relaxed text-[#64748B] font-normal">
-            Toàn bộ lịch sử quét sản phẩm, giao dịch ví, lịch hẹn chuyên gia và đặt dịch vụ của bạn.
+            Toàn bộ lịch sử quét sản phẩm, giao dịch ví, voucher, lịch hẹn chuyên gia và đặt dịch vụ của bạn, gộp chung 1 dòng thời gian.
           </p>
-
-          {/* DASHBOARD SUMMARY METRICS CARDS */}
-          {activeTab === 'scan' && history !== null && (
-            <div className="mt-8 grid gap-4 grid-cols-3 text-left">
-              <div className="rounded-2xl bg-white border border-[#E8ECEE] p-5 shadow-xs">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#64748B]">Tổng quét</p>
-                <p className="mt-2 font-display text-3xl font-black text-[#0e3b33]">{totalScans}</p>
-                <p className="mt-1 text-[11px] text-[#64748B]">Lần phân tích AI</p>
-              </div>
-
-              <div className="rounded-2xl bg-white border border-[#E8ECEE] p-5 shadow-xs">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#2fa98c]">Phù hợp</p>
-                <p className="mt-2 font-display text-3xl font-black text-[#2fa98c]">{suitableCount}</p>
-                <p className="mt-1 text-[11px] text-[#64748B]">Tương thích cao</p>
-              </div>
-
-              <div className="rounded-2xl bg-white border border-[#E8ECEE] p-5 shadow-xs">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#A87A45]">Cân nhắc</p>
-                <p className="mt-2 font-display text-3xl font-black text-[#A87A45]">{cautionCount}</p>
-                <p className="mt-1 text-[11px] text-[#64748B]">Chú ý thành phần</p>
-              </div>
-            </div>
-          )}
         </motion.div>
 
-        {/* TAB SWITCHER */}
+        {/* FILTER SWITCHER */}
         <div className="flex flex-wrap items-center justify-center gap-2">
-          {TABS.map((tab) => (
+          {FILTERS.map((f) => (
             <button
-              key={tab.key}
+              key={f.key}
               type="button"
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => setFilter(f.key)}
               className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition ${
-                activeTab === tab.key ? 'bg-[#2fa98c] text-white' : 'bg-white border border-[#c5e7dd] text-[#64748B]'
+                filter === f.key ? 'bg-[#2fa98c] text-white' : 'bg-white border border-[#c5e7dd] text-[#64748B]'
               }`}
             >
-              <tab.icon className="h-3.5 w-3.5" />
-              {tab.label}
+              <f.icon className="h-3.5 w-3.5" />
+              {f.label}
+              {!loading && countsByType[f.key] > 0 && (
+                <span className={`ml-0.5 rounded-full px-1.5 text-[10px] ${
+                  filter === f.key ? 'bg-white/20' : 'bg-[#eaf7f1]'
+                }`}>
+                  {countsByType[f.key]}
+                </span>
+              )}
             </button>
           ))}
         </div>
 
-        {activeTab === 'transactions' && <TransactionsTab />}
-        {activeTab === 'expert-bookings' && <ExpertBookingsTab />}
-        {activeTab === 'venue-bookings' && <VenueBookingsTab />}
-
-        {/* CONTENT TIMELINE AREA (tab "Quét sản phẩm") */}
-        {activeTab === 'scan' && (
+        {/* CONTENT */}
         <div className="space-y-6">
-          {/* ERROR ALERT */}
           {error && (
             <div className="mx-auto max-w-xl rounded-2xl bg-rose-50 border border-rose-200 p-5 text-center text-sm font-bold text-rose-700">
               {error}
             </div>
           )}
 
-          {/* LOADING SKELETON CARDS */}
-          {!error && history === null && (
+          {!error && loading && (
             <div className="space-y-6">
               {[1, 2, 3].map((n) => (
-                <div
-                  key={n}
-                  className="rounded-[28px] border border-[#E8ECEE] bg-[#FCFDFC] p-8 shadow-xs animate-pulse space-y-4"
-                >
+                <div key={n} className="rounded-[24px] border border-[#E8ECEE] bg-[#FCFDFC] p-6 shadow-xs animate-pulse space-y-4">
                   <div className="flex justify-between items-center">
                     <div className="h-4 w-32 bg-[#E8ECEE] rounded-full" />
-                    <div className="h-6 w-24 bg-[#E8ECEE] rounded-full" />
+                    <div className="h-4 w-24 bg-[#E8ECEE] rounded-full" />
                   </div>
                   <div className="h-6 w-2/3 bg-[#E8ECEE] rounded-xl" />
-                  <div className="h-16 w-full bg-[#E8ECEE] rounded-2xl" />
                 </div>
               ))}
             </div>
           )}
 
-          {/* EMPTY HISTORY STATE */}
-          {history?.length === 0 && (
+          {!loading && filteredItems.length === 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -322,10 +355,10 @@ function ScanHistoryPage() {
                 <SparklesIcon className="h-8 w-8" />
               </div>
               <h2 className="font-display text-2xl font-bold text-[#0e3b33]">
-                Chưa có lịch sử quét
+                {filter === 'all' ? 'Chưa có hoạt động nào' : 'Chưa có mục nào ở đây'}
               </h2>
               <p className="text-sm leading-relaxed text-[#64748B] max-w-md mx-auto font-normal">
-                Bạn chưa thực hiện lần quét ảnh sản phẩm nào. Hãy quét nhãn mỹ phẩm hoặc thực phẩm đầu tiên để AI phân tích đối chiếu.
+                Hãy quét nhãn mỹ phẩm hoặc thực phẩm đầu tiên để AI phân tích đối chiếu, hoặc khám phá các tính năng khác của HEALTHY SKIN.
               </p>
               <div className="pt-2">
                 <motion.div
@@ -352,71 +385,25 @@ function ScanHistoryPage() {
             </motion.div>
           )}
 
-          {/* SCAN HISTORY TIMELINE */}
-          {history && history.length > 0 && (
-            <div className="relative space-y-8 before:absolute before:left-4 sm:before:left-6 before:top-6 before:bottom-6 before:w-[2px] before:bg-gradient-to-b before:from-[#2fa98c]/40 before:via-[#70c4af]/50 before:to-[#6F9D8D]/20">
-              {history.map((entry, index) => {
-                const theme = entry.result ? THEME[entry.result] : null
-                const Icon = theme?.icon
-
-                return (
-                  <motion.div
-                    key={entry.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.08 }}
-                    className="relative pl-10 sm:pl-14"
-                  >
-                    {/* Timeline Node Icon */}
-                    <div className="absolute left-1.5 sm:left-3.5 top-6 -translate-x-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-[#2fa98c] text-white ring-4 ring-[#eaf7f1] shadow-sm">
-                      <SparklesIcon className="h-3 w-3 text-white" />
-                    </div>
-
-                    <motion.div
-                      whileHover={{ y: -4, scale: 1.005 }}
-                      transition={{ duration: 0.3 }}
-                      className="rounded-[28px] border border-[#E8ECEE] bg-[#FCFDFC] p-7 shadow-[0_12px_40px_rgba(47, 169, 140,0.06)] hover:border-[#2fa98c] hover:shadow-[0_20px_50px_rgba(47, 169, 140,0.12)] transition-all space-y-4"
-                    >
-                      {/* CARD TOP ROW: TIMESTAMP & RESULT BADGE */}
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <span className="font-mono text-xs font-bold text-[#2fa98c] bg-[#2fa98c]/10 border border-[#2fa98c]/20 px-3 py-1 rounded-full">
-                          {formatDate(entry.createdAt)}
-                        </span>
-
-                        {entry.result && (
-                          <span
-                            className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-extrabold shadow-xs ${theme.badge}`}
-                          >
-                            <Icon className="h-3.5 w-3.5" />
-                            {theme.label || entry.result}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* PRODUCT NAME */}
-                      <h2 className="font-display text-xl sm:text-2xl font-black text-[#0e3b33] leading-snug">
-                        {entry.matchedItemName || entry.productName || 'Không nhận diện được sản phẩm'}
-                      </h2>
-
-                      {/* AI EXPLANATION / INSIGHT CARD */}
-                      {entry.reason && (
-                        <div className="rounded-2xl bg-white border border-[#c5e7dd] p-5 space-y-1.5 shadow-xs">
-                          <p className="text-xs font-bold text-[#2fa98c] uppercase tracking-wider">
-                            Phân tích từ AI Assistant
-                          </p>
-                          <p className="text-sm leading-relaxed text-[#0e3b33] font-normal">
-                            {entry.reason}
-                          </p>
-                        </div>
-                      )}
-                    </motion.div>
-                  </motion.div>
-                )
-              })}
+          {!loading && filteredItems.length > 0 && (
+            <div className="space-y-5">
+              {filteredItems.map((item, index) => (
+                <motion.div
+                  key={item.key}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: Math.min(index, 8) * 0.05 }}
+                >
+                  {item.type === 'scan' && <ScanCard entry={item.data} />}
+                  {item.type === 'transactions' && <TransactionCard t={item.data} />}
+                  {item.type === 'vouchers' && <VoucherCard v={item.data} />}
+                  {item.type === 'expert-bookings' && <ExpertBookingCard b={item.data} />}
+                  {item.type === 'venue-bookings' && <VenueBookingCard b={item.data} />}
+                </motion.div>
+              ))}
             </div>
           )}
         </div>
-        )}
       </div>
     </div>
   )

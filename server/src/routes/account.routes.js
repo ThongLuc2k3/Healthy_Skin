@@ -23,11 +23,11 @@ router.get('/bank-options', (req, res) => {
 })
 
 router.put('/', requireAuth, asyncHandler(async (req, res) => {
-  const { fullName, phone, dateOfBirth, addressVi } = req.body ?? {}
+  const { fullName, phone, dateOfBirth, addressVi, socialLink } = req.body ?? {}
   if (typeof fullName !== 'string' || !fullName.trim()) {
     return res.status(400).json({ error: 'Vui lòng nhập họ tên.' })
   }
-  res.json(await updateAccountInfo(req.userId, { fullName, phone, dateOfBirth, addressVi }))
+  res.json(await updateAccountInfo(req.userId, { fullName, phone, dateOfBirth, addressVi, socialLink }))
 }))
 
 router.post('/bank-link', requireAuth, asyncHandler(async (req, res) => {

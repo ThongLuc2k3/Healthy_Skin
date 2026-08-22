@@ -1,15 +1,19 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { apiClient } from '../lib/apiClient'
-import { formatVnd, formatDateTime } from '../lib/format'
+import { apiClient, notifyAccountUpdated } from '../lib/apiClient'
+import { useAuth } from '../context/AuthContext'
+import { formatVnd, formatDateTime, formatDate, formatCompactNumber } from '../lib/format'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import { UserIcon, WalletIcon, ShieldIcon, CheckCircleIcon } from '../components/Icons'
+import { UserIcon, WalletIcon, ShieldIcon, CheckCircleIcon, StarIcon, SparklesIcon } from '../components/Icons'
+import { BadgeTierIcon } from './MotivationPage'
 
 function PersonalInfoCard({ account, onSaved }) {
   const [fullName, setFullName] = useState(account.fullName)
   const [phone, setPhone] = useState(account.phone)
   const [dateOfBirth, setDateOfBirth] = useState(account.dateOfBirth)
   const [addressVi, setAddressVi] = useState(account.addressVi)
+  const [socialLink, setSocialLink] = useState(account.socialLink)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
@@ -20,8 +24,9 @@ function PersonalInfoCard({ account, onSaved }) {
     setError('')
     setMessage('')
     try {
-      const updated = await apiClient.put('/account', { fullName, phone, dateOfBirth, addressVi }, { auth: true })
+      const updated = await apiClient.put('/account', { fullName, phone, dateOfBirth, addressVi, socialLink }, { auth: true })
       onSaved(updated)
+      notifyAccountUpdated()
       setMessage('Đã lưu thông tin cá nhân.')
     } catch (err) {
       setError(err.message)
@@ -89,6 +94,20 @@ function PersonalInfoCard({ account, onSaved }) {
         />
         <p className="mt-1 text-[11px] text-[#64748B]">
           Dùng làm vị trí dự phòng để tính khoảng cách ở "Dịch Vụ Quanh Bạn" khi trình duyệt không cấp quyền vị trí.
+        </p>
+      </div>
+
+      <div>
+        <label className="text-xs font-bold uppercase tracking-wider text-[#2fa98c]">Link mạng xã hội</label>
+        <input
+          type="url"
+          value={socialLink}
+          onChange={(e) => setSocialLink(e.target.value)}
+          placeholder="https://facebook.com/... hoặc Zalo, Instagram..."
+          className="mt-1.5 w-full rounded-xl border border-[#c5e7dd] bg-[#eaf7f1] px-3.5 py-2.5 text-sm text-[#0e3b33] focus:border-[#2fa98c] focus:outline-none"
+        />
+        <p className="mt-1 text-[11px] text-[#64748B]">
+          Hiện công khai kèm tên bạn khi người khác bấm vào bài đăng của bạn ở Góc truyền động lực.
         </p>
       </div>
 
@@ -226,8 +245,110 @@ function BankLinkCard({ account, bankOptions, onChanged }) {
   )
 }
 
+function ActivityCard({ userId }) {
+  const [profile, setProfile] = useState(null)
+  const [reviews, setReviews] = useState(null)
+  const [followers, setFollowers] = useState(null)
+  const [openPanel, setOpenPanel] = useState(null)
+
+  useEffect(() => {
+    apiClient.get(`/users/${userId}`, { auth: true }).then(setProfile).catch(() => {})
+    apiClient.get('/reviews/mine', { auth: true }).then((data) => setReviews(data.reviews)).catch(() => setReviews([]))
+  }, [userId])
+
+  function toggleFollowersPanel() {
+    if (openPanel === 'followers') {
+      setOpenPanel(null)
+      return
+    }
+    setOpenPanel('followers')
+    if (!followers) {
+      apiClient.get(`/users/${userId}/followers`, { auth: true }).then(setFollowers).catch(() => setFollowers([]))
+    }
+  }
+
+  return (
+    <div className="rounded-[28px] border border-[#c5e7dd] bg-white p-7 shadow-xs space-y-4">
+      <div className="flex items-center gap-2">
+        <SparklesIcon className="h-5 w-5 text-[#2fa98c]" />
+        <h2 className="text-lg font-bold text-[#0e3b33]">Hoạt động của tôi</h2>
+        {profile?.badgeTier && <BadgeTierIcon badgeTier={profile.badgeTier} />}
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <button
+          type="button"
+          onClick={toggleFollowersPanel}
+          className="rounded-2xl bg-[#eaf7f1] p-4 text-left hover:bg-[#70c4af]/15 transition"
+        >
+          <p className="text-xl font-black text-[#2fa98c]">{profile ? formatCompactNumber(profile.followerCount) : '...'}</p>
+          <p className="text-xs text-[#64748B]">Người theo dõi</p>
+        </button>
+
+        <Link to={`/nguoi-dung/${userId}`} className="rounded-2xl bg-[#eaf7f1] p-4 hover:bg-[#70c4af]/15 transition">
+          <p className="text-xl font-black text-[#2fa98c]">{profile?.posts?.length ?? '...'}</p>
+          <p className="text-xs text-[#64748B]">Bài đăng (Góc truyền động lực)</p>
+        </Link>
+
+        <button
+          type="button"
+          onClick={() => setOpenPanel((v) => (v === 'reviews' ? null : 'reviews'))}
+          className="rounded-2xl bg-[#eaf7f1] p-4 text-left hover:bg-[#70c4af]/15 transition"
+        >
+          <p className="text-xl font-black text-[#2fa98c]">{reviews?.length ?? '...'}</p>
+          <p className="text-xs text-[#64748B]">Bài đánh giá (Diễn đàn)</p>
+        </button>
+      </div>
+
+      {openPanel === 'followers' && (
+        <div className="rounded-2xl border border-[#c5e7dd] p-4 space-y-2">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#2fa98c]">Người đang theo dõi bạn</p>
+          {followers === null ? (
+            <p className="text-sm text-[#64748B]">Đang tải...</p>
+          ) : followers.length === 0 ? (
+            <p className="text-sm text-[#64748B]">Chưa có ai theo dõi bạn.</p>
+          ) : (
+            <ul className="space-y-1.5">
+              {followers.map((f) => (
+                <li key={f.id}>
+                  <Link to={`/nguoi-dung/${f.id}`} className="text-sm font-medium text-[#0e3b33] hover:text-[#2fa98c] hover:underline">
+                    {f.fullName}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {openPanel === 'reviews' && (
+        <div className="rounded-2xl border border-[#c5e7dd] p-4 space-y-3">
+          <p className="text-xs font-bold uppercase tracking-wider text-[#2fa98c]">Bài đánh giá của bạn</p>
+          {reviews.length === 0 ? (
+            <p className="text-sm text-[#64748B]">Bạn chưa viết đánh giá nào ở Diễn đàn.</p>
+          ) : (
+            reviews.map((r) => (
+              <div key={r.id} className="rounded-xl bg-[#eaf7f1] p-3 space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-bold text-[#0e3b33]">{r.title}</p>
+                  <span className="flex items-center gap-1 text-xs font-bold text-amber-500 shrink-0">
+                    <StarIcon className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                    {r.rating}/5
+                  </span>
+                </div>
+                <p className="text-xs text-[#64748B]">{formatDate(r.created_at)}</p>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function AccountSettingsPage() {
   useDocumentTitle('Tài khoản của tôi')
+  const { user } = useAuth()
   const [account, setAccount] = useState(null)
   const [wallet, setWallet] = useState(null)
   const [bankOptions, setBankOptions] = useState([])
@@ -270,6 +391,7 @@ function AccountSettingsPage() {
           <p className="text-sm text-[#64748B]">Quản lý thông tin cá nhân, ví và ngân hàng liên kết.</p>
         </motion.div>
 
+        {user && <ActivityCard userId={user.id} />}
         <PersonalInfoCard account={account} onSaved={setAccount} />
         <WalletCard wallet={wallet} />
         <BankLinkCard account={account} bankOptions={bankOptions} onChanged={setAccount} />

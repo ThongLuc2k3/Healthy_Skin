@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { PlayIcon, SparklesIcon, HeartIcon, UploadIcon, TrashIcon } from '../components/Icons'
+import { PlayIcon, SparklesIcon, HeartIcon, UploadIcon } from '../components/Icons'
 import { MOTIVATION_CATEGORIES } from '../data/motivationContent'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { useAuth } from '../context/AuthContext'
 import { apiClient } from '../lib/apiClient'
-import { formatDate } from '../lib/format'
+import { formatDate, formatCompactNumber } from '../lib/format'
+import { Lightbox, CommentSection } from './WebsiteReviews'
 
 // Video tự tải lên được backend trả về dạng đường dẫn tương đối ("/uploads/motivation_videos/...").
 // Trình duyệt cần URL tuyệt đối trỏ đúng cổng backend (Vite dev proxy chỉ xử lý /api và /ws, không
@@ -13,8 +15,87 @@ import { formatDate } from '../lib/format'
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 const BACKEND_HOST = API_BASE_URL.replace(/\/api\/?$/, '')
 
-function toFileUrl(path) {
+export function toFileUrl(path) {
   return path ? `${BACKEND_HOST}${path}` : ''
+}
+
+// Huy hiệu theo số người theo dõi (xem followService.getBadgeTier ở backend) — chỉ trả tier số +
+// nhãn từ server, hình dáng/màu map ở đây vì Tailwind cần thấy đúng tên class trong file frontend
+// mới giữ lại lúc build, không thể truyền class name từ backend. Mỗi cấp 1 KIỂU icon riêng (không
+// chỉ đổi màu 1 icon) — càng lên cao càng chi tiết/"xịn" hơn: check trơn -> check viền đậm -> sao
+// khía cạnh (kiểu tick mạng xã hội) -> khiên -> vương miện.
+function BadgeTier1Icon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M8 12.5l2.5 2.5L16 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function BadgeTier2Icon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="9" fill="currentColor" fillOpacity="0.15" stroke="currentColor" strokeWidth="2" />
+      <path d="M8 12.5l2.5 2.5L16 9.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function BadgeTier3Icon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path fill="currentColor" d="M12 2l2.2 2.3 3.2-.7.8 3.2 3 1.3-1.1 3 1.1 3-3 1.3-.8 3.2-3.2-.7L12 22l-2.2-2.1-3.2.7-.8-3.2-3-1.3 1.1-3-1.1-3 3-1.3.8-3.2 3.2.7L12 2z" />
+      <path d="M8.5 12.2l2.3 2.3 4.5-4.5" stroke="white" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function BadgeTier4Icon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path fill="currentColor" d="M12 2l7 3.2v5.3c0 5-3 8.7-7 11.5-4-2.8-7-6.5-7-11.5V5.2L12 2z" />
+      <path d="M8.3 12.2l2.4 2.4 5-5" stroke="white" strokeWidth="1.7" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function BadgeTier5Icon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path fill="currentColor" d="M3.5 8.5L8 12l4-7 4 7 4.5-3.5L19 18H5L3.5 8.5z" />
+      <circle cx="12" cy="5" r="1.4" fill="currentColor" />
+      <circle cx="3.5" cy="8.5" r="1.4" fill="currentColor" />
+      <circle cx="20.5" cy="8.5" r="1.4" fill="currentColor" />
+    </svg>
+  )
+}
+
+const BADGE_TIER_ICONS = {
+  1: BadgeTier1Icon,
+  2: BadgeTier2Icon,
+  3: BadgeTier3Icon,
+  4: BadgeTier4Icon,
+  5: BadgeTier5Icon,
+}
+
+const BADGE_TIER_COLORS = {
+  1: 'text-orange-700',
+  2: 'text-gray-400',
+  3: 'text-amber-500',
+  4: 'text-cyan-500',
+  5: 'text-sky-400',
+}
+
+export function BadgeTierIcon({ badgeTier, className = 'h-4 w-4' }) {
+  if (!badgeTier) return null
+  const Icon = BADGE_TIER_ICONS[badgeTier.tier] || BadgeTier1Icon
+  return (
+    <Icon
+      className={`${className} ${BADGE_TIER_COLORS[badgeTier.tier] || BADGE_TIER_COLORS[1]} shrink-0`}
+      aria-label={`Huy hiệu ${badgeTier.label}`}
+    />
+  )
 }
 
 const THEME = {
@@ -102,7 +183,7 @@ function PostComposer({ onCreated, onClose }) {
       className="rounded-[28px] border border-[#c5e7dd] bg-white p-6 sm:p-7 shadow-xs space-y-4"
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold text-[#0e3b33]">Đăng video truyền động lực</h3>
+        <h3 className="text-lg font-bold text-[#0e3b33]">Đăng ảnh/video truyền động lực</h3>
         <button type="button" onClick={onClose} className="text-xs font-bold text-[#64748B] hover:text-[#2fa98c]">
           Đóng
         </button>
@@ -137,7 +218,7 @@ function PostComposer({ onCreated, onClose }) {
           onClick={() => setMode('file')}
           className={`rounded-full px-4 py-2 transition ${mode === 'file' ? 'bg-[#2fa98c] text-white' : 'bg-[#eaf7f1] text-[#64748B]'}`}
         >
-          Tải file video lên
+          Tải file ảnh/video lên
         </button>
       </div>
 
@@ -153,10 +234,10 @@ function PostComposer({ onCreated, onClose }) {
       ) : (
         <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-[#2fa98c]/40 bg-[#eaf7f1] px-4 py-3 text-sm font-semibold text-[#2fa98c] hover:border-[#2fa98c]">
           <UploadIcon className="h-4 w-4" />
-          {videoFile ? videoFile.name : 'Chọn file video (tối đa 60MB)'}
+          {videoFile ? videoFile.name : 'Chọn file ảnh hoặc video (tối đa 60MB)'}
           <input
             type="file"
-            accept="video/*"
+            accept="video/*,image/*"
             required
             className="hidden"
             onChange={(e) => setVideoFile(e.target.files?.[0] || null)}
@@ -177,8 +258,99 @@ function PostComposer({ onCreated, onClose }) {
   )
 }
 
-function CommunityPostCard({ post, currentUserId, onLikeToggle, onDelete }) {
+// Menu "..." dùng cho bài đăng — cùng kiểu với EntryMenu ở WebsiteReviews.jsx nhưng định nghĩa riêng
+// ở đây để tránh vòng lặp import (WebsiteReviews đã import BadgeTierIcon từ file này).
+function PostMenu({ onEdit, onDelete }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="relative shrink-0">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Tuỳ chọn bài đăng"
+        className="px-1 text-sm font-bold leading-none text-[#64748B] hover:text-[#0e3b33]"
+      >
+        ⋯
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-full z-20 mt-1 min-w-[100px] overflow-hidden rounded-lg border border-[#c5e7dd] bg-white shadow-md">
+            <button
+              type="button"
+              onClick={() => { setOpen(false); onEdit() }}
+              className="block w-full whitespace-nowrap px-3 py-1.5 text-left text-xs font-bold text-[#0e3b33] hover:bg-[#eaf7f1]"
+            >
+              Sửa
+            </button>
+            <button
+              type="button"
+              onClick={() => { setOpen(false); onDelete() }}
+              className="block w-full whitespace-nowrap px-3 py-1.5 text-left text-xs font-bold text-rose-600 hover:bg-rose-50"
+            >
+              Xoá
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+// Sửa tại chỗ chỉ tiêu đề/mô tả — đổi ảnh/video thì phải xoá đăng lại bài mới (xem
+// motivationPostService.updatePost).
+function PostEditForm({ post, onSaved, onCancel }) {
+  const [title, setTitle] = useState(post.title)
+  const [description, setDescription] = useState(post.description || '')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  async function handleSave(e) {
+    e.preventDefault()
+    setSaving(true)
+    setError('')
+    try {
+      const updated = await apiClient.put(`/motivation/posts/${post.id}`, { title: title.trim(), description: description.trim() }, { auth: true })
+      onSaved(updated)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <form onSubmit={handleSave} className="space-y-2">
+      <input
+        type="text"
+        required
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        className="w-full rounded-xl border border-[#c5e7dd] px-3 py-2 text-sm focus:outline-none focus:border-[#2fa98c]"
+      />
+      <textarea
+        rows={2}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        className="w-full rounded-xl border border-[#c5e7dd] px-3 py-2 text-sm focus:outline-none focus:border-[#2fa98c]"
+      />
+      {error && <p className="text-xs font-medium text-rose-600">{error}</p>}
+      <div className="flex gap-2">
+        <button type="submit" disabled={saving} className="rounded-xl bg-[#2fa98c] px-4 py-1.5 text-xs font-bold text-white disabled:opacity-60">
+          {saving ? 'Đang lưu...' : 'Lưu'}
+        </button>
+        <button type="button" onClick={onCancel} className="rounded-xl border border-[#c5e7dd] px-4 py-1.5 text-xs font-bold text-[#64748B]">
+          Huỷ
+        </button>
+      </div>
+    </form>
+  )
+}
+
+export function CommunityPostCard({ post, currentUserId, onLikeToggle, onDelete, onEdited, onCommentCountChange }) {
   const [viewed, setViewed] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [lightbox, setLightbox] = useState(null)
 
   function trackView() {
     if (viewed) return
@@ -188,59 +360,109 @@ function CommunityPostCard({ post, currentUserId, onLikeToggle, onDelete }) {
 
   return (
     <div className="overflow-hidden rounded-[24px] border border-[#c5e7dd] bg-white shadow-xs flex flex-col">
-      {post.videoFileUrl ? (
-        <video
-          controls
-          onPlay={trackView}
-          className="h-52 w-full bg-black object-contain"
-          src={toFileUrl(post.videoFileUrl)}
-        />
-      ) : (
-        <a
-          href={post.videoUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={trackView}
-          className="group relative flex h-52 w-full items-center justify-center bg-gradient-to-br from-[#0e3b33] via-[#2fa98c] to-[#70c4af]"
+      {/* Tên người đăng to + số người theo dõi lên đầu, trước cả media; "..." ở trên cùng bên phải */}
+      <div className="flex items-center justify-between gap-2 px-5 pt-4">
+        <Link
+          to={`/nguoi-dung/${post.userId}`}
+          className="inline-flex items-center gap-1.5 font-bold text-[#0e3b33] hover:text-[#2fa98c]"
         >
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-[#2fa98c] shadow-xl transition-transform group-hover:scale-110">
-            <PlayIcon className="h-6 w-6 translate-x-0.5" />
-          </span>
-        </a>
-      )}
+          {post.authorName}
+          <BadgeTierIcon badgeTier={post.authorBadgeTier} className="h-5 w-5" />
+        </Link>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs text-[#64748B]">{formatCompactNumber(post.authorFollowerCount)} người theo dõi</span>
+          {currentUserId === post.userId && (
+            <PostMenu onEdit={() => setEditing(true)} onDelete={() => onDelete(post)} />
+          )}
+        </div>
+      </div>
 
-      <div className="flex flex-1 flex-col p-5 space-y-1.5">
-        <h4 className="font-bold text-[#0e3b33] leading-snug">{post.title}</h4>
-        {post.description && <p className="text-xs text-[#64748B] leading-relaxed">{post.description}</p>}
-        <p className="text-[11px] text-[#64748B]">
-          {post.authorName} · {formatDate(post.createdAt)}
-        </p>
+      <div className="mt-3">
+        {post.videoFileUrl ? (
+          post.mediaType === 'image' ? (
+            <img
+              onLoad={trackView}
+              onClick={() => setLightbox({ src: toFileUrl(post.videoFileUrl), type: 'image' })}
+              className="h-52 w-full cursor-zoom-in bg-[#eaf7f1] object-contain"
+              src={toFileUrl(post.videoFileUrl)}
+              alt={post.title}
+            />
+          ) : (
+            <div className="relative">
+              <video
+                controls
+                onPlay={trackView}
+                className="h-52 w-full bg-black object-contain"
+                src={toFileUrl(post.videoFileUrl)}
+              />
+              <button
+                type="button"
+                onClick={() => setLightbox({ src: toFileUrl(post.videoFileUrl), type: 'video' })}
+                aria-label="Xem video phóng to"
+                className="absolute top-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
+              >
+                ⤢
+              </button>
+            </div>
+          )
+        ) : (
+          <a
+            href={post.videoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={trackView}
+            className="group relative flex h-52 w-full items-center justify-center bg-gradient-to-br from-[#0e3b33] via-[#2fa98c] to-[#70c4af]"
+          >
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-[#2fa98c] shadow-xl transition-transform group-hover:scale-110">
+              <PlayIcon className="h-6 w-6 translate-x-0.5" />
+            </span>
+          </a>
+        )}
+      </div>
 
-        <div className="mt-auto pt-3 flex items-center justify-between">
+      <div className="flex flex-1 flex-col p-5 pt-3 space-y-1.5">
+        {editing ? (
+          <PostEditForm
+            post={post}
+            onSaved={(updated) => { onEdited(updated); setEditing(false) }}
+            onCancel={() => setEditing(false)}
+          />
+        ) : (
+          <>
+            <h4 className="font-bold text-[#0e3b33] leading-snug">{post.title}</h4>
+            {post.description && <p className="text-xs text-[#64748B] leading-relaxed">{post.description}</p>}
+          </>
+        )}
+
+        {/* Tim bên trái, lượt xem chính giữa, ngày đăng sát phải */}
+        <div className="mt-auto grid grid-cols-3 items-center pt-3">
           <button
             type="button"
             onClick={() => onLikeToggle(post)}
             disabled={!currentUserId}
-            className={`flex items-center gap-1.5 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50 ${
+            className={`flex items-center gap-1.5 justify-self-start text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50 ${
               post.likedByMe ? 'text-rose-500' : 'text-[#64748B] hover:text-rose-500'
             }`}
           >
             <HeartIcon className="h-4 w-4" filled={post.likedByMe} />
-            {post.likeCount}
+            {formatCompactNumber(post.likeCount)}
           </button>
-          <span className="text-xs text-[#64748B]">{post.viewCount} lượt xem</span>
-          {currentUserId === post.userId && (
-            <button
-              type="button"
-              onClick={() => onDelete(post)}
-              className="text-rose-400 hover:text-rose-600"
-              aria-label="Xoá bài đăng"
-            >
-              <TrashIcon className="h-4 w-4" />
-            </button>
-          )}
+          <span className="justify-self-center text-xs text-[#64748B]">{formatCompactNumber(post.viewCount)} lượt xem</span>
+          <span className="justify-self-end text-xs text-[#64748B]">{formatDate(post.createdAt)}</span>
+        </div>
+
+        <div className="border-t border-[#eaf7f1] pt-2">
+          <CommentSection
+            listPath={`/motivation/posts/${post.id}/comments`}
+            mutateBase="/motivation"
+            commentCount={post.commentCount || 0}
+            onCommentCountChange={(delta) => onCommentCountChange(post.id, delta)}
+            onImageClick={(src) => setLightbox({ src, type: 'image' })}
+          />
         </div>
       </div>
+
+      <Lightbox media={lightbox} onClose={() => setLightbox(null)} />
     </div>
   )
 }
@@ -275,6 +497,14 @@ function MotivationPage() {
     }
   }
 
+  function handleEdited(updated) {
+    setPosts((prev) => prev.map((p) => (p.id === updated.id ? updated : p)))
+  }
+
+  function handleCommentCountChange(postId, delta) {
+    setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, commentCount: (p.commentCount || 0) + delta } : p)))
+  }
+
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-[#eaf7f1] via-[#FCFDFC] to-[#eaf7f1] py-16 px-4 sm:px-6 lg:px-8 mt-12 overflow-hidden">
       {/* Soft Ambient Radial Orbs */}
@@ -306,9 +536,9 @@ function MotivationPage() {
         <div className="space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="font-display text-2xl font-extrabold text-[#0e3b33]">Video từ cộng đồng</h2>
+              <h2 className="font-display text-2xl font-extrabold text-[#0e3b33]">Ảnh/video từ cộng đồng</h2>
               <p className="mt-1 text-sm text-[#64748B]">
-                Tự đăng video của bạn. Lượt xem &amp; lượt tim từ người khác sẽ cộng điểm tích luỹ, dùng đổi voucher ở Kho Voucher.
+                Tự đăng ảnh hoặc video của bạn. Lượt xem &amp; lượt tim từ người khác sẽ cộng điểm tích luỹ, dùng đổi voucher ở Kho Voucher.
               </p>
             </div>
             {user && (
@@ -333,7 +563,7 @@ function MotivationPage() {
           )}
 
           {posts.length === 0 ? (
-            <p className="text-sm text-[#64748B]">Chưa có video nào từ cộng đồng, hãy là người đăng đầu tiên.</p>
+            <p className="text-sm text-[#64748B]">Chưa có bài đăng nào từ cộng đồng, hãy là người đăng đầu tiên.</p>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {posts.map((post) => (
@@ -343,6 +573,8 @@ function MotivationPage() {
                   currentUserId={user?.id}
                   onLikeToggle={handleLikeToggle}
                   onDelete={handleDelete}
+                  onEdited={handleEdited}
+                  onCommentCountChange={handleCommentCountChange}
                 />
               ))}
             </div>

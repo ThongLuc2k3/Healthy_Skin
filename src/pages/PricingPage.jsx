@@ -164,7 +164,7 @@ function PricingPage() {
             <div className="mt-10 rounded-[28px] border border-[#c5e7dd] bg-white p-7 shadow-xs">
               <h3 className="text-lg font-bold text-[#0e3b33]">Nạp ví</h3>
               <p className="mt-1 text-sm text-[#64748B]">
-                Nạp ví được cộng thêm điểm tích luỹ (10% giá trị nạp), dùng đổi voucher ở Kho Voucher.
+                Nạp ví được cộng thêm điểm tích luỹ (10.000đ = 1 điểm), dùng đổi voucher ở Kho Voucher.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 {TOPUP_PRESETS.map((amount) => (

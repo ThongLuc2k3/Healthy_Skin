@@ -33,7 +33,7 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="mt-6 max-w-2xl text-base sm:text-lg text-[#126b59] leading-relaxed font-semibold bg-white/70 backdrop-blur-md px-6 py-3.5 rounded-2xl border border-[#c5e7dd] shadow-glow"
         >
-          Nền tảng cá nhân hóa chăm sóc da và dinh dưỡng dựa trên một hồ sơ cá nhân dùng chung, giúp bạn biết ngay sản phẩm hay thực phẩm nào phù hợp với chính mình.
+          Nền tảng cá nhân hóa chăm sóc da và dinh dưỡng từ một hồ sơ duy nhất, giúp bạn biết ngay sản phẩm hay thực phẩm nào phù hợp với mình.
         </motion.p>
 
         <motion.div

@@ -51,6 +51,11 @@ router.post(
     if (!passwordMatches) {
       return res.status(401).json({ error: 'Email hoặc mật khẩu không đúng.' })
     }
+    if (user.is_locked) {
+      return res.status(403).json({
+        error: `Tài khoản đã bị khoá${user.locked_reason ? `: ${user.locked_reason}` : '.'}`,
+      })
+    }
 
     const token = signToken(user)
     res.json({ token, user: { id: user.id, email: user.email } })
@@ -61,6 +66,13 @@ router.get('/me', requireAuth, asyncHandler(async (req, res) => {
   const user = await findUserById(req.userId)
   if (!user) {
     return res.status(404).json({ error: 'Không tìm thấy người dùng.' })
+  }
+  // Tài khoản bị khoá SAU khi đã đăng nhập (phiên JWT còn hạn) — trả 401 để AuthContext coi như
+  // hết phiên và tự đăng xuất ở lần tải trang kế tiếp (xem AuthContext.jsx, chỉ xử lý status 401).
+  if (user.is_locked) {
+    return res.status(401).json({
+      error: `Tài khoản đã bị khoá${user.locked_reason ? `: ${user.locked_reason}` : '.'}`,
+    })
   }
   res.json({ id: user.id, email: user.email })
 }))

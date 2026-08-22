@@ -9,7 +9,7 @@ export async function findUserByEmail(email) {
 }
 
 export async function findUserById(id) {
-  const { rows } = await query('SELECT id, email, created_at FROM users WHERE id = $1', [id])
+  const { rows } = await query('SELECT id, email, created_at, is_locked, locked_reason FROM users WHERE id = $1', [id])
   return rows[0]
 }
 

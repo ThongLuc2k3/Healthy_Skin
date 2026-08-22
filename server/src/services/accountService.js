@@ -9,6 +9,7 @@ function toShape(row) {
     phone: row.phone || '',
     dateOfBirth: row.date_of_birth ? row.date_of_birth.toISOString().slice(0, 10) : '',
     addressVi: row.address_vi || '',
+    socialLink: row.social_link || '',
     bankName: row.bank_name || null,
     bankAccountMasked: row.bank_account_masked || null,
     bankLinkedAt: row.bank_linked_at || null,
@@ -21,10 +22,11 @@ export async function getAccountInfo(userId) {
   return rows[0] ? toShape(rows[0]) : null
 }
 
-export async function updateAccountInfo(userId, { fullName, phone, dateOfBirth, addressVi }) {
+export async function updateAccountInfo(userId, { fullName, phone, dateOfBirth, addressVi, socialLink }) {
   const { rows } = await query(
-    `UPDATE users SET full_name = $2, phone = $3, date_of_birth = $4, address_vi = $5 WHERE id = $1 RETURNING *`,
-    [userId, fullName?.trim() || null, phone?.trim() || null, dateOfBirth || null, addressVi?.trim() || null],
+    `UPDATE users SET full_name = $2, phone = $3, date_of_birth = $4, address_vi = $5, social_link = $6
+     WHERE id = $1 RETURNING *`,
+    [userId, fullName?.trim() || null, phone?.trim() || null, dateOfBirth || null, addressVi?.trim() || null, socialLink?.trim() || null],
   )
   return rows[0] ? toShape(rows[0]) : null
 }

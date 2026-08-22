@@ -16,8 +16,12 @@ function slugify(text) {
     .slice(0, 40)
 }
 
+// grossTotalVnd/commissionTotalVnd (từ settlement_records) CHỈ tính hoa hồng lịch hẹn chuyên gia/dịch
+// vụ đối tác — nạp ví và mua gói đi qua payment_intents, MỘT bảng hoàn toàn khác, trước đây không hề
+// được cộng vào đây nên "doanh thu" admin thấy luôn thiếu phần nạp tiền/mua gói dù người dùng nạp rất
+// nhiều (bug đã báo). Cộng thêm tổng payment_intents theo purpose, chỉ tính bản ghi status='succeeded'.
 export async function getOverviewStats() {
-  const [members, experts, venues, pendingApps, expertBookings, venueBookings, settlement] = await Promise.all([
+  const [members, experts, venues, pendingApps, expertBookings, venueBookings, settlement, paymentTotals] = await Promise.all([
     query('SELECT COUNT(*)::int AS count FROM users'),
     query('SELECT COUNT(*)::int AS count FROM experts'),
     query('SELECT COUNT(*)::int AS count FROM partner_venues'),
@@ -25,10 +29,19 @@ export async function getOverviewStats() {
     query('SELECT COUNT(*)::int AS count FROM expert_bookings'),
     query('SELECT COUNT(*)::int AS count FROM venue_bookings'),
     getSettlementSummary(),
+    query(
+      `SELECT purpose, COALESCE(SUM(amount_vnd), 0)::int AS total_vnd, COUNT(*)::int AS count
+       FROM payment_intents WHERE status = 'succeeded' GROUP BY purpose`,
+    ),
   ])
 
   const grossTotalVnd = settlement.reduce((sum, row) => sum + row.gross_total_vnd, 0)
   const commissionTotalVnd = settlement.reduce((sum, row) => sum + row.commission_total_vnd, 0)
+
+  const byPurpose = Object.fromEntries(paymentTotals.rows.map((r) => [r.purpose, { totalVnd: r.total_vnd, count: r.count }]))
+  const walletTopupVnd = byPurpose.wallet_topup?.totalVnd || 0
+  const planPurchaseVnd = byPurpose.plan_purchase?.totalVnd || 0
+  const venueDepositVnd = byPurpose.venue_deposit?.totalVnd || 0
 
   return {
     memberCount: members.rows[0].count,
@@ -40,13 +53,19 @@ export async function getOverviewStats() {
     grossTotalVnd,
     commissionTotalVnd,
     settlementByType: settlement,
+    walletTopupVnd,
+    planPurchaseVnd,
+    venueDepositVnd,
+    paymentRevenueTotalVnd: walletTopupVnd + planPurchaseVnd + venueDepositVnd,
+    paymentByPurpose: byPurpose,
   }
 }
 
 export async function listMembers({ limit = 100 } = {}) {
   const { rows } = await query(
     `SELECT
-       u.id, u.email, u.full_name, u.phone, u.created_at,
+       u.id, u.email, u.full_name, u.phone, u.created_at, u.date_of_birth, u.address_vi, u.social_link,
+       u.bank_name, u.bank_account_masked, u.bank_linked_at, u.is_locked, u.locked_reason, u.locked_at,
        COALESCE(w.plan_id, 'free') AS plan_id,
        COALESCE(w.balance_vnd, 0) AS balance_vnd,
        COALESCE(w.loyalty_points, 0) AS loyalty_points,
@@ -65,6 +84,15 @@ export async function listMembers({ limit = 100 } = {}) {
     fullName: row.full_name || '',
     phone: row.phone || '',
     createdAt: row.created_at,
+    dateOfBirth: row.date_of_birth,
+    addressVi: row.address_vi || '',
+    socialLink: row.social_link || '',
+    bankName: row.bank_name || '',
+    bankAccountMasked: row.bank_account_masked || '',
+    bankLinkedAt: row.bank_linked_at,
+    isLocked: row.is_locked,
+    lockedReason: row.locked_reason || '',
+    lockedAt: row.locked_at,
     planId: row.plan_id,
     balanceVnd: row.balance_vnd,
     loyaltyPoints: row.loyalty_points,
@@ -72,6 +100,96 @@ export async function listMembers({ limit = 100 } = {}) {
     venueBookingCount: row.venue_booking_count,
     reviewCount: row.review_count,
   }))
+}
+
+// Khoá/mở khoá tài khoản từ Cổng Quản Trị — dùng khi nghi ngờ rửa tiền/gian lận/vi phạm. Enforce ở
+// auth.routes.js (chặn đăng nhập mới + kick phiên đang mở), xem ghi chú ở schema.sql cột is_locked.
+export async function setMemberLock(userId, locked, reason) {
+  const { rows } = await query(
+    `UPDATE users SET is_locked = $2, locked_reason = $3, locked_at = CASE WHEN $2 THEN NOW() ELSE NULL END
+     WHERE id = $1
+     RETURNING id, is_locked, locked_reason, locked_at`,
+    [userId, locked, locked ? (reason || null) : null],
+  )
+  if (!rows[0]) return null
+  return {
+    id: rows[0].id,
+    isLocked: rows[0].is_locked,
+    lockedReason: rows[0].locked_reason || '',
+    lockedAt: rows[0].locked_at,
+  }
+}
+
+const ACTIVITY_TYPES = new Set([
+  'deposit', 'plan_purchase', 'venue_deposit', 'expert_booking', 'venue_booking',
+  'review_post', 'motivation_post', 'expert_chat',
+])
+
+// Nhật ký hoạt động trang web — CHỈ các thao tác quan trọng (nạp tiền, mua gói, đặt lịch/dịch vụ,
+// đăng bài, mở tư vấn chuyên gia...), KHÔNG log việc chuyển tab/điều hướng vặt. Gộp bằng UNION ALL
+// đọc trực tiếp từ các bảng nghiệp vụ đã có sẵn thay vì 1 bảng audit_log ghi riêng — mọi thao tác ở
+// trên vốn đã có dòng + created_at trong DB, tránh rủi ro quên gọi log ở 1 nhánh code nào đó.
+export async function listActivity({ type, q, limit = 50, offset = 0 } = {}) {
+  const cleanType = ACTIVITY_TYPES.has(type) ? type : null
+  const cleanQ = typeof q === 'string' && q.trim() ? q.trim().slice(0, 100) : null
+
+  const { rows } = await query(
+    `WITH activity AS (
+       SELECT 'deposit' AS type, p.id::text AS source_id, p.user_id, p.amount_vnd,
+              'Nạp ví' AS description, p.created_at
+       FROM payment_intents p WHERE p.purpose = 'wallet_topup' AND p.status = 'succeeded'
+       UNION ALL
+       SELECT 'plan_purchase', p.id::text, p.user_id, p.amount_vnd,
+              'Mua gói dịch vụ' || COALESCE(' (' || p.reference_id || ')', ''), p.created_at
+       FROM payment_intents p WHERE p.purpose = 'plan_purchase' AND p.status = 'succeeded'
+       UNION ALL
+       SELECT 'venue_deposit', p.id::text, p.user_id, p.amount_vnd,
+              'Đặt cọc dịch vụ đối tác', p.created_at
+       FROM payment_intents p WHERE p.purpose = 'venue_deposit' AND p.status = 'succeeded'
+       UNION ALL
+       SELECT 'expert_booking', eb.id::text, eb.user_id, NULL::integer,
+              'Đặt lịch chuyên gia (' || eb.status || ')', eb.created_at
+       FROM expert_bookings eb
+       UNION ALL
+       SELECT 'venue_booking', vb.id::text, vb.user_id, vb.final_price_vnd,
+              'Đặt dịch vụ đối tác (' || vb.status || ')', vb.created_at
+       FROM venue_bookings vb
+       UNION ALL
+       SELECT 'review_post', r.id::text, r.user_id, NULL::integer,
+              'Đăng đánh giá: ' || r.title, r.created_at
+       FROM website_reviews r
+       UNION ALL
+       SELECT 'motivation_post', mp.id::text, mp.user_id, NULL::integer,
+              'Đăng bài truyền động lực: ' || mp.title, mp.created_at
+       FROM motivation_posts mp
+       UNION ALL
+       SELECT 'expert_chat', ct.id::text, eb.user_id, NULL::integer,
+              'Mở tư vấn chuyên gia', ct.created_at
+       FROM consultation_threads ct JOIN expert_bookings eb ON eb.id = ct.booking_id
+     )
+     SELECT a.*, u.full_name, u.email, COUNT(*) OVER()::int AS total_count
+     FROM activity a
+     JOIN users u ON u.id = a.user_id
+     WHERE ($1::text IS NULL OR a.type = $1)
+       AND ($2::text IS NULL OR u.full_name ILIKE '%' || $2 || '%' OR u.email ILIKE '%' || $2 || '%')
+     ORDER BY a.created_at DESC
+     LIMIT $3 OFFSET $4`,
+    [cleanType, cleanQ, limit, offset],
+  )
+
+  return {
+    total: rows[0]?.total_count || 0,
+    items: rows.map((r) => ({
+      type: r.type,
+      id: `${r.type}-${r.source_id}`,
+      userId: r.user_id,
+      userName: r.full_name || r.email,
+      userEmail: r.email,
+      amountVnd: r.amount_vnd,
+      description: r.description,
+      createdAt: r.created_at,
+    })),
+  }
 }
 
 export async function listExpertsAdmin() {

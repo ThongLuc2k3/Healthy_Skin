@@ -29,6 +29,7 @@ import reviewRoutes from './routes/review.routes.js'
 import sponsoredRoutes from './routes/sponsored.routes.js'
 import venuesRoutes from './routes/venues.routes.js'
 import motivationRoutes from './routes/motivation.routes.js'
+import usersRoutes from './routes/users.routes.js'
 import vouchersRoutes from './routes/vouchers.routes.js'
 import settlementRoutes from './routes/settlement.routes.js'
 import adminRoutes from './routes/admin.routes.js'
@@ -152,21 +153,28 @@ app.use('/api/reviews', reviewRoutes)
 app.use('/api/sponsored', sponsoredRoutes)
 app.use('/api/venues', venuesRoutes)
 app.use('/api/motivation', motivationRoutes)
+app.use('/api/users', usersRoutes)
 app.use('/api/vouchers', vouchersRoutes)
 app.use('/api/settlement', settlementRoutes)
 app.use('/api/admin', adminRoutes)
-app.use(express.static(path.join(process.cwd(), 'public')))
-app.use('/uploads', express.static(path.join(process.cwd(), 'public/uploads')))
-app.use(cors())
+// /uploads (ảnh/video công khai: review, motivation post...) phải luôn có 2 header nới lỏng này để
+// trình duyệt cho phép hiển thị khi frontend dùng URL TUYỆT ĐỐI trỏ thẳng backend (VITE_API_BASE_URL
+// có set, ví dụ chạy qua dev-all.mjs) — lúc đó ảnh là cross-origin thật với trang, và helmet() mặc
+// định set Cross-Origin-Resource-Policy: same-origin sẽ khiến trình duyệt ÂM THẦM CHẶN hiển thị ảnh
+// dù request HTTP vẫn trả 200 OK bình thường (không có lỗi network để thấy). Phải đặt middleware này
+// TRƯỚC express.static('public') chung bên dưới — nếu không, static('public') sẽ tự phục vụ trước
+// (vì public/uploads/... vẫn nằm trong public/) và thiếu mất 2 header, y hệt lỗi vừa gặp.
 app.use(
   '/uploads',
   (req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin') 
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
     next()
   },
-  express.static(path.join(process.cwd(), 'public/uploads'))
+  express.static(path.join(process.cwd(), 'public/uploads')),
 )
+app.use(express.static(path.join(process.cwd(), 'public')))
+app.use(cors())
 
 if (hasClientBuild) {
   app.use(express.static(clientDistPath))

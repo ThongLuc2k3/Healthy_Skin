@@ -4,10 +4,11 @@ import { getProvider } from '../payments/provider.js'
 // Số câu hỏi Trợ Lý miễn phí mỗi ngày cho tài khoản chưa mua thêm gói.
 export const FREE_DAILY_QUESTIONS = 5
 
-// Nạp ví theo demo: quy đổi 10% số tiền nạp thành điểm tích luỹ (dùng đổi voucher ở Kho Voucher).
-// Mua Gói Trợ Lý cũng quy đổi theo cùng tỷ lệ này (xem purchasePlan) — trước đây chỉ nạp ví mới có
-// điểm, khiến người mua gói tưởng nhầm là lỗi vì "thanh toán xong mà không thấy gì đổi khác".
-const POINTS_PER_VND = 0.1
+// Nạp ví theo demo: quy đổi 0,01% số tiền nạp thành điểm tích luỹ, tức 10.000đ = 1 điểm (100.000đ =
+// 10 điểm) — KHÔNG phải 10% (0.1 sẽ ra 100.000đ = 10.000 điểm, lạm phát điểm quá nhiều so với giá
+// voucher). Mua Gói Trợ Lý cũng quy đổi theo cùng tỷ lệ này (xem purchasePlan) — trước đây chỉ nạp
+// ví mới có điểm, khiến người mua gói tưởng nhầm là lỗi vì "thanh toán xong mà không thấy gì đổi khác".
+const POINTS_PER_VND = 0.0001
 
 // Điểm tặng chào mừng — cấp 1 lần cho mọi tài khoản (user mới lúc đăng ký, xem auth.routes.js; user
 // cũ được cấp bù 1 lần qua script backfill, xem server/scripts/grantWelcomePoints.js).

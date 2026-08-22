@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import NavBar from './components/NavBar'
 import Footer from './components/Footer'
 import HomePage from './pages/HomePage'
@@ -24,15 +24,21 @@ import MyVouchersPage from './pages/MyVouchersPage'
 import SkinPlaygroundPage from './pages/SkinPlaygroundPage'
 import WebsiteReviews from './pages/WebsiteReviews'
 import AboutPage from './pages/AboutPage'
+import UserProfilePage from './pages/UserProfilePage'
 
 function App() {
+  const { pathname } = useLocation()
+  // Cổng Quản Trị (/admin) có header/tab riêng của nó, không cần NavBar/Footer/ChatWidget của trang
+  // khách hàng chèn thêm vào nữa (gây rối giao diện, xem phản hồi người dùng).
+  const isAdmin = pathname.startsWith('/admin')
+
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-gradient-to-br from-[#f6fbf9] via-[#eef7f2] to-[#eaf7f1] text-[#0e3b33] antialiased selection:bg-[#0e3b33]/20 selection:text-[#0e3b33]">
       {/* Background ambient radial glow layers matching light brand theme */}
       <div className="pointer-events-none fixed inset-0 -z-10 bg-gradient-to-br from-[#f6fbf9] via-[#eef7f2] to-[#eaf7f1]" />
       <div className="pointer-events-none fixed inset-0 -z-10 grid-bg opacity-30 mask-fade-b" />
 
-      <NavBar />
+      {!isAdmin && <NavBar />}
       <main className="relative z-10">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -56,11 +62,12 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/reviews" element={<WebsiteReviews />} />
+          <Route path="/nguoi-dung/:id" element={<UserProfilePage />} />
           <Route path="/about" element={<AboutPage />} />
         </Routes>
       </main>
-      <Footer />
-      <ChatWidget />
+      {!isAdmin && <Footer />}
+      {!isAdmin && <ChatWidget />}
     </div>
   )
 }

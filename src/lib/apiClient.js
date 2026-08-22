@@ -17,6 +17,18 @@ export function onAuthExpired(tokenKey, callback) {
   return () => window.removeEventListener('auth:expired', handler)
 }
 
+// Báo cho các thành phần khác (NavBar...) biết thông tin tài khoản vừa đổi ở trang "Tài khoản của
+// tôi" — NavBar chỉ tải /account 1 lần lúc đăng nhập nên không tự thấy thay đổi nếu không có tín
+// hiệu này, dẫn tới hiện tên/thông tin cũ dù đã lưu thành công.
+export function notifyAccountUpdated() {
+  window.dispatchEvent(new CustomEvent('account:updated'))
+}
+
+export function onAccountUpdated(callback) {
+  window.addEventListener('account:updated', callback)
+  return () => window.removeEventListener('account:updated', callback)
+}
+
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY)
 }

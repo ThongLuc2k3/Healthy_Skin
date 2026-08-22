@@ -25,6 +25,28 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS bank_linked_at TIMESTAMPTZ;
 -- cách khớp tên quận/huyện trong chuỗi địa chỉ, KHÔNG phải geocoding thật).
 ALTER TABLE users ADD COLUMN IF NOT EXISTS address_vi TEXT;
 
+-- Link mạng xã hội tự khai (Facebook/Zalo/Instagram...) — hiện công khai kèm tên khi người khác bấm
+-- vào tác giả 1 bài đăng ở Góc truyền động lực (xem motivationPostService.listPosts), KHÁC với các
+-- trường address/phone/DOB ở trên vốn chỉ dùng nội bộ (ước tính khoảng cách), không public.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS social_link TEXT;
+
+-- Theo dõi (follow) giữa người dùng — dùng cho trang cá nhân công khai + huy hiệu theo số người
+-- theo dõi (xem followService.js). PRIMARY KEY kép chặn follow trùng, CHECK chặn tự follow chính
+-- mình.
+CREATE TABLE IF NOT EXISTS user_follows (
+  follower_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  followed_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (follower_id, followed_id),
+  CHECK (follower_id <> followed_id)
+);
+CREATE INDEX IF NOT EXISTS idx_user_follows_followed ON user_follows(followed_id);
+
+-- Số người theo dõi "ảo" cộng thêm cho mục đích demo/trình diễn (ví dụ thuyết trình khoá luận) —
+-- KHÔNG phải follower thật, không tạo hàng triệu dòng user_follows giả. Cộng vào số đếm thật khi
+-- hiển thị (xem followService.getFollowerCount), mặc định 0 với tài khoản bình thường.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS follower_boost INTEGER NOT NULL DEFAULT 0;
+
 CREATE TABLE IF NOT EXISTS profiles (
   user_id BIGINT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   skin_type TEXT NOT NULL DEFAULT '',
@@ -237,6 +259,12 @@ CREATE TABLE IF NOT EXISTS user_vouchers (
   used_at TIMESTAMPTZ,
   obtained_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Chỉ populate cho obtained_via='points_redeem' (đổi bằng điểm) — các nguồn còn lại (tặng kèm/thưởng
+-- minigame/quà chào mừng) không trừ điểm nên để NULL. Lưu lại NGAY LÚC đổi vì loyalty_points là số
+-- chạy theo thời gian, không thể suy ngược "lúc đó còn bao nhiêu điểm" nếu không chụp lại tại đây.
+ALTER TABLE user_vouchers ADD COLUMN IF NOT EXISTS points_spent INTEGER;
+ALTER TABLE user_vouchers ADD COLUMN IF NOT EXISTS points_balance_after INTEGER;
 CREATE INDEX IF NOT EXISTS idx_user_vouchers_user ON user_vouchers(user_id);
 
 CREATE TABLE IF NOT EXISTS venue_bookings (
@@ -270,6 +298,59 @@ ALTER TABLE website_reviews ADD COLUMN IF NOT EXISTS author_name TEXT;
 ALTER TABLE website_reviews DROP CONSTRAINT IF EXISTS website_reviews_user_id_fkey;
 ALTER TABLE website_reviews ADD CONSTRAINT website_reviews_user_id_fkey
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
+
+-- Bình luận dưới 1 đánh giá ở Diễn đàn — parent_comment_id cho phép trả lời 1 bình luận (đúng 1 cấp
+-- lồng: bình luận -> trả lời, không trả lời-của-trả lời để khỏi phải làm UI thread nhiều cấp phức
+-- tạp). image_path/image_mime tuỳ chọn, đúng cách profileService lưu ảnh khuôn mặt.
+CREATE TABLE IF NOT EXISTS review_comments (
+  id BIGSERIAL PRIMARY KEY,
+  review_id BIGINT NOT NULL REFERENCES website_reviews(id) ON DELETE CASCADE,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_review_comments_review ON review_comments(review_id);
+ALTER TABLE review_comments ADD COLUMN IF NOT EXISTS parent_comment_id BIGINT REFERENCES review_comments(id) ON DELETE CASCADE;
+ALTER TABLE review_comments ADD COLUMN IF NOT EXISTS image_path TEXT;
+ALTER TABLE review_comments ADD COLUMN IF NOT EXISTS image_mime TEXT;
+ALTER TABLE review_comments ALTER COLUMN content DROP NOT NULL;
+
+-- Nhiều ảnh/1 bình luận (mảng đường dẫn) — cột image_path/image_mime cũ giữ lại để không vỡ dữ liệu
+-- bình luận cũ, đọc dữ liệu ưu tiên image_paths, rỗng thì mới lấy image_path (xem commentService.js).
+ALTER TABLE review_comments ADD COLUMN IF NOT EXISTS image_paths TEXT[];
+
+-- Dùng CHUNG bảng review_comments/comment_reactions cho cả bình luận ở Diễn đàn (đánh giá) LẪN Góc
+-- truyền động lực (bài đăng) — motivation_post_id nullable, đúng 1 trong 2 cột (review_id/
+-- motivation_post_id) có giá trị tuỳ loại nội dung đang bình luận (xem commentService.js). Gộp
+-- chung để không phải nhân đôi toàn bộ logic bình luận/trả lời/thích/sửa/xoá cho riêng Góc truyền
+-- động lực.
+ALTER TABLE review_comments ALTER COLUMN review_id DROP NOT NULL;
+ALTER TABLE review_comments ADD COLUMN IF NOT EXISTS motivation_post_id BIGINT REFERENCES motivation_posts(id) ON DELETE CASCADE;
+CREATE INDEX IF NOT EXISTS idx_review_comments_motivation_post ON review_comments(motivation_post_id);
+
+-- Nhiều ảnh/1 đánh giá — cùng kiểu image_paths ở trên, image_path/image_mime cũ giữ lại cho dữ liệu
+-- đánh giá cũ.
+ALTER TABLE website_reviews ADD COLUMN IF NOT EXISTS image_paths TEXT[];
+
+-- Thích/không thích 1 đánh giá — mỗi người đúng 1 phản ứng/đánh giá; bấm lại cùng loại thì gỡ, bấm
+-- loại khác thì thay (xem toggleReaction trong review.routes.js).
+CREATE TABLE IF NOT EXISTS review_reactions (
+  review_id BIGINT NOT NULL REFERENCES website_reviews(id) ON DELETE CASCADE,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reaction TEXT NOT NULL CHECK (reaction IN ('like','dislike')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (review_id, user_id)
+);
+
+-- Thích/không thích 1 bình luận — cùng cơ chế toggle với review_reactions, tách bảng riêng vì khoá
+-- ngoại trỏ vào review_comments chứ không phải website_reviews.
+CREATE TABLE IF NOT EXISTS comment_reactions (
+  comment_id BIGINT NOT NULL REFERENCES review_comments(id) ON DELETE CASCADE,
+  user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  reaction TEXT NOT NULL CHECK (reaction IN ('like','dislike')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (comment_id, user_id)
+);
 
 -- Nhật ký đồng ý (consent) — thay cho việc chỉ có 1 cờ profiles.consent_given_at bị ghi đè không
 -- lưu lịch sử. Mỗi lần người dùng đồng ý/thu hồi đồng ý dùng dữ liệu nhạy cảm, hoặc đồng ý gửi hồ sơ
@@ -410,3 +491,10 @@ CREATE TABLE IF NOT EXISTS payment_intents (
   completed_at TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS idx_payment_intents_user ON payment_intents(user_id);
+
+-- Khoá tài khoản từ Cổng Quản Trị (nghi rửa tiền/gian lận...) — chặn đăng nhập mới NGAY (auth.routes
+-- login) và buộc đăng xuất phiên đang mở ở lần gọi /auth/me kế tiếp (mỗi lần tải lại trang), KHÔNG
+-- kiểm tra ở requireAuth cho mọi request để tránh cõng thêm 1 lượt truy vấn DB vào từng API.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_locked BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS locked_reason TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS locked_at TIMESTAMPTZ;

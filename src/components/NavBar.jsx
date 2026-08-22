@@ -19,7 +19,7 @@ import {
   ChevronDownIcon,
 } from './Icons'
 import { useAuth } from '../context/AuthContext'
-import { apiClient } from '../lib/apiClient'
+import { apiClient, onAccountUpdated } from '../lib/apiClient'
 
 function initialsFor(fullName, email) {
   const source = fullName?.trim() || email || ''
@@ -120,6 +120,14 @@ function NavBar() {
       .then(setAccountInfo)
       .catch(() => {})
   }, [user])
+
+  // Trang "Tài khoản của tôi" phát tín hiệu này sau khi lưu — nếu không nghe, dropdown ở đây vẫn
+  // hiện tên/thông tin cũ (chỉ tải /account đúng 1 lần lúc đăng nhập ở effect trên) cho tới khi
+  // đăng xuất/đăng nhập lại hoặc tải lại trang.
+  useEffect(() => onAccountUpdated(() => {
+    if (!user) return
+    apiClient.get('/account', { auth: true }).then(setAccountInfo).catch(() => {})
+  }), [user])
 
   useEffect(() => {
     function onClickOutside(e) {

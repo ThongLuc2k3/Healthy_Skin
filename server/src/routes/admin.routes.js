@@ -6,6 +6,8 @@ import {
   getOverviewStats,
   listMembers,
   listMemberTransactions,
+  setMemberLock,
+  listActivity,
   listExpertsAdmin,
   createExpert,
   updateExpert,
@@ -49,6 +51,33 @@ router.get('/members', asyncHandler(async (req, res) => {
 
 router.get('/members/:id/transactions', asyncHandler(async (req, res) => {
   res.json(await listMemberTransactions(Number(req.params.id)))
+}))
+
+router.post('/members/:id/lock', asyncHandler(async (req, res) => {
+  const { reason } = req.body ?? {}
+  const result = await setMemberLock(Number(req.params.id), true, typeof reason === 'string' ? reason.trim().slice(0, 300) : '')
+  if (!result) {
+    return res.status(404).json({ error: 'Không tìm thấy thành viên.' })
+  }
+  res.json(result)
+}))
+
+router.post('/members/:id/unlock', asyncHandler(async (req, res) => {
+  const result = await setMemberLock(Number(req.params.id), false, '')
+  if (!result) {
+    return res.status(404).json({ error: 'Không tìm thấy thành viên.' })
+  }
+  res.json(result)
+}))
+
+router.get('/activity', asyncHandler(async (req, res) => {
+  const { type, q, limit, offset } = req.query ?? {}
+  res.json(await listActivity({
+    type: typeof type === 'string' ? type : undefined,
+    q: typeof q === 'string' ? q : undefined,
+    limit: Math.min(Number(limit) || 50, 200),
+    offset: Number(offset) || 0,
+  }))
 }))
 
 router.get('/experts', asyncHandler(async (req, res) => {

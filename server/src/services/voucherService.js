@@ -22,6 +22,8 @@ function toUserVoucherShape(row) {
     obtainedVia: row.obtained_via,
     usedAt: row.used_at,
     obtainedAt: row.obtained_at,
+    pointsSpent: row.points_spent,
+    pointsBalanceAfter: row.points_balance_after,
   }
 }
 
@@ -59,15 +61,20 @@ export async function redeemVoucherWithPoints(userId, voucherId) {
       throw new Error('Bạn không đủ điểm tích luỹ để đổi voucher này.')
     }
 
+    const balanceAfter = points - voucher.points_cost
     await client.query(
       'UPDATE user_wallets SET loyalty_points = loyalty_points - $2, updated_at = NOW() WHERE user_id = $1',
       [userId, voucher.points_cost],
     )
     const { rows } = await client.query(
-      `INSERT INTO user_vouchers (user_id, voucher_id, obtained_via) VALUES ($1,$2,'points_redeem') RETURNING *`,
-      [userId, voucherId],
+      `INSERT INTO user_vouchers (user_id, voucher_id, obtained_via, points_spent, points_balance_after)
+       VALUES ($1,$2,'points_redeem',$3,$4) RETURNING *`,
+      [userId, voucherId, voucher.points_cost, balanceAfter],
     )
-    return { id: rows[0].id, voucherId, obtainedVia: 'points_redeem' }
+    return {
+      id: rows[0].id, voucherId, obtainedVia: 'points_redeem',
+      pointsSpent: voucher.points_cost, pointsBalanceAfter: balanceAfter,
+    }
   })
 }
 

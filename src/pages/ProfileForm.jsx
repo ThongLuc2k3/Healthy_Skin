@@ -269,7 +269,7 @@ function ProfileForm() {
               }}
             >
               <span className="relative z-10 flex items-center justify-center gap-2 font-display tracking-wide drop-shadow-sm">
-                Xem gợi ý cho tôi
+                Lưu thông tin
               </span>
             </motion.button>
           </div>

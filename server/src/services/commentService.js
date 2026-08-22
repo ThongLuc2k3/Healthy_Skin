@@ -1,5 +1,5 @@
-import fs from 'node:fs'
 import { query } from '../db/connection.js'
+import { uploadBuffer, deleteFile, extractPublicId } from './cloudinaryService.js'
 
 // Bình luận dùng CHUNG cho cả đánh giá (Diễn đàn) và bài đăng (Góc truyền động lực) — 1 bảng
 // review_comments với 2 cột khoá ngoại (review_id / motivation_post_id), đúng 1 trong 2 luôn có giá
@@ -52,10 +52,28 @@ export async function listComments(targetType, targetId, viewerId) {
 
 const MAX_IMAGES = 6
 
+// Ảnh bình luận lưu Cloudinary (files ở đây là buffer trong RAM từ multer.memoryStorage, không phải
+// file đã ghi ổ đĩa) — cùng lý do với review.routes.js: ổ đĩa local trên Render bị xoá mỗi lần deploy.
+async function uploadCommentImages(files) {
+  const uploaded = await Promise.all(
+    (files || []).slice(0, MAX_IMAGES).map((f) => uploadBuffer(f.buffer, f.mimetype, { folder: 'healthyskin/comments' })),
+  )
+  return uploaded.map((u) => u.url)
+}
+
+function deleteOldImages(paths) {
+  for (const p of paths) {
+    if (typeof p === 'string' && p.startsWith('http')) {
+      const publicId = extractPublicId(p)
+      if (publicId) deleteFile(publicId)
+    }
+  }
+}
+
 export async function createComment(targetType, targetId, userId, { content, parentCommentId }, files) {
   const col = targetColumn(targetType)
   const cleanContent = String(content || '').trim().slice(0, 1000)
-  const imagePaths = (files || []).slice(0, MAX_IMAGES).map((f) => `/uploads/reviews/${f.filename}`)
+  const imagePaths = await uploadCommentImages(files)
   if (!cleanContent && imagePaths.length === 0) return null
 
   const { rows } = await query(
@@ -90,10 +108,10 @@ export async function updateComment(userId, commentId, { content, removeImages }
   let imagePaths = toImagePaths(comment)
 
   if (files && files.length > 0) {
-    for (const p of imagePaths) fs.unlink(`public${p}`, () => {})
-    imagePaths = files.slice(0, MAX_IMAGES).map((f) => `/uploads/reviews/${f.filename}`)
+    deleteOldImages(imagePaths)
+    imagePaths = await uploadCommentImages(files)
   } else if (removeImages === 'true') {
-    for (const p of imagePaths) fs.unlink(`public${p}`, () => {})
+    deleteOldImages(imagePaths)
     imagePaths = []
   }
   if (!cleanContent && imagePaths.length === 0) return null
@@ -118,7 +136,7 @@ export async function deleteComment(userId, commentId) {
   const { rows } = await query('SELECT * FROM review_comments WHERE id=$1', [commentId])
   const comment = rows[0]
   if (!comment || Number(comment.user_id) !== Number(userId)) return false
-  for (const p of toImagePaths(comment)) fs.unlink(`public${p}`, () => {})
+  deleteOldImages(toImagePaths(comment))
   await query('DELETE FROM review_comments WHERE id=$1', [commentId])
   return true
 }

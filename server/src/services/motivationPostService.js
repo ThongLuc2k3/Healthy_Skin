@@ -1,7 +1,7 @@
-import fs from 'node:fs'
 import { query } from '../db/connection.js'
 import { addLoyaltyPoints } from './chatWalletService.js'
 import { getBadgeTier } from './followService.js'
+import { deleteFile, extractPublicId } from './cloudinaryService.js'
 
 // Điểm thưởng demo cho chủ bài đăng — cộng vào loyalty_points có sẵn (dùng đổi voucher ở Kho
 // Voucher), KHÔNG phải tiền thật. Xem/tim tính điểm tối đa 1 lần/người/bài để tránh cày điểm ảo.
@@ -62,14 +62,14 @@ export async function listPostsByUser(authorUserId, viewerUserId) {
 }
 
 // Đúng 1 trong 2 nguồn video phải có: videoUrl (dán link) hoặc file (tự tải lên) — không cả hai,
-// không thiếu cả hai. file.path đã là đường dẫn web-servable do route gán filename (xem
-// motivation.routes.js), không phải đường dẫn ổ đĩa thật.
+// không thiếu cả hai. file ở đây là { url, mimetype } đã upload lên Cloudinary xong (xem
+// motivation.routes.js), url là link Cloudinary tuyệt đối, không phải đường dẫn local.
 export async function createPost(userId, { title, description, videoUrl }, file) {
   const cleanTitle = String(title || '').trim().slice(0, 200)
   const cleanUrl = typeof videoUrl === 'string' ? videoUrl.trim().slice(0, 500) : ''
   if (!cleanTitle || (!cleanUrl && !file) || (cleanUrl && file)) return null
 
-  const videoPath = file ? `/uploads/motivation_videos/${file.filename}` : null
+  const videoPath = file ? file.url : null
   const videoMime = file ? file.mimetype : null
 
   const { rows } = await query(
@@ -150,8 +150,11 @@ export async function deletePost(userId, postId) {
   const { rows } = await query('SELECT * FROM motivation_posts WHERE id=$1', [postId])
   const post = rows[0]
   if (!post || Number(post.user_id) !== Number(userId)) return false
-  if (post.video_path) {
-    fs.unlink(`public${post.video_path}`, () => {})
+  // video_path có thể là URL Cloudinary (mới) hoặc đường dẫn local "/uploads/..." (dữ liệu cũ trước
+  // khi chuyển sang Cloudinary, file local trên Render đã mất từ lâu nên bỏ qua, không cần fs.unlink).
+  if (post.video_path?.startsWith('http')) {
+    const publicId = extractPublicId(post.video_path)
+    if (publicId) deleteFile(publicId, post.video_mime?.startsWith('video/') ? 'video' : 'image')
   }
   await query('DELETE FROM motivation_posts WHERE id=$1', [postId])
   return true

@@ -1,31 +1,18 @@
 import { Router } from 'express'
-import fs from 'node:fs'
 import multer from 'multer'
 import { requireAuth, optionalAuth } from '../middleware/auth.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
 import { profileUploadLimiter } from '../middleware/rateLimit.js'
 import { listPosts, createPost, updatePost, recordView, toggleLike, deletePost } from '../services/motivationPostService.js'
 import { listComments, createComment, updateComment, deleteComment, toggleCommentReaction } from '../services/commentService.js'
+import { uploadBuffer } from '../services/cloudinaryService.js'
 
 const router = Router()
 
-// Lưu công khai vào public/uploads (giống review.routes.js) — video đăng ở Góc truyền động lực là
-// nội dung công khai cho mọi người xem, khác với ảnh khuôn mặt/báo cáo khám (riêng tư, phải qua
-// requireAuth mới xem được ảnh) ở profile.routes.js.
-const UPLOAD_DIR = 'public/uploads/motivation_videos'
-fs.mkdirSync(UPLOAD_DIR, { recursive: true })
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, UPLOAD_DIR),
-  filename: (req, file, cb) => {
-    const dot = file.originalname.lastIndexOf('.')
-    const ext = dot >= 0 ? file.originalname.slice(dot) : ''
-    cb(null, `motivation-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`)
-  },
-})
-
+// Ảnh/video đăng ở Góc truyền động lực lưu Cloudinary (memoryStorage, KHÔNG ghi ổ đĩa local) — cùng
+// lý do với review.routes.js: ổ đĩa tạm thời trên Render bị xoá mỗi lần deploy.
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 60 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (!file.mimetype.startsWith('video/') && !file.mimetype.startsWith('image/')) {
@@ -35,22 +22,10 @@ const upload = multer({
   },
 })
 
-// Bình luận (kể cả ảnh đính kèm) dùng chung logic VÀ thư mục lưu với review.routes.js — xem
-// commentService.js (đường dẫn ảnh nó tự ghép luôn là "/uploads/reviews/...", không phân biệt bình
-// luận cho đánh giá hay bài đăng, nên multer ở đây phải ghi vào ĐÚNG thư mục đó).
-const REVIEW_UPLOAD_DIR = 'public/uploads/reviews'
-fs.mkdirSync(REVIEW_UPLOAD_DIR, { recursive: true })
-const commentImageStorage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, REVIEW_UPLOAD_DIR),
-  filename: (req, file, cb) => {
-    const dot = file.originalname.lastIndexOf('.')
-    const ext = dot >= 0 ? file.originalname.slice(dot) : ''
-    cb(null, `review-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`)
-  },
-})
+// Bình luận (kể cả ảnh đính kèm) dùng CHUNG logic với review.routes.js — xem commentService.js.
 const MAX_COMMENT_IMAGES = 6
 const uploadCommentImages = multer({
-  storage: commentImageStorage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024, files: MAX_COMMENT_IMAGES },
   fileFilter: (req, file, cb) => {
     if (!file.mimetype.startsWith('image/')) return cb(new Error('Chỉ chấp nhận file hình ảnh!'))
@@ -105,7 +80,14 @@ router.post(
   upload.single('video'),
   asyncHandler(async (req, res) => {
     const { title, description, videoUrl } = req.body ?? {}
-    const post = await createPost(req.userId, { title, description, videoUrl }, req.file)
+    const uploaded = req.file
+      ? await uploadBuffer(req.file.buffer, req.file.mimetype, { folder: 'healthyskin/motivation' })
+      : null
+    const post = await createPost(
+      req.userId,
+      { title, description, videoUrl },
+      uploaded ? { url: uploaded.url, mimetype: req.file.mimetype } : null,
+    )
     if (!post) {
       return res.status(400).json({
         error: 'Vui lòng nhập tiêu đề và cung cấp đúng 1 nguồn nội dung: dán link video hoặc tải file ảnh/video lên, không cả hai.',

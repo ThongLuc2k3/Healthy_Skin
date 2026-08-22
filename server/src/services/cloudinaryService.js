@@ -15,8 +15,17 @@ const MIME_TO_RESOURCE = {
   'application/pdf': 'raw',
 }
 
+function resolveResourceType(mimeType) {
+  if (MIME_TO_RESOURCE[mimeType]) return MIME_TO_RESOURCE[mimeType]
+  // Video tự tải lên ở Góc truyền động lực có nhiều định dạng (mp4/webm/mov...) — nhận diện theo
+  // tiền tố mime thay vì liệt kê từng loại, Cloudinary bắt buộc đúng resource_type='video' mới xử lý
+  // đúng (upload nhầm resource_type='image' cho video sẽ lỗi hoặc lưu sai).
+  if (mimeType?.startsWith('video/')) return 'video'
+  return 'image'
+}
+
 export async function uploadBuffer(buffer, mimeType, { folder = 'da-duong' } = {}) {
-  const resourceType = MIME_TO_RESOURCE[mimeType] || 'image'
+  const resourceType = resolveResourceType(mimeType)
 
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
@@ -30,10 +39,13 @@ export async function uploadBuffer(buffer, mimeType, { folder = 'da-duong' } = {
   })
 }
 
-export async function deleteFile(publicId) {
+// resourceType phải khớp đúng loại lúc upload (mặc định 'image') — Cloudinary lập chỉ mục publicId
+// riêng theo từng resource_type, gọi destroy() với resourceType sai sẽ "thành công" nhưng không xoá
+// được gì (video tải lên ở Góc truyền động lực phải truyền resourceType='video').
+export async function deleteFile(publicId, resourceType = 'image') {
   if (!publicId) return
   try {
-    await cloudinary.uploader.destroy(publicId)
+    await cloudinary.uploader.destroy(publicId, { resource_type: resourceType })
   } catch {
     // silent fail — xoá file không quan trọng nếu Cloudinary lỗi
   }

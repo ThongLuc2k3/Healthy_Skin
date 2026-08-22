@@ -15,8 +15,12 @@ import { Lightbox, CommentSection } from './WebsiteReviews'
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 const BACKEND_HOST = API_BASE_URL.replace(/\/api\/?$/, '')
 
+// Ảnh/video tự tải lên giờ lưu Cloudinary nên path đã là URL tuyệt đối (https://res.cloudinary.com/...)
+// — chỉ ghép thêm BACKEND_HOST cho đường dẫn tương đối kiểu cũ "/uploads/..." (dữ liệu cũ trước khi
+// chuyển sang Cloudinary), không được ghép cho URL đã tuyệt đối.
 export function toFileUrl(path) {
-  return path ? `${BACKEND_HOST}${path}` : ''
+  if (!path) return ''
+  return path.startsWith('http') ? path : `${BACKEND_HOST}${path}`
 }
 
 // Huy hiệu theo số người theo dõi (xem followService.getBadgeTier ở backend) — chỉ trả tier số +

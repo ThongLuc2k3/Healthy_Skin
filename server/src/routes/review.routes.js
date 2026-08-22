@@ -1,36 +1,21 @@
 import express from 'express'
 import multer from 'multer'
-import fs from 'fs'
-import path from 'path'
 import { query } from '../db/connection.js'
 import { requireAuth, optionalAuth } from '../middleware/auth.js'
 import { asyncHandler } from '../middleware/asyncHandler.js'
 import { getBadgeTier } from '../services/followService.js'
 import { listComments, createComment, updateComment, deleteComment, toggleCommentReaction } from '../services/commentService.js'
+import { uploadBuffer, deleteFile, extractPublicId } from '../services/cloudinaryService.js'
 
 const router = express.Router()
 
-// multer.diskStorage không tự tạo thư mục đích — nếu server/public/uploads/reviews chưa tồn tại
-// (ví dụ lần đầu chạy, hoặc uploads/ bị .gitignore nên không có sẵn khi clone), mọi lần ghi file sẽ
-// ném ENOENT và route trả lỗi 500 dù dữ liệu gửi lên hợp lệ. Tạo trước ngay khi module load, cùng
-// cách profileService.js/consultationService.js đang làm cho các thư mục upload khác.
-const REVIEW_UPLOAD_DIR = 'public/uploads/reviews'
-fs.mkdirSync(REVIEW_UPLOAD_DIR, { recursive: true })
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, REVIEW_UPLOAD_DIR)
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname)
-    cb(null, `review-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`)
-  }
-})
-
+// Ảnh đánh giá lưu ở Cloudinary (memoryStorage giữ tạm trong RAM rồi upload lên, KHÔNG ghi ổ đĩa
+// local) — Render free tier có ổ đĩa tạm thời (ephemeral), mọi file ghi ra local sẽ mất sau mỗi lần
+// deploy dù DB (Neon) vẫn còn nguyên dòng review trỏ tới đường dẫn đó, gây ảnh vỡ trên production.
 const MAX_IMAGES = 6
 
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024, files: MAX_IMAGES }, // Giới hạn mỗi ảnh 5MB, tối đa 6 ảnh/lần
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
@@ -40,6 +25,25 @@ const upload = multer({
     }
   }
 })
+
+async function uploadReviewImages(files) {
+  const uploaded = await Promise.all(
+    (files || []).map((f) => uploadBuffer(f.buffer, f.mimetype, { folder: 'healthyskin/reviews' })),
+  )
+  return uploaded.map((u) => u.url)
+}
+
+// Ảnh cũ có thể là URL Cloudinary (mới) hoặc đường dẫn local "/uploads/..." (dữ liệu cũ trước khi
+// chuyển sang Cloudinary) — chỉ gọi xoá trên Cloudinary cho URL http(s), bỏ qua đường dẫn local vì
+// file local trên Render đã mất từ lâu, gọi fs.unlink cho chúng chỉ tổ vô nghĩa.
+function deleteOldImages(paths) {
+  for (const p of paths) {
+    if (typeof p === 'string' && p.startsWith('http')) {
+      const publicId = extractPublicId(p)
+      if (publicId) deleteFile(publicId)
+    }
+  }
+}
 
 function toImagePaths(row) {
   if (row.image_paths?.length) return row.image_paths
@@ -90,7 +94,7 @@ router.post('/', requireAuth, upload.array('images', MAX_IMAGES), asyncHandler(a
   try {
     const { title, content, rating = 5 } = req.body
 
-    const imagePaths = (req.files || []).map((f) => `/uploads/reviews/${f.filename}`)
+    const imagePaths = await uploadReviewImages(req.files)
 
     if (!title || !content) {
       return res.status(400).json({ error: 'Vui lòng nhập đầy đủ tiêu đề và nội dung' })
@@ -127,10 +131,10 @@ router.put('/:id', requireAuth, upload.array('images', MAX_IMAGES), asyncHandler
 
   let imagePaths = toImagePaths(review)
   if (req.files?.length) {
-    for (const p of imagePaths) fs.unlink(`public${p}`, () => {})
-    imagePaths = req.files.map((f) => `/uploads/reviews/${f.filename}`)
+    deleteOldImages(imagePaths)
+    imagePaths = await uploadReviewImages(req.files)
   } else if (req.body?.removeImages === 'true') {
-    for (const p of imagePaths) fs.unlink(`public${p}`, () => {})
+    deleteOldImages(imagePaths)
     imagePaths = []
   }
 
@@ -149,7 +153,7 @@ router.delete('/:id', requireAuth, asyncHandler(async (req, res) => {
   if (!review || Number(review.user_id) !== Number(req.userId)) {
     return res.status(404).json({ error: 'Không tìm thấy đánh giá hoặc bạn không phải chủ đánh giá.' })
   }
-  for (const p of toImagePaths(review)) fs.unlink(`public${p}`, () => {})
+  deleteOldImages(toImagePaths(review))
   await query('DELETE FROM website_reviews WHERE id=$1', [req.params.id])
   res.json({ ok: true })
 }))

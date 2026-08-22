@@ -51,4 +51,10 @@ if (!config.geminiApiKey) {
   )
 }
 
+if (!config.cloudinaryCloudName || !config.cloudinaryApiKey || !config.cloudinaryApiSecret) {
+  console.warn(
+    '[uploads] CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET chưa được cấu hình đủ — upload ảnh/video (đánh giá, bình luận, Góc truyền động lực) sẽ lỗi cho đến khi thiết lập trong .env. Trên Render (ổ đĩa tạm thời), ảnh lưu local sẽ mất sau mỗi lần deploy nên đây là cách lưu trữ chính, không phải tuỳ chọn.',
+  )
+}
+
 export default config

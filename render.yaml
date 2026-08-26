@@ -10,8 +10,6 @@ services:
         value: https://tlucs-api.onrender.com/api/v1
       - key: VITE_GOOGLE_CLIENT_ID
         value: 290375066402-8c233c3bqatpkfe4a9l3fla4j26kaced.apps.googleusercontent.com
-      - key: VITE_WEB_PUSH_PUBLIC_KEY
-        sync: false
     routes:
       - type: rewrite
         source: /*
@@ -19,6 +17,7 @@ services:
   - type: web
     name: tlucs-api
     runtime: node
+    plan: free
     rootDir: server
     buildCommand: npm ci
     startCommand: npm run db:setup && npm start
@@ -28,8 +27,6 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        sync: false
-      - key: DATABASE_URL_DIRECT
         sync: false
       - key: DATABASE_SCHEMA
         value: tlucs
@@ -42,18 +39,4 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: UPLOAD_DIR
-        value: /var/data/tlucs-uploads
-      - key: RESEND_API_KEY
-        sync: false
-      - key: EMAIL_FROM
-        sync: false
-      - key: WEB_PUSH_PUBLIC_KEY
-        sync: false
-      - key: WEB_PUSH_PRIVATE_KEY
-        sync: false
-      - key: WEB_PUSH_SUBJECT
-        sync: false
-    disk:
-      name: tlucs-uploads
-      mountPath: /var/data
-      sizeGB: 1
+        value: /tmp/tlucs-uploads

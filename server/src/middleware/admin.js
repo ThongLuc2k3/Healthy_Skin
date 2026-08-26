@@ -1,0 +1,2 @@
+import { database } from '../db/connection.js'
+export async function requireModerator(req,res,next){try{const db=database();if(!db){if(req.auth?.email==='demo@tlucs.local')return next();return res.status(403).json({error:{code:'MODERATOR_REQUIRED',message:'Bạn không có quyền quản trị.'}})}const user=(await db.query('select role from users where id=$1',[req.auth.sub])).rows[0];if(!['moderator','admin'].includes(user?.role))return res.status(403).json({error:{code:'MODERATOR_REQUIRED',message:'Bạn không có quyền quản trị.'}});next()}catch(error){next(error)}}

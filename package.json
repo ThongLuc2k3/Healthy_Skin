@@ -1,5 +1,5 @@
 {
-  "name": "da-duong",
+  "name": "tlucs-web",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,7 +10,7 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "node src/logic/matchEngine.test.js && node server/src/logic/voucherPricing.test.js && node server/src/qa/runQa.js --rule-only"
+    "test": "npm run build && npm --prefix server test"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.2",

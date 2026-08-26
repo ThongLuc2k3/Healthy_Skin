@@ -1,8 +1,59 @@
 services:
   - type: web
-    name: healthy-skin
-    env: node
-    plan: free
-    buildCommand: npm install && npm --prefix server install && npm run build
-    startCommand: cd server && npm start
+    name: tlucs-web
+    runtime: static
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
     autoDeploy: true
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://tlucs-api.onrender.com/api/v1
+      - key: VITE_GOOGLE_CLIENT_ID
+        value: 290375066402-8c233c3bqatpkfe4a9l3fla4j26kaced.apps.googleusercontent.com
+      - key: VITE_WEB_PUSH_PUBLIC_KEY
+        sync: false
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+  - type: web
+    name: tlucs-api
+    runtime: node
+    rootDir: server
+    buildCommand: npm ci
+    startCommand: npm run db:setup && npm start
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_URL_DIRECT
+        sync: false
+      - key: DATABASE_SCHEMA
+        value: tlucs
+      - key: WEB_ORIGIN
+        value: https://tlucs-web.onrender.com
+      - key: GOOGLE_CLIENT_ID
+        value: 290375066402-8c233c3bqatpkfe4a9l3fla4j26kaced.apps.googleusercontent.com
+      - key: PAYMENT_MODE
+        value: simulation
+      - key: JWT_SECRET
+        generateValue: true
+      - key: UPLOAD_DIR
+        value: /var/data/tlucs-uploads
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: WEB_PUSH_PUBLIC_KEY
+        sync: false
+      - key: WEB_PUSH_PRIVATE_KEY
+        sync: false
+      - key: WEB_PUSH_SUBJECT
+        sync: false
+    disk:
+      name: tlucs-uploads
+      mountPath: /var/data
+      sizeGB: 1

@@ -1,87 +1,11 @@
 import { Router } from 'express'
-import { createUser, findUserByEmail, findUserById, verifyPassword } from '../services/userService.js'
-import { deleteAccount } from '../services/accountDeletionService.js'
-import { grantWelcomePoints } from '../services/chatWalletService.js'
-import { requireAuth, signToken } from '../middleware/auth.js'
-import { authLimiter } from '../middleware/rateLimit.js'
-import { asyncHandler } from '../middleware/asyncHandler.js'
-
-const router = Router()
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
-router.post(
-  '/register',
-  authLimiter,
-  asyncHandler(async (req, res) => {
-    const { email, password, acceptedTerms } = req.body ?? {}
-
-    if (typeof email !== 'string' || !EMAIL_RE.test(email)) {
-      return res.status(400).json({ error: 'Email không hợp lệ.' })
-    }
-    if (typeof password !== 'string' || password.length < 6) {
-      return res.status(400).json({ error: 'Mật khẩu phải có ít nhất 6 ký tự.' })
-    }
-    if (acceptedTerms !== true) {
-      return res.status(400).json({ error: 'Bạn cần đồng ý với Điều khoản sử dụng trước khi đăng ký.' })
-    }
-
-    if (await findUserByEmail(email)) {
-      return res.status(400).json({ error: 'Email này đã được đăng ký.' })
-    }
-
-    const user = await createUser(email, password, new Date().toISOString())
-    // Điểm chào mừng — tặng 1 lần cho mọi tài khoản mới. Không để lỗi cấp điểm chặn đăng ký thành công.
-    await grantWelcomePoints(user.id).catch((err) => {
-      console.error('[auth] Không cấp được điểm chào mừng:', err)
-    })
-    const token = signToken(user)
-    res.status(201).json({ token, user: { id: user.id, email: user.email } })
-  }),
-)
-
-router.post(
-  '/login',
-  authLimiter,
-  asyncHandler(async (req, res) => {
-    const { email, password } = req.body ?? {}
-
-    const user = await findUserByEmail(email)
-    const passwordMatches = user && (await verifyPassword(password ?? '', user.password_hash))
-    if (!passwordMatches) {
-      return res.status(401).json({ error: 'Email hoặc mật khẩu không đúng.' })
-    }
-    if (user.is_locked) {
-      return res.status(403).json({
-        error: `Tài khoản đã bị khoá${user.locked_reason ? `: ${user.locked_reason}` : '.'}`,
-      })
-    }
-
-    const token = signToken(user)
-    res.json({ token, user: { id: user.id, email: user.email } })
-  }),
-)
-
-router.get('/me', requireAuth, asyncHandler(async (req, res) => {
-  const user = await findUserById(req.userId)
-  if (!user) {
-    return res.status(404).json({ error: 'Không tìm thấy người dùng.' })
-  }
-  // Tài khoản bị khoá SAU khi đã đăng nhập (phiên JWT còn hạn) — trả 401 để AuthContext coi như
-  // hết phiên và tự đăng xuất ở lần tải trang kế tiếp (xem AuthContext.jsx, chỉ xử lý status 401).
-  if (user.is_locked) {
-    return res.status(401).json({
-      error: `Tài khoản đã bị khoá${user.locked_reason ? `: ${user.locked_reason}` : '.'}`,
-    })
-  }
-  res.json({ id: user.id, email: user.email })
-}))
-
-// Xoá tài khoản và toàn bộ dữ liệu liên quan (hồ sơ, lịch sử quét, lịch hẹn, ảnh, đánh giá...) —
-// không thể hoàn tác. Xem accountDeletionService.js để biết chính xác những gì bị xoá.
-router.delete('/me', requireAuth, asyncHandler(async (req, res) => {
-  await deleteAccount(req.userId)
-  res.json({ ok: true })
-}))
-
+import { completeOnboarding,getUser,loginDev,loginWithGoogle,refreshSession } from '../services/authService.js'
+import { validateOnboarding } from '../services/onboardingPolicy.js'
+import { requireAuth } from '../middleware/auth.js'
+const router=Router();const meta=req=>({userAgent:req.get('user-agent'),ip:req.ip})
+router.post('/google',async(req,res,next)=>{try{res.json(await loginWithGoogle(req.body.credential,meta(req)))}catch(e){next(e)}})
+router.post('/dev',async(req,res,next)=>{try{res.json(await loginDev(meta(req)))}catch(e){next(e)}})
+router.post('/refresh',async(req,res,next)=>{try{res.json(await refreshSession(req.body.refreshToken))}catch(e){next(e)}})
+router.get('/me',requireAuth,async(req,res,next)=>{try{const user=await getUser(req.auth.sub);if(!user)return res.status(404).json({error:{code:'USER_NOT_FOUND',message:'Không tìm thấy tài khoản.'}});res.json({user})}catch(e){next(e)}})
+router.put('/onboarding',requireAuth,async(req,res,next)=>{try{const result=validateOnboarding(req.body);if(!result.valid)return res.status(422).json({error:{code:'VALIDATION_ERROR',message:'Thông tin onboarding chưa hợp lệ.',fields:result.errors}});res.json({user:await completeOnboarding(req.auth.sub,req.body)})}catch(e){next(e)}})
 export default router

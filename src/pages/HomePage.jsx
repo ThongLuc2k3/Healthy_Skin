@@ -1,32 +1,18 @@
-import Hero from '../components/Hero'
-import ExpertsShowcase from '../components/ExpertsShowcase'
-import Analysis from '../components/Analysis'
-import Technology from '../components/Technology'
-import ServicesHighlight from '../components/ServicesHighlight'
-import SponsoredStrip from '../components/SponsoredStrip'
-import CTA from '../components/CTA'
-import { SectionSeam } from '../components/SectionSeam'
-import { useGsapScroll } from '../hooks/useGsapScroll'
-
-function HomePage() {
-  useGsapScroll()
-
-  return (
-    <div className="relative min-h-screen bg-[#eaf7f1] text-[#0e3b33] antialiased overflow-x-hidden">
-      <main>
-        <Hero />
-        <SectionSeam />
-        <ExpertsShowcase />
-        <SectionSeam />
-        <Analysis />
-        <SectionSeam />
-        <Technology />
-        <ServicesHighlight />
-        <SponsoredStrip />
-        <CTA />
-      </main>
-    </div>
-  )
-}
-
-export default HomePage
+import { Link } from 'react-router-dom'
+import { ArrowRight, BadgeCheck, BookOpen, CalendarCheck, Check, Clock3, GraduationCap, ShieldCheck, Sparkles, Star, Users } from 'lucide-react'
+import { RequestCard } from './MarketplacePage'
+import { useAuth } from '../context/AuthContext'
+import DashboardPage from './DashboardPage'
+const sample={id:'home-ai',kind:'paid',title:'Cần hỏi kinh nghiệm học môn AI với thầy Minh',description:'Muốn hỏi workload, cách chấm và kiến thức cần chuẩn bị.',university_code:'HCMUS',course_name:'Trí tuệ nhân tạo',duration_minutes:30,amount_vnd:50000}
+const steps=[['01','Đăng điều bạn đang cần','Chọn trường, môn học, thời lượng và mức ngân sách phù hợp.'],['02','Ghép đúng người đã học','TLUCS ưu tiên người đúng trường, đúng tiêu chí và đã được xác minh.'],['03','Trao đổi và đánh giá','Trao đổi online hoặc trực tiếp. Tiền chỉ được chuyển sau khi phiên hoàn tất.']]
+export default function HomePage({focusHow=false}) { const {user}=useAuth();if(user&&!focusHow)return <DashboardPage/>;return <>
+  <section className="hero-grid overflow-hidden"><div className="page grid min-h-[700px] items-center gap-12 py-16 lg:grid-cols-[1.08fr_.92fr]">
+    <div><span className="eyebrow"><Sparkles size={15}/> Peer-to-peer learning · HCMUS first</span><h1 className="mt-6 max-w-3xl text-[clamp(3rem,6vw,5.8rem)] font-black leading-[.98] tracking-[-.065em]">Đừng tự mò<br/>đường <span className="relative text-[#2D5BFF]">một mình.<svg className="absolute -bottom-3 left-0 w-full" viewBox="0 0 360 14"><path d="M4 9C82 1 218 3 356 8" fill="none" stroke="#B7F34A" strokeWidth="7" strokeLinecap="round"/></svg></span></h1><p className="mt-8 max-w-xl text-lg leading-8 text-slate-600">Kết nối với anh chị khóa trên đã học <b>đúng môn, đúng trường</b> để hỏi kinh nghiệm hoặc ôn tập 1-1: nhanh, rõ ràng và có xác minh.</p><div className="mt-8 flex flex-wrap gap-3"><Link to="/dang-yeu-cau" className="btn-primary">Đăng điều bạn đang cần <ArrowRight size={18}/></Link><Link to="/yeu-cau" className="btn-secondary">Tôi muốn hỗ trợ</Link></div><div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-500"><span className="flex gap-2"><Check size={17} className="text-[#2D5BFF]"/>Xác minh sinh viên</span><span className="flex gap-2"><Check size={17} className="text-[#2D5BFF]"/>Giá minh bạch</span><span className="flex gap-2"><Check size={17} className="text-[#2D5BFF]"/>Thanh toán an toàn</span></div></div>
+    <div className="relative mx-auto w-full max-w-lg"><div className="absolute -inset-8 rounded-full bg-[#DDE5FF] blur-3xl"/><div className="relative rotate-2 rounded-[2rem] bg-[#14213d] p-4 shadow-2xl"><div className="mb-3 flex items-center justify-between px-2 text-xs text-slate-300"><span>Yêu cầu mới gần bạn</span><span className="flex items-center gap-1"><span className="h-2 w-2 animate-pulse rounded-full bg-[#B7F34A]"/> đang online</span></div><div className="rounded-2xl bg-white p-5"><span className="tag tag-blue">Trí tuệ nhân tạo</span><h3 className="mt-4 text-xl font-extrabold">Cần hỏi kinh nghiệm học môn AI với thầy Minh</h3><p className="mt-3 text-sm leading-6 text-slate-500">Em đang phân vân về workload, cách chấm và kiến thức cần chuẩn bị trước...</p><div className="my-5 flex gap-4 border-y border-slate-100 py-4 text-sm text-slate-500"><span className="flex gap-1"><GraduationCap size={17}/> HCMUS</span><span className="flex gap-1"><Clock3 size={17}/> 30 phút</span></div><div className="flex items-center justify-between"><div><p className="text-xs text-slate-400">Ngân sách</p><b className="text-xl text-[#2D5BFF]">50.000đ</b></div><button className="rounded-xl bg-[#B7F34A] px-5 py-3 text-sm font-extrabold text-[#14213d]">Nhận hỗ trợ</button></div></div></div><div className="absolute -left-8 top-20 rounded-2xl bg-white p-3 shadow-xl"><div className="flex items-center gap-2 text-sm font-bold"><BadgeCheck className="fill-[#2D5BFF] text-white"/> Đã xác minh môn học</div></div><div className="absolute -bottom-7 right-3 rounded-2xl bg-white p-4 shadow-xl"><div className="flex items-center gap-2"><span className="text-lg font-extrabold">4.9</span><span className="flex">{[1,2,3,4,5].map(i=><Star key={i} size={14} className="fill-amber-400 text-amber-400"/>)}</span></div><p className="mt-1 text-xs text-slate-400">từ 32 phiên hỗ trợ</p></div></div>
+  </div></section>
+  <section className="border-y border-slate-200 bg-white"><div className="page grid grid-cols-2 gap-6 py-8 text-center md:grid-cols-4"><div><b className="stat">HCMUS</b><p>Thị trường pilot</p></div><div><b className="stat">1%</b><p>Phí khi giải ngân</p></div><div><b className="stat">15–240'</b><p>Thời lượng linh hoạt</p></div><div><b className="stat">0đ</b><p>Diễn đàn và yêu cầu miễn phí</p></div></div></section>
+  <section id="how" className="page py-24"><div className="text-center"><span className="eyebrow">Cách hoạt động</span><h2 className="section-title">Từ khuất mắc đến đúng người<br/>chỉ trong vài bước.</h2></div><div className="mt-14 grid gap-5 md:grid-cols-3">{steps.map((s,i)=><div className="card relative p-7" key={s[0]}><span className="text-5xl font-black text-[#E2E8FF]">{s[0]}</span>{i===0?<BookOpen className="mt-7 text-[#2D5BFF]"/>:i===1?<Users className="mt-7 text-[#2D5BFF]"/>:<CalendarCheck className="mt-7 text-[#2D5BFF]"/>}<h3 className="mt-5 text-xl font-extrabold">{s[1]}</h3><p className="mt-3 leading-7 text-slate-500">{s[2]}</p></div>)}</div></section>
+  <section className="bg-[#F0F3FF]"><div className="page py-24"><div className="flex flex-wrap items-end justify-between gap-5"><div><span className="eyebrow">Vừa được đăng</span><h2 className="section-title !mt-4 !text-left">Kiến thức của bạn<br/>đang có người cần.</h2></div><Link to="/yeu-cau" className="btn-secondary">Xem tất cả <ArrowRight size={17}/></Link></div><div className="mt-10 grid gap-5 md:grid-cols-3"><RequestCard job={sample}/><RequestCard job={{...sample,id:'home-dsa',course_name:'Cấu trúc dữ liệu',title:'Ôn cây đỏ đen trước kỳ thi cuối kỳ',duration_minutes:120,amount_vnd:200000}}/><RequestCard job={{...sample,id:'home-path',kind:'exchange',course_name:'Định hướng',title:'Phân vân giữa Khoa học dữ liệu và AI',duration_minutes:45,amount_vnd:null}}/></div></div></section>
+  <section className="page py-24"><div className="overflow-hidden rounded-[2.5rem] bg-[#14213d] px-7 py-14 text-white md:px-14"><div className="grid items-center gap-10 md:grid-cols-[1fr_auto]"><div><ShieldCheck size={40} className="text-[#B7F34A]"/><h2 className="mt-5 max-w-2xl text-3xl font-extrabold tracking-tight md:text-5xl">Có điều chưa rõ ở trường?<br/>Sẽ có người từng trải qua.</h2><p className="mt-5 text-slate-300">Đăng yêu cầu miễn phí. Chỉ thanh toán khi bạn chọn được Peer phù hợp.</p></div><Link to="/dang-yeu-cau" className="inline-flex items-center justify-center rounded-2xl bg-[#B7F34A] px-7 py-4 font-extrabold text-[#14213d]">Bắt đầu ngay <ArrowRight className="ml-2"/></Link></div></div></section>
+  {focusHow && <script dangerouslySetInnerHTML={{__html:`document.getElementById('how')?.scrollIntoView()`}}/>}
+ </> }

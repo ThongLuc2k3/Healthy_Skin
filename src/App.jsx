@@ -1,77 +1,9 @@
-import { Routes, Route, useLocation } from 'react-router-dom'
-import NavBar from './components/NavBar'
-import Footer from './components/Footer'
-import HomePage from './pages/HomePage'
-import ProfileForm from './pages/ProfileForm'
-import AccountSettingsPage from './pages/AccountSettingsPage'
-import ScanDemoPage from './pages/ScanDemoPage'
-import ScanHistoryPage from './pages/ScanHistoryPage'
-import MotivationPage from './pages/MotivationPage'
-import ExpertListPage from './pages/ExpertListPage'
-import ExpertApplicationPage from './pages/ExpertApplicationPage'
-import ExpertDetailPage from './pages/ExpertDetailPage'
-import BookingDetailPage from './pages/BookingDetailPage'
-import LoginPage from './pages/LoginPage'
-import RegisterPage from './pages/RegisterPage'
-import ChatWidget from './components/ChatWidget'
-import PricingPage from './pages/PricingPage'
-import ExpertDashboardPage from './pages/expert/ExpertDashboardPage'
-import AdminDashboardPage from './pages/admin/AdminDashboardPage'
-import ServicesNearbyPage from './pages/ServicesNearbyPage'
-import VenueApplicationPage from './pages/VenueApplicationPage'
-import ServiceDetailPage from './pages/ServiceDetailPage'
-import MyVouchersPage from './pages/MyVouchersPage'
-import SkinPlaygroundPage from './pages/SkinPlaygroundPage'
-import WebsiteReviews from './pages/WebsiteReviews'
-import AboutPage from './pages/AboutPage'
-import UserProfilePage from './pages/UserProfilePage'
+import { Route,Routes } from 'react-router-dom'
+import NavBar from './components/NavBar';import Footer from './components/Footer';import PaymentSimulationOverlay from './components/PaymentSimulationOverlay'
+import HomePage from './pages/HomePage';import MarketplacePage from './pages/MarketplacePage';import PeersPage from './pages/PeersPage';import CreateRequestPage from './pages/CreateRequestPage'
+import LoginPage from './pages/LoginPage';import RegisterPage from './pages/RegisterPage';import SharingBoardPage from './pages/SharingBoardPage';import ForumPage from './pages/ForumPage';import SchoolServersPage from './pages/SchoolServersPage';import MessagesPage from './pages/MessagesPage'
+import WalletPage from './pages/WalletPage';import SessionsPage from './pages/SessionsPage';import AccountPage from './pages/AccountPage';import AdminPage from './pages/AdminPage';import SearchPage from './pages/SearchPage';import NotificationsPage from './pages/NotificationsPage';import MySharingPage from './pages/MySharingPage';import MyRequestsPage from './pages/MyRequestsPage'
 
-function App() {
-  const { pathname } = useLocation()
-  // Cổng Quản Trị (/admin) có header/tab riêng của nó, không cần NavBar/Footer/ChatWidget của trang
-  // khách hàng chèn thêm vào nữa (gây rối giao diện, xem phản hồi người dùng).
-  const isAdmin = pathname.startsWith('/admin')
-
-  return (
-    <div className="relative min-h-screen overflow-x-hidden bg-gradient-to-br from-[#f6fbf9] via-[#eef7f2] to-[#eaf7f1] text-[#0e3b33] antialiased selection:bg-[#0e3b33]/20 selection:text-[#0e3b33]">
-      {/* Background ambient radial glow layers matching light brand theme */}
-      <div className="pointer-events-none fixed inset-0 -z-10 bg-gradient-to-br from-[#f6fbf9] via-[#eef7f2] to-[#eaf7f1]" />
-      <div className="pointer-events-none fixed inset-0 -z-10 grid-bg opacity-30 mask-fade-b" />
-
-      {!isAdmin && <NavBar />}
-      <main className="relative z-10">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/profile" element={<ProfileForm />} />
-          <Route path="/tai-khoan" element={<AccountSettingsPage />} />
-          <Route path="/scan" element={<ScanDemoPage />} />
-          <Route path="/history" element={<ScanHistoryPage />} />
-          <Route path="/motivation" element={<MotivationPage />} />
-          <Route path="/skin-lab" element={<SkinPlaygroundPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/expert-dashboard" element={<ExpertDashboardPage />} />
-          <Route path="/admin" element={<AdminDashboardPage />} />
-          <Route path="/dich-vu" element={<ServicesNearbyPage />} />
-          <Route path="/dich-vu/dang-ky" element={<VenueApplicationPage />} />
-          <Route path="/dich-vu/voucher" element={<MyVouchersPage />} />
-          <Route path="/dich-vu/:id" element={<ServiceDetailPage />} />
-          <Route path="/experts" element={<ExpertListPage />} />
-          <Route path="/experts/dang-ky" element={<ExpertApplicationPage />} />
-          <Route path="/experts/:id" element={<ExpertDetailPage />} />
-          <Route path="/my-bookings/:id" element={<BookingDetailPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/reviews" element={<WebsiteReviews />} />
-          <Route path="/nguoi-dung/:id" element={<UserProfilePage />} />
-          <Route path="/about" element={<AboutPage />} />
-        </Routes>
-      </main>
-      {!isAdmin && <Footer />}
-      {!isAdmin && <ChatWidget />}
-    </div>
-  )
-}
-
-
-export default App
-
+export default function App(){return <div className="min-h-screen bg-[#fbfcff] text-[#14213d]"><NavBar/><PaymentSimulationOverlay/><main><Routes>
+  <Route path="/" element={<HomePage/>}/><Route path="/tim-kiem" element={<SearchPage/>}/><Route path="/thong-bao" element={<NotificationsPage/>}/><Route path="/yeu-cau" element={<MarketplacePage/>}/><Route path="/yeu-cau-cua-toi" element={<MyRequestsPage/>}/><Route path="/chia-se" element={<SharingBoardPage/>}/><Route path="/chia-se-cua-toi" element={<MySharingPage/>}/><Route path="/dien-dan" element={<ForumPage/>}/><Route path="/server" element={<SchoolServersPage/>}/><Route path="/tin-nhan" element={<MessagesPage/>}/><Route path="/phien" element={<SessionsPage/>}/><Route path="/vi" element={<WalletPage/>}/><Route path="/tai-khoan" element={<AccountPage/>}/><Route path="/quan-tri" element={<AdminPage/>}/><Route path="/peers" element={<PeersPage/>}/><Route path="/dang-yeu-cau" element={<CreateRequestPage/>}/><Route path="/cach-hoat-dong" element={<HomePage focusHow/>}/><Route path="/login" element={<LoginPage/>}/><Route path="/register" element={<RegisterPage/>}/><Route path="*" element={<HomePage/>}/>
+</Routes></main><Footer/></div>}

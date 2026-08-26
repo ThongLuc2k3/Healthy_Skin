@@ -1,10 +1,2 @@
-export function notFoundHandler(req, res) {
-  res.status(404).json({ error: 'Không tìm thấy đường dẫn API này.' })
-}
-
-export function errorHandler(err, req, res, _next) {
-  console.error(err)
-  const status = err.status || 500
-  const message = err.publicMessage || 'Đã có lỗi xảy ra phía máy chủ, vui lòng thử lại sau.'
-  res.status(status).json({ error: message })
-}
+export function notFound(req,res){res.status(404).json({error:{code:'NOT_FOUND',message:'Không tìm thấy tài nguyên.'}})}
+export function errorHandler(error,req,res,_next){console.error(error);res.status(error.status||500).json({error:{code:error.code||'INTERNAL_ERROR',message:error.status?error.message:'Đã có lỗi xảy ra.',...(error.fields?{fields:error.fields}:{})}})}

@@ -1,7 +1,15 @@
-import AuthPageContainer from '../components/auth/AuthPageContainer'
-
-function RegisterPage() {
-  return <AuthPageContainer initialMode="register" />
+import { useEffect,useState } from 'react'
+import { Link,useNavigate } from 'react-router-dom'
+import { api } from '../lib/api'
+import { useAuth } from '../context/AuthContext'
+const accountKinds=[['university_student','Sinh viên đại học'],['high_school_student','Học sinh THPT'],['alumni','Cựu sinh viên'],['explorer','Người đang tìm hiểu']]
+const slots=[['weekday_evening','Buổi tối trong tuần',{weekday:1,startTime:'18:00',endTime:'21:00'}],['weekday_day','Ban ngày trong tuần',{weekday:2,startTime:'08:00',endTime:'17:00'}],['weekend','Cuối tuần',{weekday:6,startTime:'08:00',endTime:'21:00'}]]
+export default function RegisterPage(){
+  const {session,loginDemo,onboarding}=useAuth();const navigate=useNavigate()
+  const [universities,setUniversities]=useState([]);const [topics,setTopics]=useState([]);const [busy,setBusy]=useState(false);const [error,setError]=useState('')
+  const [form,setForm]=useState({displayName:'',accountKind:'university_student',defaultUniversityId:'',areaLabel:'',topicIds:[],slot:'weekday_evening'})
+  useEffect(()=>{Promise.all([api('/universities'),api('/topics')]).then(([u,t])=>{setUniversities(u.data);setTopics(t.data);setForm(f=>({...f,defaultUniversityId:f.defaultUniversityId||u.data[0]?.id||''}))}).catch(e=>setError(e.message))},[])
+  function toggleTopic(id){setForm(f=>({...f,topicIds:f.topicIds.includes(id)?f.topicIds.filter(x=>x!==id):[...f.topicIds,id]}))}
+  async function submit(e){e.preventDefault();setBusy(true);setError('');try{const authSession=session||await loginDemo();const slot=slots.find(x=>x[0]===form.slot)[2];await onboarding({...form,availability:[slot]},authSession);navigate('/')}catch(e){setError(e.details?.fields?Object.values(e.details.fields)[0]:e.message)}finally{setBusy(false)}}
+  return <div className="page grid min-h-[680px] items-center gap-10 py-16 lg:grid-cols-2"><div><span className="eyebrow">Tạo hồ sơ cộng đồng</span><h1 className="section-title !text-left">Một tài khoản.<br/>Vừa hỏi, vừa giúp.</h1><p className="mt-5 max-w-lg text-lg leading-8 text-slate-500">Một trạng thái chính giúp TLUCS cá nhân hóa bảng tin; bạn vẫn có thể thêm nhiều quan hệ trường sau đó.</p></div><form className="card p-8" onSubmit={submit}><div className="grid gap-5"><label>Tên hiển thị<input required minLength="2" maxLength="40" value={form.displayName} onChange={e=>setForm({...form,displayName:e.target.value})} placeholder="Ví dụ: Mèo Máy HCMUS"/></label><label>Bạn hiện là<select value={form.accountKind} onChange={e=>setForm({...form,accountKind:e.target.value})}>{accountKinds.map(x=><option key={x[0]} value={x[0]}>{x[1]}</option>)}</select></label><label>Trường mặc định<select value={form.defaultUniversityId} onChange={e=>setForm({...form,defaultUniversityId:e.target.value})}>{universities.map(u=><option key={u.id} value={u.id}>{u.name}</option>)}</select></label><label>Khu vực hiện tại<input required value={form.areaLabel} onChange={e=>setForm({...form,areaLabel:e.target.value})} placeholder="Ví dụ: Làng Đại học, Thủ Đức"/></label><fieldset><legend className="text-xs font-extrabold text-slate-700">Chủ đề quan tâm</legend><div className="mt-2 flex flex-wrap gap-2">{topics.map(t=><button type="button" onClick={()=>toggleTopic(t.id)} className={form.topicIds.includes(t.id)?'btn-primary !px-3 !py-2':'btn-secondary !px-3 !py-2'} key={t.id}>{t.name}</button>)}</div></fieldset><label>Khung giờ thường rảnh<select value={form.slot} onChange={e=>setForm({...form,slot:e.target.value})}>{slots.map(x=><option key={x[0]} value={x[0]}>{x[1]}</option>)}</select></label><button disabled={busy} className="btn-primary justify-center">{busy?'Đang lưu...':'Hoàn tất hồ sơ'}</button>{error&&<p className="text-sm text-red-600">{error}</p>}<p className="text-center text-xs text-slate-400">Ảnh đại diện và thông tin xác minh có thể bổ sung sau.</p><Link className="text-center text-sm font-bold text-[#2D5BFF]" to="/login">Quay lại đăng nhập</Link></div></form></div>
 }
-
-export default RegisterPage

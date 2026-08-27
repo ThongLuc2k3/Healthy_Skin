@@ -158,7 +158,7 @@ Người mua vé hủy trước hạn đăng ký được hoàn 100%; hủy sau 
 - Người đăng vắng quá 50% thời lượng: dừng phiên, người nhận nhận 50%, người đăng được hoàn 50%.
 - Người nhận vắng quá 50%: người đăng dừng, được hoàn toàn bộ, đánh giá 1 sao kèm nhận xét và đăng lại nhanh.
 - Hai bên đánh giá 1–5 sao, nhận xét và tiêu chí sau giao dịch.
-- Yêu cầu trực tiếp chỉ công khai khu vực/campus; địa điểm chính xác chỉ lộ sau khi ghép.
+- Toàn bộ yêu cầu và phiên hỗ trợ diễn ra trực tuyến trên nền tảng; không có lựa chọn gặp trực tiếp hoặc trao đổi địa điểm.
 - Thông báo qua website, email và web push.
 - Học sinh THPT có tài khoản được dùng yêu cầu miễn phí/trả phí/trao đổi; cần bổ sung lớp an toàn cho người chưa đủ 18 tuổi trước pilot thật.
 - Mỗi tranh chấp được khiếu nại một lần trong 48 giờ nếu có bằng chứng mới. Quản trị viên khác xem xét khi có thể; quyết định cũ không bị sửa mà được lưu cùng quyết định phúc tra trong audit log.

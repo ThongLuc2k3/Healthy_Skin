@@ -92,13 +92,6 @@ export function validateRequestInput(input = {}, now = new Date()) {
     (!input.offeredDescription || input.offeredDescription.trim().length < 10)
   )
     errors.offeredDescription = "Mô tả điều bạn có thể giúp.";
-  if (!["online", "in_person", "either"].includes(input.deliveryMode))
-    errors.deliveryMode = "Hình thức không hợp lệ.";
-  if (
-    input.deliveryMode !== "online" &&
-    (!input.areaLabel || input.areaLabel.trim().length < 2)
-  )
-    errors.areaLabel = "Vui lòng chọn khu vực công khai.";
   return {
     valid: Object.keys(errors).length === 0,
     errors,
@@ -166,14 +159,10 @@ export async function createRequest(userId, input) {
     amount_vnd: input.kind === "paid" ? Number(input.amountVnd) : null,
     deposit_vnd: input.kind === "paid" ? requestPolicy.paidDepositVnd : 0,
     duration_minutes: Number(input.durationMinutes),
-    delivery_mode: input.deliveryMode,
-    area_label: input.areaLabel?.trim() || null,
-    latitude_blurred: Number.isFinite(Number(input.latitudeBlurred))
-      ? Number(input.latitudeBlurred)
-      : null,
-    longitude_blurred: Number.isFinite(Number(input.longitudeBlurred))
-      ? Number(input.longitudeBlurred)
-      : null,
+    delivery_mode: "online",
+    area_label: null,
+    latitude_blurred: null,
+    longitude_blurred: null,
     starts_at: new Date(input.startsAt).toISOString(),
     require_verified_university: Boolean(input.requireVerifiedUniversity),
     created_at: new Date().toISOString(),

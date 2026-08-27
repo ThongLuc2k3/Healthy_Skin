@@ -79,7 +79,7 @@ TLUCS
 │   │   ├── Thủ tục hành chính
 │   │   ├── Ký túc xá/nhà trọ/đời sống quanh trường
 │   │   └── Học sinh THPT tìm hiểu trường/ngành
-│   ├── Online/gặp trực tiếp/linh hoạt
+│   ├── 100% trực tuyến trên nền tảng
 │   ├── Lịch từ 30 phút sau khi đăng đến tối đa 3 ngày
 │   ├── Matching
 │   │   ├── Khớp đủ điều kiện → người hợp lệ đầu tiên nhận
@@ -87,7 +87,7 @@ TLUCS
 │   │   └── Người đăng duyệt hoặc đăng lại
 │   └── Sau ghép
 │       ├── Phòng chat riêng tự động
-│       ├── Lịch và địa điểm/link họp chính xác
+│       ├── Lịch và phòng trao đổi trực tuyến
 │       ├── Check-in
 │       ├── Hoàn tất/vắng mặt/tranh chấp
 │       └── Đánh giá hai chiều
@@ -301,7 +301,7 @@ TLUCS
 - Thông tin về giảng viên có thể chủ quan, sai hoặc gây tổn hại danh dự.
 - Mua bán tài liệu trái phép, đề rò rỉ, thi hộ, đa cấp và lừa đảo.
 - Xác minh bảng điểm/thẻ sinh viên chứa dữ liệu nhạy cảm.
-- Người chưa thành niên tham gia yêu cầu gặp trực tiếp.
+- Người chưa thành niên tham gia phiên trực tuyến cần lớp bảo vệ và kiểm duyệt phù hợp.
 - Free-tier infrastructure không phù hợp khi có tải thật.
 
 ## 7. Việc ưu tiên ngay sau bản demo
@@ -311,4 +311,3 @@ TLUCS
 3. Khép kín admin dispute và chat media.
 4. Thử closed pilot không tiền thật với 30–50 người HCMUS.
 5. Dùng dữ liệu pilot để quyết định wedge, không dùng cảm nhận cá nhân để mở rộng.
-

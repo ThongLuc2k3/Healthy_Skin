@@ -8,7 +8,9 @@ import { demoTopup,getWallet,payRemaining } from '../src/services/walletService.
 test('E2E yêu cầu trả phí: đăng → ghép → chat → thanh toán → hoàn tất → đánh giá',async()=>{
   const author='e2e-author',receiver='e2e-receiver'
   await demoTopup(author,100000)
-  const request=await createRequest(author,{kind:'paid',title:'Cần trao đổi kinh nghiệm môn kiểm thử',description:'Mình cần trao đổi kỹ về cách chuẩn bị và ôn tập môn kiểm thử phần mềm.',amountVnd:50000,durationMinutes:30,deliveryMode:'online',startsAt:new Date(Date.now()+3600000).toISOString()})
+  const request=await createRequest(author,{kind:'paid',title:'Cần trao đổi kinh nghiệm môn kiểm thử',description:'Mình cần trao đổi kỹ về cách chuẩn bị và ôn tập môn kiểm thử phần mềm.',amountVnd:50000,durationMinutes:30,deliveryMode:'in_person',areaLabel:'Giá trị từ client cũ phải bị bỏ qua',startsAt:new Date(Date.now()+3600000).toISOString()})
+  assert.equal(request.delivery_mode,'online')
+  assert.equal(request.area_label,null)
   const accepted=await acceptRequest(request.id,receiver)
   assert.equal(accepted.mode,'instant')
   await payRemaining(author,request.id)

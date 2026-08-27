@@ -154,7 +154,7 @@ CREATE TABLE requests (
   offered_description text, amount_vnd integer CHECK(amount_vnd IS NULL OR (amount_vnd BETWEEN 10000 AND 200000 AND amount_vnd % 1000 = 0)),
   deposit_vnd integer NOT NULL DEFAULT 0 CHECK(deposit_vnd >= 0),
   duration_minutes integer NOT NULL CHECK(duration_minutes BETWEEN 15 AND 240),
-  delivery_mode text NOT NULL CHECK(delivery_mode IN ('online','in_person','either')), area_label text, latitude_blurred numeric(9,6), longitude_blurred numeric(9,6),
+  delivery_mode text NOT NULL DEFAULT 'online' CHECK(delivery_mode = 'online'), area_label text, latitude_blurred numeric(9,6), longitude_blurred numeric(9,6),
   starts_at timestamptz NOT NULL, instant_match boolean NOT NULL DEFAULT true, created_at timestamptz NOT NULL DEFAULT now()
 );
 COMMENT ON COLUMN requests.starts_at IS 'API bắt buộc nằm trong [server_now + 30 phút, server_now + 3 ngày] tại thời điểm đăng';

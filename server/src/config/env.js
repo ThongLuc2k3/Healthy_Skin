@@ -8,7 +8,7 @@ export const env = {
   databaseUrlDirect: process.env.DATABASE_URL_DIRECT || process.env.DATABASE_URL || '',
   databaseSchema: process.env.DATABASE_SCHEMA || 'tlucs',
   paymentMode: process.env.PAYMENT_MODE || 'simulation',
-  webOrigin: process.env.WEB_ORIGIN || 'http://localhost:5173',
+  webOrigin: process.env.WEB_ORIGIN || process.env.CORS_ORIGIN || 'http://localhost:5173',
   nodeEnv: process.env.NODE_ENV || 'development',
   googleClientId: process.env.GOOGLE_CLIENT_ID || '',
   jwtSecret: process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'tlucs-local-development-secret-change-me'),

@@ -36,7 +36,7 @@ Mỗi tài khoản có thể đồng thời đăng và nhận yêu cầu. Không
 | Ví/thanh toán cũ | Xóa nghiệp vụ | Xây ledger/escrow mô phỏng theo mô hình mới |
 | Review website cũ | Xóa | Xây đánh giá hai chiều theo giao dịch |
 | Admin cũ | Xóa | Xây moderation, verification, dispute và server administration |
-| Logo/ảnh/tài liệu Healthy Skin | Xóa | Thay bằng bộ nhận diện TLUCS |
+| Logo/ảnh/tài liệu hệ thống cũ | Xóa | Thay bằng bộ nhận diện TLUCS |
 | CV/mentor/tài liệu chương trình ngoài app | Giữ | Không đủ căn cứ để coi là tài sản sản phẩm cũ |
 
 ## 3. Kiến trúc mục tiêu
@@ -167,7 +167,7 @@ Người mua vé hủy trước hạn đăng ký được hoàn 100%; hủy sau 
 
 ### M0: Nền móng
 
-- Dọn sạch Healthy Skin; cấu trúc monorepo rõ web/server.
+- Dọn sạch dấu vết hệ thống cũ; cấu trúc monorepo rõ web/server.
 - Design tokens, navigation, error/loading/empty states.
 - Schema mới, migration, seed nhiều trường với HCMUS là mặc định pilot.
 
@@ -237,7 +237,7 @@ Ngưỡng mở rộng pilot: tỷ lệ ghép ≥60%, hoàn tất trên số đã
 
 ## 9. Tiêu chuẩn hoàn thành MVP
 
-- Không còn route, bảng, asset hay nội dung Healthy Skin trong sản phẩm.
+- Không còn route, bảng, asset hay nội dung của hệ thống cũ trong sản phẩm.
 - Luồng từ đăng nhập → đăng yêu cầu → ghép → chat → hoàn tất → ledger → đánh giá chạy end-to-end.
 - Mỗi màn hình danh sách có tìm kiếm, lọc, phân trang và trạng thái rỗng/lỗi/loading.
 - Có test cho matching, escrow, vắng mặt, quyền server và moderation.

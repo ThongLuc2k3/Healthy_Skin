@@ -20,5 +20,9 @@ export const env = {
   webPushSubject: process.env.WEB_PUSH_SUBJECT || 'mailto:admin@tlucs.local',
   geminiApiKey: process.env.GEMINI_API_KEY || '',
   geminiModel: process.env.GEMINI_MODEL || 'gemini-3.6-flash',
+  superAdminEmail: process.env.SUPER_ADMIN_EMAIL || '',
+  superAdminPassword: process.env.SUPER_ADMIN_PASSWORD || '',
+  adminEmail: process.env.ADMIN_EMAIL || '',
+  adminPassword: process.env.ADMIN_PASSWORD || '',
 }
 if(env.nodeEnv==='production'&&(!env.jwtSecret||env.jwtSecret.length<32))throw new Error('JWT_SECRET production phải có ít nhất 32 ký tự.')

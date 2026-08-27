@@ -13,6 +13,7 @@ import operationsRoutes from './operations.routes.js'
 import searchRoutes from './search.routes.js'
 import materialRoutes from './materials.routes.js'
 import socialRoutes from './social.routes.js'
+import assistantRoutes from './assistant.routes.js'
 const router=Router()
 router.use('/auth',authRoutes)
 router.use('/requests',requestRoutes)
@@ -27,6 +28,7 @@ router.use('/operations',operationsRoutes)
 router.use('/search',searchRoutes)
 router.use('/sharing-access',materialRoutes)
 router.use('/social',socialRoutes)
+router.use('/assistant',assistantRoutes)
 const fallbackUniversities=[
   {id:'hcmus',code:'HCMUS',name:'Trường Đại học Khoa học Tự nhiên – ĐHQG TP.HCM',pilot:true},
   {id:'hcmut',code:'HCMUT',name:'Trường Đại học Bách khoa – ĐHQG TP.HCM',pilot:false},

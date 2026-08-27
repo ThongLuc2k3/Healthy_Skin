@@ -23,6 +23,7 @@ try {
   }
   await client.query(`create unique index if not exists transactions_request_unique on transactions(request_id) where request_id is not null`)
   await client.query(`create unique index if not exists transactions_sharing_buyer_unique on transactions(sharing_post_id,payer_id) where sharing_post_id is not null`)
+  await client.query(`alter table requests add column if not exists course_name text`)
 } catch (error) {
   await client.query('rollback')
   throw error

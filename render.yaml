@@ -36,6 +36,10 @@ services:
         value: 290375066402-8c233c3bqatpkfe4a9l3fla4j26kaced.apps.googleusercontent.com
       - key: PAYMENT_MODE
         value: simulation
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
       - key: JWT_SECRET
         generateValue: true
       - key: UPLOAD_DIR

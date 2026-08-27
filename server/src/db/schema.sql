@@ -150,7 +150,7 @@ CREATE TABLE post_attachments (
 
 CREATE TABLE requests (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(), parent_request_id uuid REFERENCES requests(id), author_id uuid NOT NULL REFERENCES users(id), university_id uuid REFERENCES universities(id), course_id uuid REFERENCES courses(id),
-  kind request_kind NOT NULL, status request_status NOT NULL DEFAULT 'moderation', title text NOT NULL, description text NOT NULL,
+  course_name text, kind request_kind NOT NULL, status request_status NOT NULL DEFAULT 'moderation', title text NOT NULL, description text NOT NULL,
   offered_description text, amount_vnd integer CHECK(amount_vnd IS NULL OR (amount_vnd BETWEEN 10000 AND 200000 AND amount_vnd % 1000 = 0)),
   deposit_vnd integer NOT NULL DEFAULT 0 CHECK(deposit_vnd >= 0),
   duration_minutes integer NOT NULL CHECK(duration_minutes BETWEEN 15 AND 240),

@@ -18,5 +18,7 @@ export const env = {
   webPushPublicKey: process.env.WEB_PUSH_PUBLIC_KEY || '',
   webPushPrivateKey: process.env.WEB_PUSH_PRIVATE_KEY || '',
   webPushSubject: process.env.WEB_PUSH_SUBJECT || 'mailto:admin@tlucs.local',
+  geminiApiKey: process.env.GEMINI_API_KEY || '',
+  geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
 }
 if(env.nodeEnv==='production'&&(!env.jwtSecret||env.jwtSecret.length<32))throw new Error('JWT_SECRET production phải có ít nhất 32 ký tự.')

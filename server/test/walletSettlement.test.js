@@ -1,6 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { attachPayee,demoTopup,getWallet,holdPaidRequest,holdSharingAccess,payRemaining,refundSharingAccess,settleRequestNoShow } from '../src/services/walletService.js'
+import { attachPayee,demoTopup,demoWithdraw,getWallet,holdPaidRequest,holdSharingAccess,payRemaining,refundSharingAccess,settleRequestNoShow } from '../src/services/walletService.js'
+
+test('rút tiền mô phỏng trừ số dư và ghi sổ cái',async()=>{
+  const user='demo-withdraw-user';await demoTopup(user,200000);await demoWithdraw(user,50000);const wallet=await getWallet(user)
+  assert.equal(wallet.available_vnd,150000);assert.equal(wallet.entries[0].entry_type,'demo_withdraw')
+})
 
 test('người nhận vắng mặt thì hoàn đủ tiền đã giữ cho người đăng',async()=>{
   const payer='no-show-payer',payee='no-show-receiver',requestId='no-show-request'

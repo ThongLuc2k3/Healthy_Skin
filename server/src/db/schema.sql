@@ -7,7 +7,7 @@ CREATE TYPE verification_status AS ENUM ('pending','approved','rejected','revoke
 CREATE TYPE request_kind AS ENUM ('free','paid','exchange');
 CREATE TYPE request_status AS ENUM ('draft','moderation','open','matched','scheduled','completed','cancelled','disputed');
 CREATE TYPE application_status AS ENUM ('queued','accepted','rejected','withdrawn');
-CREATE TYPE transaction_status AS ENUM ('pending','held','released','refunded','partially_refunded','disputed');
+CREATE TYPE transaction_status AS ENUM ('pending','held','released','refunded','partially_refunded','disputed','cancelled');
 
 CREATE TABLE users (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

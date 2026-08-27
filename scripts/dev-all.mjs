@@ -59,7 +59,7 @@ async function main() {
   }
 
   const frontendOrigin = `http://localhost:${FRONTEND_PORT}`
-  const backendApiBaseUrl = `http://localhost:${BACKEND_PORT}/api`
+  const backendApiBaseUrl = `http://localhost:${BACKEND_PORT}/api/v1`
 
   console.log(`[dev-all] Frontend sẽ chạy tại ${frontendOrigin}`)
   console.log(`[dev-all] Backend sẽ chạy tại http://localhost:${BACKEND_PORT}`)

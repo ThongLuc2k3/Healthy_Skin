@@ -2,7 +2,7 @@
 
 ### Đúng cộng đồng. Đúng người. Đúng điều bạn cần.
 
-**TLUCS — Trusted Local University Community Space** là không gian cộng đồng dành cho sinh viên, nơi những câu hỏi rất riêng của đời sống đại học có thể tìm đến đúng người từng trải qua.
+**TLUCS (Trusted Local University Community Space)** là không gian cộng đồng dành cho sinh viên, nơi những câu hỏi rất riêng của đời sống đại học có thể tìm đến đúng người từng trải qua.
 
 Không chỉ là một diễn đàn hay nơi tìm gia sư, TLUCS kết nối sinh viên theo **trường, môn học, kinh nghiệm, thời gian và nhu cầu thực tế**. Bạn có thể hỏi kinh nghiệm học một môn, tìm người ôn tập cùng, xin lời khuyên từ khóa trên, chia sẻ tài liệu hoặc dùng chính trải nghiệm của mình để hỗ trợ người khác.
 
@@ -28,9 +28,9 @@ TLUCS khởi đầu tại **HCMUS** và được xây dựng với định hư�
 
 ## TLUCS hoạt động như thế nào?
 
-1. **Đăng điều bạn cần** — mô tả rõ trường, môn học, thời lượng và hình thức hỗ trợ.
-2. **Kết nối đúng người** — hệ thống ưu tiên những thành viên phù hợp với bối cảnh và tiêu chí của yêu cầu.
-3. **Trao đổi và đánh giá** — hai bên thống nhất, thực hiện phiên hỗ trợ và cùng xây dựng uy tín trong cộng đồng.
+1. **Đăng điều bạn cần:** Mô tả rõ trường, môn học, thời lượng và hình thức hỗ trợ.
+2. **Kết nối đúng người:** Hệ thống ưu tiên những thành viên phù hợp với bối cảnh và tiêu chí của yêu cầu.
+3. **Trao đổi và đánh giá:** Hai bên thống nhất, thực hiện phiên hỗ trợ và cùng xây dựng uy tín trong cộng đồng.
 
 ## Nguyên tắc cộng đồng
 

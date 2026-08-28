@@ -11,20 +11,22 @@ const money = value => Number(value) === 0 ? 'Miễn phí' : `${Number(value).to
 const formatLabel = item => item.format === 'instant_unlock' ? 'Mở khóa ngay' : 'Tham gia trao đổi'
 
 function SharingCard({ item, onOpen, onJoin }) {
-  return <article onClick={() => onOpen(item)} className="card cursor-pointer overflow-hidden transition hover:-translate-y-1 hover:shadow-lg">
+  return <article onClick={() => onOpen(item)} className="card flex h-full cursor-pointer flex-col overflow-hidden transition hover:-translate-y-1 hover:shadow-lg">
     <div className="h-36 bg-gradient-to-br from-[#183153] to-[#2D5BFF] p-5 text-white">
       <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold">
         {item.format === 'instant_unlock' ? <FileText size={14}/> : <CalendarClock size={14}/>} {formatLabel(item)}
       </span>
       <p className="mt-7 text-xs text-blue-100">{item.content_extent || item.content_format || 'Thông tin từ cộng đồng'}</p>
     </div>
-    <div className="p-5">
+    <div className="flex flex-1 flex-col p-5">
       <div className="flex flex-wrap gap-2">{item.keywords?.map(tag => <span className="tag tag-blue" key={tag}>{tag}</span>)}</div>
       <h2 className="mt-4 text-lg font-extrabold leading-snug">{item.title}</h2>
       <p className="mt-2 line-clamp-2 text-sm text-slate-500">{item.description}</p>
       <p className="mt-3 flex items-center gap-1 text-sm text-slate-500">@{item.display_name || 'thành_viên'}{item.verified_claim && <ShieldCheck size={15} className="text-[#2D5BFF]"/>}</p>
-      <div className="mt-5 flex items-center justify-between border-t pt-4"><b className="text-[#2D5BFF]">{money(item.access_price_vnd)}</b><span className="flex items-center gap-1 text-sm"><Star size={15} className="fill-amber-400 text-amber-400"/>4.9</span></div>
-      <button onClick={event => { event.stopPropagation(); onJoin(item) }} className="btn-secondary mt-4 w-full justify-center">{formatLabel(item)}</button>
+      <div className="mt-auto pt-4">
+        <div className="flex items-center justify-between border-t pt-4"><b className="text-[#2D5BFF]">{money(item.access_price_vnd)}</b><span className="flex items-center gap-1 text-sm"><Star size={15} className="fill-amber-400 text-amber-400"/>4.9</span></div>
+        <button onClick={event => { event.stopPropagation(); onJoin(item) }} className="btn-secondary mt-4 w-full justify-center">{formatLabel(item)}</button>
+      </div>
     </div>
   </article>
 }

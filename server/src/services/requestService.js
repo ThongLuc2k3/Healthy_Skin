@@ -12,6 +12,23 @@ import { createRequestConversation } from "./conversationService.js";
 
 export const demoRequests = [
   {
+    id: "demo-probability",
+    author_id: "demo-author-free",
+    kind: "free",
+    status: "open",
+    title: "Cần một người cùng ôn biến ngẫu nhiên tối nay",
+    description: "Mình đang hổng phần biến ngẫu nhiên và cần một bạn dành 30 phút hướng dẫn trực tuyến theo lịch đã đăng.",
+    university_code: "HCMUS",
+    university_name: "HCMUS",
+    course_name: "Xác suất",
+    duration_minutes: 30,
+    amount_vnd: null,
+    starts_at: new Date(Date.now() + 4 * 3600000).toISOString(),
+    delivery_mode: "online",
+    area_label: null,
+    created_at: new Date().toISOString(),
+  },
+  {
     id: "demo-ai",
     kind: "paid",
     status: "open",

@@ -129,6 +129,8 @@ Trong MVP, mỗi yêu cầu chỉ có một phiên. Khi hoàn tất, nút Đặt
 
 Yêu cầu trao đổi vẫn tạo lịch, phòng chat, xác nhận hoàn tất và đánh giá như phiên trả phí nhưng không có escrow hay bồi thường tiền. Vắng mặt được ghi nhận và có thể đánh giá.
 
+Diễn đàn là nơi hỏi đáp và chia sẻ thông tin miễn phí bằng thảo luận công khai. Yêu cầu miễn phí chỉ dùng khi cần một người cam kết hỗ trợ 1–1 vào thời gian cụ thể; yêu cầu trao đổi và trả phí cũng giữ luồng ghép người, tạo lịch và phòng riêng. Bảng yêu cầu không mở bình luận công khai để tránh trùng chức năng với diễn đàn.
+
 Ngoài Bảng yêu cầu có **Bảng chia sẻ**: người đăng chủ động đưa thông tin hữu ích, người quan tâm mở quyền truy cập rồi tham gia chat nhóm/tài liệu. Nội dung có thể miễn phí hoặc 1.000–20.000đ/người theo bước 1.000đ; giá cao hơn phải được admin duyệt chống lừa đảo. Link lạ hoặc QR làm bài bị giam chờ duyệt. Mỗi thành viên có escrow riêng; sau xác nhận hoặc hết hạn không tranh chấp, tiền được giải ngân sau phí 1%.
 
 Bài chia sẻ có hai định dạng: Mở khóa ngay cho nội dung/tài liệu có sẵn, và Tham gia trao đổi cho buổi có lịch, chat nhóm cùng người đăng. Feed và bộ lọc phải thể hiện rõ định dạng trước khi người dùng thanh toán.

@@ -25,6 +25,8 @@ export const requestPolicy = Object.freeze({
   lateSharingCancellationRefundRate: 0.5,
   disputeAppealWindowHours: 48,
   maximumDisputeAppeals: 1,
+  giftPlatformFeeRate: 0.1,
+  giftTiersVnd: [100, 1000, 10000],
 })
 
 export function validateRequestStart(startsAt, now = new Date()) {
@@ -53,6 +55,29 @@ export function validatePaidAmount(amountVnd) {
 
 export function calculatePlatformFee(amountVnd) {
   return Math.round(amountVnd * requestPolicy.platformFeeRate)
+}
+
+export function calculateGiftFee(amountVnd) {
+  return Math.round(amountVnd * requestPolicy.giftPlatformFeeRate)
+}
+
+// Tính toán thuần cho việc xử lý tranh chấp: từ số tiền đang giữ (held) và quyết định
+// của quản trị viên, trả về trạng thái giao dịch mới và các khoản chuyển cho hai bên.
+export function settleDisputeAmounts(heldVnd, decision) {
+  const held = Math.max(0, Math.trunc(Number(heldVnd) || 0))
+  if (decision === 'refund') return { transactionStatus:'refunded', feeVnd:0, payerRefundVnd:held, payeePayoutVnd:0 }
+  if (decision === 'release') {
+    const feeVnd = calculatePlatformFee(held)
+    return { transactionStatus:'released', feeVnd, payerRefundVnd:0, payeePayoutVnd:held - feeVnd }
+  }
+  if (decision === 'split') {
+    const payerRefundVnd = Math.floor(held / 2)
+    const compensation = held - payerRefundVnd
+    const feeVnd = calculatePlatformFee(compensation)
+    return { transactionStatus:'partially_refunded', feeVnd, payerRefundVnd, payeePayoutVnd:compensation - feeVnd }
+  }
+  if (decision === 'dismiss') return { transactionStatus:'held', feeVnd:0, payerRefundVnd:0, payeePayoutVnd:0 }
+  throw Object.assign(new Error('Quyết định tranh chấp không hợp lệ.'), { status:422, code:'INVALID_DISPUTE_DECISION' })
 }
 
 export function reviewContentAccessPrice(amountVnd) {

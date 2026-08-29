@@ -1,6 +1,6 @@
 import crypto from 'node:crypto'
 import { database } from '../db/connection.js'
-import { calculatePlatformFee } from '../config/policies.js'
+import { calculateGiftFee, calculatePlatformFee, settleDisputeAmounts } from '../config/policies.js'
 
 const memoryWallets=new Map();const memoryTransactions=new Map();const memoryLedger=[]
 const walletFor=id=>{if(!memoryWallets.has(id))memoryWallets.set(id,{user_id:id,available_vnd:0,pending_vnd:0});return memoryWallets.get(id)}
@@ -176,4 +176,58 @@ export async function distributeSharingHostDeposit(hostId,sharingPostId,amountVn
   if(!amountVnd)return [];if(!recipientIds.length){const db=database();if(!db){walletFor(hostId).pending_vnd-=amountVnd;walletFor(hostId).available_vnd+=amountVnd;entry(hostId,null,'credit',amountVnd,'sharing_host_deposit_return');return []}await db.query('update wallets set pending_vnd=pending_vnd-$2,available_vnd=available_vnd+$2 where user_id=$1',[hostId,amountVnd]);await db.query(`insert into ledger_entries(user_id,direction,amount_vnd,entry_type) values($1,'credit',$2,'sharing_host_deposit_return')`,[hostId,amountVnd]);return []}const fee=calculatePlatformFee(amountVnd),net=amountVnd-fee,each=Math.floor(net/recipientIds.length),remainder=net%recipientIds.length;const distributions=recipientIds.map((id,index)=>({recipientId:id,amountVnd:each+(index<remainder?1:0)}));const db=database()
   if(!db){walletFor(hostId).pending_vnd-=amountVnd;for(const item of distributions){walletFor(item.recipientId).available_vnd+=item.amountVnd;entry(item.recipientId,null,'credit',item.amountVnd,'sharing_host_deposit_compensation')}return distributions}
   const client=await db.connect();try{await client.query('begin');await client.query('update wallets set pending_vnd=pending_vnd-$2 where user_id=$1',[hostId,amountVnd]);for(const item of distributions){await client.query('insert into wallets(user_id) values($1) on conflict do nothing',[item.recipientId]);await client.query('update wallets set available_vnd=available_vnd+$2 where user_id=$1',[item.recipientId,item.amountVnd]);const ledger=(await client.query(`insert into ledger_entries(user_id,direction,amount_vnd,entry_type) values($1,'credit',$2,'sharing_host_deposit_compensation') returning id`,[item.recipientId,item.amountVnd])).rows[0];await client.query('insert into sharing_cancellation_distributions(sharing_post_id,recipient_id,amount_vnd,ledger_entry_id) values($1,$2,$3,$4) on conflict do nothing',[sharingPostId,item.recipientId,item.amountVnd,ledger.id])}await client.query('commit');return distributions}catch(error){await client.query('rollback');throw error}finally{client.release()}
+}
+
+// Chuyển tiền quà tặng bài viết: trừ ví người gửi, cộng ví tác giả (sau phí nền tảng),
+// ghi sổ cái cho cả hai. Dùng chung cho cả chế độ demo (không client) lẫn PostgreSQL.
+export async function applyGiftTransfer({client,senderId,recipientId,amountVnd}){
+  const amount=Math.trunc(Number(amountVnd)||0)
+  if(amount<=0)throw Object.assign(new Error('Số tiền quà tặng không hợp lệ.'),{status:422,code:'INVALID_GIFT_AMOUNT'})
+  const fee=calculateGiftFee(amount),payout=amount-fee
+  if(!client){
+    const wallet=walletFor(senderId)
+    if(wallet.available_vnd<amount)throw Object.assign(new Error('Số dư ví không đủ để tặng quà.'),{status:402,code:'INSUFFICIENT_BALANCE'})
+    wallet.available_vnd-=amount
+    walletFor(recipientId).available_vnd+=payout
+    entry(senderId,null,'debit',amount,'post_gift_sent')
+    entry(recipientId,null,'credit',payout,'post_gift_received')
+    return {fee,payout}
+  }
+  await client.query('insert into wallets(user_id) values($1) on conflict do nothing',[senderId])
+  const wallet=(await client.query('select available_vnd from wallets where user_id=$1 for update',[senderId])).rows[0]
+  if(!wallet||Number(wallet.available_vnd)<amount)throw Object.assign(new Error('Số dư ví không đủ để tặng quà.'),{status:402,code:'INSUFFICIENT_BALANCE'})
+  await client.query('insert into wallets(user_id) values($1) on conflict do nothing',[recipientId])
+  await client.query('update wallets set available_vnd=available_vnd-$2,updated_at=now() where user_id=$1',[senderId,amount])
+  await client.query('update wallets set available_vnd=available_vnd+$2,updated_at=now() where user_id=$1',[recipientId,payout])
+  await client.query(`insert into ledger_entries(user_id,direction,amount_vnd,entry_type) values($1,'debit',$2,'post_gift_sent')`,[senderId,amount])
+  await client.query(`insert into ledger_entries(user_id,direction,amount_vnd,entry_type) values($1,'credit',$2,'post_gift_received')`,[recipientId,payout])
+  return {fee,payout}
+}
+
+export async function settleDisputedTransaction(client,transactionId,decision){
+  const tx=(await client.query('select * from transactions where id=$1 for update',[transactionId])).rows[0]
+  if(!tx)throw Object.assign(new Error('Không tìm thấy giao dịch.'),{status:404})
+  if(tx.status!=='disputed')throw Object.assign(new Error('Giao dịch không ở trạng thái tranh chấp.'),{status:409})
+  const held=Number((await client.query(`select coalesce(sum(amount_vnd),0) amount from ledger_entries where transaction_id=$1 and direction='debit'`,[tx.id])).rows[0].amount)
+  const kind=tx.request_id?'request':'sharing'
+  const {transactionStatus:status,feeVnd:fee,payerRefundVnd,payeePayoutVnd}=settleDisputeAmounts(held,decision)
+  if(held&&decision==='refund'){
+    await client.query('update wallets set pending_vnd=pending_vnd-$2,available_vnd=available_vnd+$2,updated_at=now() where user_id=$1',[tx.payer_id,held])
+    await client.query(`insert into ledger_entries(transaction_id,user_id,direction,amount_vnd,entry_type) values($1,$2,'credit',$3,$4)`,[tx.id,tx.payer_id,held,`${kind}_dispute_refund`])
+  }else if(held&&decision==='release'){
+    await client.query('insert into wallets(user_id) values($1) on conflict do nothing',[tx.payee_id])
+    await client.query('update wallets set pending_vnd=pending_vnd-$2,updated_at=now() where user_id=$1',[tx.payer_id,held])
+    await client.query('update wallets set available_vnd=available_vnd+$2,updated_at=now() where user_id=$1',[tx.payee_id,payeePayoutVnd])
+    await client.query(`insert into ledger_entries(transaction_id,user_id,direction,amount_vnd,entry_type) values($1,$2,'credit',$3,$4)`,[tx.id,tx.payee_id,payeePayoutVnd,`${kind}_dispute_payout`])
+  }else if(held&&decision==='split'){
+    await client.query('insert into wallets(user_id) values($1) on conflict do nothing',[tx.payee_id])
+    await client.query('update wallets set pending_vnd=pending_vnd-$2,updated_at=now() where user_id=$1',[tx.payer_id,held])
+    await client.query('update wallets set available_vnd=available_vnd+$2,updated_at=now() where user_id=$1',[tx.payer_id,payerRefundVnd])
+    await client.query('update wallets set available_vnd=available_vnd+$2,updated_at=now() where user_id=$1',[tx.payee_id,payeePayoutVnd])
+    await client.query(`insert into ledger_entries(transaction_id,user_id,direction,amount_vnd,entry_type) values($1,$2,'credit',$3,$4),($1,$5,'credit',$6,$7)`,[tx.id,tx.payer_id,payerRefundVnd,`${kind}_dispute_partial_refund`,tx.payee_id,payeePayoutVnd,`${kind}_dispute_partial_payout`])
+  }
+  const result=(await client.query('update transactions set status=$2,fee_vnd=$3 where id=$1 returning *',[tx.id,status,fee])).rows[0]
+  if(tx.request_id){const requestStatus=decision==='dismiss'?'scheduled':decision==='refund'?'cancelled':'completed';await client.query('update requests set status=$2 where id=$1',[tx.request_id,requestStatus])}
+  if(tx.sharing_post_id){const memberStatus=decision==='dismiss'?'access_granted':decision==='refund'?'refunded':'completed';await client.query('update sharing_post_members set status=$3,completed_at=now(),refunded_vnd=coalesce(refunded_vnd,0)+$4 where sharing_post_id=$1 and user_id=$2',[tx.sharing_post_id,tx.payer_id,memberStatus,decision==='refund'?held:0])}
+  return result
 }

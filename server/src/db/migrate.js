@@ -41,6 +41,12 @@ try {
   await client.query(`alter table requests drop constraint if exists requests_delivery_mode_check`)
   await client.query(`alter table requests alter column delivery_mode set default 'online'`)
   await client.query(`alter table requests add constraint requests_delivery_mode_check check(delivery_mode='online')`)
+  await client.query(`create table if not exists post_gifts(id uuid primary key default gen_random_uuid(),post_id uuid not null references posts(id),sender_id uuid not null references users(id),recipient_id uuid not null references users(id),amount_vnd integer not null check(amount_vnd > 0),fee_vnd integer not null default 0,payout_vnd integer not null,created_at timestamptz not null default now())`)
+  await client.query(`create index if not exists post_gifts_post_id_idx on post_gifts(post_id)`)
+  await client.query(`alter table post_metrics add column if not exists gift_count integer not null default 0`)
+  await client.query(`alter table post_metrics add column if not exists gift_total_vnd integer not null default 0`)
+  await client.query(`alter table sharing_access_disputes add column if not exists resolution text`)
+  await client.query(`alter table sharing_access_disputes add column if not exists resolved_by uuid references users(id)`)
 } catch (error) {
   await client.query('rollback')
   throw error

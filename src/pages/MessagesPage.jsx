@@ -3,6 +3,7 @@ import { LockKeyhole, Mic, Phone, Search, Send, Video } from "lucide-react";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
+import Avatar from "../components/Avatar";
 const demoRooms=[{id:"demo-chat-presentation",demo:true,request_title:"[Mô phỏng] Luyện thuyết trình đồ án",last_message:{body:"Bạn gửi slide trước để mình xem nhé."},messages:[{id:"d1",sender_id:"peer-demo",body:"Chào bạn, mình là Tuấn Anh. Tối nay mình luyện phần mở đầu trước nhé."},{id:"d2",sender_id:"me",body:"Được nha, mình sẽ gửi slide lúc 7 giờ."},{id:"d3",sender_id:"peer-demo",body:"Bạn gửi slide trước để mình xem nhé."}]},{id:"demo-chat-sql",demo:true,request_title:"[Mô phỏng] Cùng luyện SQL và Python",last_message:{body:"Mình đã chuẩn bị 5 bài SQL rồi."},messages:[{id:"d4",sender_id:"peer-demo",body:"Mình đã chuẩn bị 5 bài SQL từ dễ đến khó rồi."},{id:"d5",sender_id:"me",body:"Hay quá, mình chuẩn bị notebook Python để trao đổi lại nhé."}]}];
 export default function MessagesPage() {
   const { session, user } = useAuth();
@@ -96,7 +97,7 @@ export default function MessagesPage() {
                 className={`flex w-full gap-3 border-t p-4 text-left ${active?.id === room.id ? "bg-blue-50" : ""}`}
                 key={room.id}
               >
-                <span className="h-11 w-11 rounded-full bg-blue-200" />
+                <Avatar name={room.request_title || "Phòng giao dịch"} className="h-11 w-11 rounded-full text-sm"/>
                 <span>
                   <b className="text-sm">
                     {room.request_title || "Phòng giao dịch"}

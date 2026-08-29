@@ -4,7 +4,7 @@ import { api } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 
 const welcome = { role: 'bot', text: 'Chào bạn! Mình là trợ lý TLUCS. Mình có thể hướng dẫn sử dụng, giải đáp về ví, yêu cầu, bài chia sẻ hoặc tiếp nhận khiếu nại.' }
-const quickQuestions = ['Cách đăng yêu cầu', 'Cách nạp tiền', 'Cách nhận hỗ trợ', 'Gửi khiếu nại']
+const quickQuestions = ['Cách đăng yêu cầu', 'Tìm bài chia sẻ phù hợp', 'Cách nạp tiền', 'Gửi khiếu nại']
 
 function answerFor(message) {
   const text = message.toLowerCase()
@@ -48,7 +48,8 @@ export default function AiChatbot() {
       setMessages(list => [...list, { role: 'bot', text: fallback.startsWith('Mình chưa hiểu rõ') ? `Mình chưa kết nối được với mô hình AI lúc này. ${error.message}` : fallback }])
     } finally { setBusy(false) }
   }
-  async function executeAction(){if(!pendingAction||busy)return;setBusy(true);try{const {data}=await api('/assistant/actions/execute',{method:'POST',token:session.accessToken,body:{action:pendingAction}});setMessages(list=>[...list,{role:'bot',text:data.type==='create_request'?'Mình đã đăng yêu cầu thành công. Bạn có thể mở Bảng yêu cầu để xem bài.':'Mình đã cập nhật hồ sơ thành công.'}]);setPendingAction(null)}catch(error){setMessages(list=>[...list,{role:'bot',text:`Chưa thể thực hiện: ${error.message}`}])}finally{setBusy(false)}}
+  const actionDoneText={create_request:'Mình đã đăng yêu cầu thành công. Bạn có thể mở Bảng yêu cầu để xem bài.',update_profile:'Mình đã cập nhật hồ sơ thành công.',create_sharing_post:'Mình đã đăng bài chia sẻ thành công. Bạn có thể mở Bảng chia sẻ để xem bài.',wallet_topup:'Mình đã nạp tiền vào ví thành công. Bạn có thể mở Ví TLUCS để xem số dư.',wallet_withdraw:'Mình đã rút tiền khỏi ví thành công.'}
+  async function executeAction(){if(!pendingAction||busy)return;setBusy(true);try{const {data}=await api('/assistant/actions/execute',{method:'POST',token:session.accessToken,body:{action:pendingAction}});setMessages(list=>[...list,{role:'bot',text:actionDoneText[data.type]||'Mình đã thực hiện thành công.'}]);setPendingAction(null)}catch(error){setMessages(list=>[...list,{role:'bot',text:`Chưa thể thực hiện: ${error.message}`}])}finally{setBusy(false)}}
   function startComplaint() { setOpen(true); setAwaitingComplaint(true); setMessages(list => [...list, { role: 'bot', text: 'Bạn hãy mô tả vấn đề, thời điểm xảy ra và điều bạn mong muốn được hỗ trợ. Nội dung sẽ được chuyển đến quản trị viên.' }]) }
 
   return <div className="fixed bottom-5 right-4 z-[75] sm:bottom-7 sm:right-7">

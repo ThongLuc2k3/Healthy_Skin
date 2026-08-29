@@ -9,7 +9,7 @@ export default function SessionsPage() {
   const [items, setItems] = useState([])
   const [notice, setNotice] = useState('')
   const load = () => session && api('/sessions', { token: session.accessToken }).then(x => setItems(x.data)).catch(e => setNotice(e.message))
-  useEffect(load, [session])
+  useEffect(() => { load() }, [session])
 
   async function action(id, path, body = {}, method = 'POST') {
     try { await api(`/sessions/${id}/${path}`, { method, token: session.accessToken, body }); setNotice(path === 'complete' ? 'Đã hoàn tất và xử lý giải ngân.' : 'Đã ghi nhận.'); load() }

@@ -40,7 +40,7 @@ export async function sendChannelMessage(userId, channelId, input={}) {
 
 export async function proposeChannel(userId,serverId,input={}){
   const name=String(input.name||'').trim(),description=String(input.description||'').trim()
-  if(name.length<3||description.length<10)throw Object.assign(new Error('Tên hoặc mô tả đề xuất quá ngắn.'),{status:422})
+  if(name.length<3||name.length>60||description.length<10||description.length>1000)throw Object.assign(new Error('Tên cần từ 3 đến 60 ký tự, mô tả từ 10 đến 1.000 ký tự.'),{status:422})
   const db=database();if(!db)return {id:crypto.randomUUID(),server_id:serverId,proposer_id:userId,name,description,status:'pending'}
   return (await db.query('insert into channel_proposals(server_id,proposer_id,name,description) values($1,$2,$3,$4) returning *',[serverId,userId,name,description])).rows[0]
 }

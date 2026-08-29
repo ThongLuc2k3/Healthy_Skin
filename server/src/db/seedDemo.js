@@ -169,9 +169,7 @@ try{
   await client.query(`update post_metrics pm set reaction_count=(select count(*) from reactions r where r.target_type='post' and r.target_id=pm.post_id),comment_count=(select count(*) from comments c where c.post_id=pm.post_id and c.moderation_status='published') where pm.post_id between '30000000-0000-4000-8000-000000000001' and '30000000-0000-4000-8000-000000000009'`)
   await client.query(`update comments c set reaction_count=(select count(*) from reactions r where r.target_type='comment' and r.target_id=c.id) where c.id between '31000000-0000-4000-8000-000000000001' and '31000000-0000-4000-8000-000000000021'`)
 
-  await client.query(`update wallets set available_vnd=100000 where user_id between '10000000-0000-4000-8000-000000000001' and '10000000-0000-4000-8000-000000000015'`)
-
-  // Tặng quà bài viết (mức 100 / 1.000 / 10.000, phí nền tảng 10%). Chạy sau bước đặt lại ví nên số dư luôn nhất quán khi seed lại.
+  // Tặng quà bài viết (mức 100 / 1.000 / 10.000, phí nền tảng 10%). Ví được tính lại ở cuối theo nguồn dữ liệu gốc.
   await client.query(`insert into post_gifts(id,post_id,sender_id,recipient_id,amount_vnd,fee_vnd,payout_vnd,created_at) values
   ('70000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000007','10000000-0000-4000-8000-000000000005',10000,1000,9000,now()-interval '2 hours'),
   ('70000000-0000-4000-8000-000000000002','30000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000013','10000000-0000-4000-8000-000000000005',1000,100,900,now()-interval '90 minutes'),
@@ -193,9 +191,23 @@ try{
   on conflict(id) do nothing`)
   await client.query(`insert into ledger_entries(id,user_id,direction,amount_vnd,entry_type,created_at) select ('75000000-0000-4000-8000-0000000000'||right(g.id::text,2))::uuid,g.sender_id,'debit',g.amount_vnd,'post_gift_sent',g.created_at from post_gifts g where g.id::text like '74000000%' on conflict(id) do nothing`)
   await client.query(`insert into ledger_entries(id,user_id,direction,amount_vnd,entry_type,created_at) select ('76000000-0000-4000-8000-0000000000'||right(g.id::text,2))::uuid,g.recipient_id,'credit',g.payout_vnd,'post_gift_received',g.created_at from post_gifts g where g.id::text like '74000000%' on conflict(id) do nothing`)
-  await client.query(`update wallets w set available_vnd=available_vnd-s.total from (select sender_id,sum(amount_vnd) total from post_gifts where id::text like '70000000%' or id::text like '74000000%' group by sender_id) s where w.user_id=s.sender_id`)
-  await client.query(`update wallets w set available_vnd=available_vnd+r.total from (select recipient_id,sum(payout_vnd) total from post_gifts where id::text like '70000000%' or id::text like '74000000%' group by recipient_id) r where w.user_id=r.recipient_id`)
   await client.query(`update post_metrics pm set gift_count=(select count(*) from post_gifts g where g.post_id=pm.post_id),gift_total_vnd=(select coalesce(sum(amount_vnd),0) from post_gifts g where g.post_id=pm.post_id) where pm.post_id between '30000000-0000-4000-8000-000000000001' and '30000000-0000-4000-8000-000000000009'`)
+
+  // Tính lại ví demo từ nguồn dữ liệu gốc: khả dụng = 100.000 − cọc đang giữ − quà đã gửi + quà nhận được; đang giữ = tổng cọc yêu cầu đang treo. Idempotent khi seed lại.
+  await client.query(`
+  with base as (select user_id from wallets where user_id between '10000000-0000-4000-8000-000000000001' and '10000000-0000-4000-8000-000000000015'),
+  held as (select payer_id uid,coalesce(sum(deposit_vnd),0) amt from transactions where status='held' and request_id is not null group by payer_id),
+  sent as (select sender_id uid,coalesce(sum(amount_vnd),0) amt from post_gifts where id::text like '70000000%' or id::text like '74000000%' group by sender_id),
+  recv as (select recipient_id uid,coalesce(sum(payout_vnd),0) amt from post_gifts where id::text like '70000000%' or id::text like '74000000%' group by recipient_id)
+  update wallets w set
+    pending_vnd=coalesce(held.amt,0),
+    available_vnd=100000-coalesce(held.amt,0)-coalesce(sent.amt,0)+coalesce(recv.amt,0),
+    updated_at=now()
+  from base
+  left join held on held.uid=base.user_id
+  left join sent on sent.uid=base.user_id
+  left join recv on recv.uid=base.user_id
+  where w.user_id=base.user_id`)
   await client.query(`update comments c set gift_count=(select count(*) from post_gifts g where g.comment_id=c.id),gift_total_vnd=(select coalesce(sum(amount_vnd),0) from post_gifts g where g.comment_id=c.id) where c.id between '31000000-0000-4000-8000-000000000001' and '31000000-0000-4000-8000-000000000021'`)
 
   await client.query('commit')

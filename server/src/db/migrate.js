@@ -47,6 +47,14 @@ try {
   await client.query(`alter table post_metrics add column if not exists gift_total_vnd integer not null default 0`)
   await client.query(`alter table sharing_access_disputes add column if not exists resolution text`)
   await client.query(`alter table sharing_access_disputes add column if not exists resolved_by uuid references users(id)`)
+  await client.query(`alter table comments add column if not exists reaction_count integer not null default 0`)
+  await client.query(`alter table comments add column if not exists gift_count integer not null default 0`)
+  await client.query(`alter table comments add column if not exists gift_total_vnd integer not null default 0`)
+  await client.query(`alter table post_gifts add column if not exists comment_id uuid references comments(id)`)
+  await client.query(`alter table post_gifts alter column post_id drop not null`)
+  await client.query(`alter table post_gifts drop constraint if exists post_gifts_target_check`)
+  await client.query(`alter table post_gifts add constraint post_gifts_target_check check(num_nonnulls(post_id,comment_id)=1)`)
+  await client.query(`create index if not exists post_gifts_comment_id_idx on post_gifts(comment_id)`)
 } catch (error) {
   await client.query('rollback')
   throw error

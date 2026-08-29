@@ -144,7 +144,42 @@ try{
   ('40000000-0000-4000-8000-000000000011','10000000-0000-4000-8000-000000000014',(select id from universities where code='HCMUS'),null,'instant_unlock','[Mô phỏng] Bộ tài liệu săn học bổng trao đổi','Hướng dẫn viết thư động lực, mẫu đơn và bảng theo dõi hạn nộp hồ sơ.','PDF hướng dẫn và mẫu đơn','PDF và DOCX','24 trang','Hoàn tiền nếu nội dung sai mô tả.',20000,0,null,null,null,'published',null)
   on conflict(id) do nothing`)
 
+  // Thả tym (reaction) cho các bài diễn đàn mô phỏng, chọn cố định theo hash để chạy lại vẫn ổn định
+  await client.query(`insert into reactions(user_id,target_type,target_id,reaction)
+  select u.id,'post',p.id,'like' from posts p
+  join lateral (select id from users where email like '%@demo.tlucs.local' and id<>p.author_id order by md5(id::text||p.id::text) limit 5) u on true
+  where p.id between '30000000-0000-4000-8000-000000000001' and '30000000-0000-4000-8000-000000000009'
+  on conflict(user_id,target_type,target_id) do nothing`)
+
+  // Bình luận trả lời bình luận (parent_id)
+  await client.query(`insert into comments(id,post_id,author_id,parent_id,body,moderation_status,created_at) values
+  ('31000000-0000-4000-8000-000000000016','30000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000005','31000000-0000-4000-8000-000000000001','Đúng rồi, mình sẽ thêm mục kiểm tra môn tiên quyết vào đầu checklist.','published',now()-interval '2 hours 20 minutes'),
+  ('31000000-0000-4000-8000-000000000017','30000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000013','31000000-0000-4000-8000-000000000002','Mẹo hai tab hay đấy, mình hay bị lỡ nút đăng ký vì lag.','published',now()-interval '2 hours'),
+  ('31000000-0000-4000-8000-000000000018','30000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000006','31000000-0000-4000-8000-000000000004','Tuyệt, mình sẽ nhắn riêng để chốt lịch buổi đầu nhé.','published',now()-interval '40 minutes'),
+  ('31000000-0000-4000-8000-000000000019','30000000-0000-4000-8000-000000000004','10000000-0000-4000-8000-000000000012','31000000-0000-4000-8000-000000000009','Bình tĩnh kể theo cấu trúc tình huống - hành động - kết quả là ổn thôi.','published',now()-interval '7 hours 20 minutes'),
+  ('31000000-0000-4000-8000-000000000020','30000000-0000-4000-8000-000000000005','10000000-0000-4000-8000-000000000014','31000000-0000-4000-8000-000000000011','Cảm ơn gợi ý, mình sẽ đọc trước rồi mới gửi email cho thầy.','published',now()-interval '10 hours'),
+  ('31000000-0000-4000-8000-000000000021','30000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000010','31000000-0000-4000-8000-000000000006','Chỗ đó mình cũng hay ngồi, cuối tuần khá đông nên nên đi sớm.','published',now()-interval '4 hours')
+  on conflict(id) do nothing`)
+  await client.query(`update post_metrics pm set reaction_count=(select count(*) from reactions r where r.target_type='post' and r.target_id=pm.post_id),comment_count=(select count(*) from comments c where c.post_id=pm.post_id and c.moderation_status='published') where pm.post_id between '30000000-0000-4000-8000-000000000001' and '30000000-0000-4000-8000-000000000009'`)
+
   await client.query(`update wallets set available_vnd=100000 where user_id between '10000000-0000-4000-8000-000000000001' and '10000000-0000-4000-8000-000000000015'`)
+
+  // Tặng quà bài viết (mức 100 / 1.000 / 10.000, phí nền tảng 10%). Chạy sau bước đặt lại ví nên số dư luôn nhất quán khi seed lại.
+  await client.query(`insert into post_gifts(id,post_id,sender_id,recipient_id,amount_vnd,fee_vnd,payout_vnd,created_at) values
+  ('70000000-0000-4000-8000-000000000001','30000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000007','10000000-0000-4000-8000-000000000005',10000,1000,9000,now()-interval '2 hours'),
+  ('70000000-0000-4000-8000-000000000002','30000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000013','10000000-0000-4000-8000-000000000005',1000,100,900,now()-interval '90 minutes'),
+  ('70000000-0000-4000-8000-000000000003','30000000-0000-4000-8000-000000000002','10000000-0000-4000-8000-000000000009','10000000-0000-4000-8000-000000000006',1000,100,900,now()-interval '45 minutes'),
+  ('70000000-0000-4000-8000-000000000004','30000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000014','10000000-0000-4000-8000-000000000010',10000,1000,9000,now()-interval '4 hours'),
+  ('70000000-0000-4000-8000-000000000005','30000000-0000-4000-8000-000000000004','10000000-0000-4000-8000-000000000001','10000000-0000-4000-8000-000000000012',10000,1000,9000,now()-interval '6 hours'),
+  ('70000000-0000-4000-8000-000000000006','30000000-0000-4000-8000-000000000005','10000000-0000-4000-8000-000000000003','10000000-0000-4000-8000-000000000014',100,10,90,now()-interval '9 hours'),
+  ('70000000-0000-4000-8000-000000000007','30000000-0000-4000-8000-000000000008','10000000-0000-4000-8000-000000000006','10000000-0000-4000-8000-000000000011',1000,100,900,now()-interval '15 hours')
+  on conflict(id) do nothing`)
+  await client.query(`insert into ledger_entries(id,user_id,direction,amount_vnd,entry_type,created_at) select ('71000000-0000-4000-8000-0000000000'||right(g.id::text,2))::uuid,g.sender_id,'debit',g.amount_vnd,'post_gift_sent',g.created_at from post_gifts g where g.id::text like '70000000%' on conflict(id) do nothing`)
+  await client.query(`insert into ledger_entries(id,user_id,direction,amount_vnd,entry_type,created_at) select ('72000000-0000-4000-8000-0000000000'||right(g.id::text,2))::uuid,g.recipient_id,'credit',g.payout_vnd,'post_gift_received',g.created_at from post_gifts g where g.id::text like '70000000%' on conflict(id) do nothing`)
+  await client.query(`update wallets w set available_vnd=available_vnd-s.total from (select sender_id,sum(amount_vnd) total from post_gifts where id::text like '70000000%' group by sender_id) s where w.user_id=s.sender_id`)
+  await client.query(`update wallets w set available_vnd=available_vnd+r.total from (select recipient_id,sum(payout_vnd) total from post_gifts where id::text like '70000000%' group by recipient_id) r where w.user_id=r.recipient_id`)
+  await client.query(`update post_metrics pm set gift_count=(select count(*) from post_gifts g where g.post_id=pm.post_id),gift_total_vnd=(select coalesce(sum(amount_vnd),0) from post_gifts g where g.post_id=pm.post_id) where pm.post_id between '30000000-0000-4000-8000-000000000001' and '30000000-0000-4000-8000-000000000009'`)
+
   await client.query('commit')
   console.log('Đã seed dữ liệu mô phỏng TLUCS.')
 }catch(error){await client.query('rollback');throw error}finally{client.release();await db.end()}

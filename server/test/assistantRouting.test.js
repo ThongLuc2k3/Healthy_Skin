@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { shouldUseAgent } from '../src/routes/assistant.routes.js'
+import { normalizeAgentAction } from '../src/services/assistantService.js'
 
 test('dữ liệu cá nhân và thao tác được chuyển tới Agent', () => {
   assert.equal(shouldUseAgent('bạn có thể xem ví tôi có bao nhiêu và nạp thêm 10k được k'), true)
@@ -15,4 +16,10 @@ test('câu hỏi kiến thức tĩnh ở lại RAG', () => {
   assert.equal(shouldUseAgent('hướng dẫn đăng yêu cầu'), false)
   assert.equal(shouldUseAgent('phí nền tảng là bao nhiêu?'), false)
   assert.equal(shouldUseAgent('TLUCS thuộc lĩnh vực nào?'), false)
+})
+
+test('máy chủ chuẩn hóa tối mai theo múi giờ Việt Nam', () => {
+  const action = normalizeAgentAction('create_request', { startsAt: '2026-09-06T20:00:00+07:00' }, 'trao đổi tầm 8h tối mai', { now: '2026-09-04T15:03:00.000Z' })
+  assert.equal(action.startsAt, '2026-09-05T20:00:00+07:00')
+  assert.equal(normalizeAgentAction('create_request', {}, 'tôi cần trao đổi ngắn', {}).durationMinutes, 30)
 })

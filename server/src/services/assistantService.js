@@ -10,7 +10,9 @@ Nguyên tắc bắt buộc:
 - Cấm làm hộ, thi hộ, mua bán đề hoặc đáp án, lừa đảo, đa cấp và chia sẻ dữ liệu trái phép.
 - Dùng tool đọc để tra dữ liệu thật; không tự bịa ID, kết quả, trạng thái, số dư, lịch sử hoặc chính sách.
 - Khi thiếu dữ kiện bắt buộc, hỏi đúng dữ kiện còn thiếu. Hiểu lỗi chính tả, 10k = 10000 VND và thời gian đời thường theo Asia/Ho_Chi_Minh.
+- Cụm "trao đổi ngắn" mặc định durationMinutes là 30. "Tầm 8h tối" đã là thời gian đủ rõ và phải hiểu là 20:00, không hỏi lại giờ.
 - Khi người dùng muốn thay đổi dữ liệu, hãy gọi đúng tool thay đổi. Máy chủ sẽ yêu cầu họ xác nhận trước khi chạy tool đó.
+- Mỗi bước chỉ gọi đúng một tool. Nếu thiếu dữ kiện bắt buộc thì hỏi người dùng, không tạo tool call lỗi hoặc gọi nhiều tool song song.
 - Không yêu cầu mật khẩu, OTP, số thẻ đầy đủ hoặc dữ liệu nhạy cảm.
 - Trả lời thân thiện, gọn, thường 1 đến 5 câu. Nếu không có dữ liệu đáng tin cậy, nói rõ là chưa biết.`
 
@@ -41,7 +43,7 @@ async function generateGeminiContent(body, timeoutMs = 120000) {
 function lowerCaseSchema(value) {
   if (Array.isArray(value)) return value.map(lowerCaseSchema)
   if (!value || typeof value !== 'object') return value
-  return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, key === 'type' ? String(item).toLowerCase() : lowerCaseSchema(item)]))
+  return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, key === 'type' && typeof item === 'string' ? item.toLowerCase() : lowerCaseSchema(item)]))
 }
 
 const toGroqTool = tool => ({ type: 'function', function: { name: tool.name, description: tool.description, parameters: lowerCaseSchema(tool.parameters) } })
@@ -63,14 +65,21 @@ function groqToolsFor(text) {
 }
 
 async function generateGroqChat(messages, { tools, timeoutMs = 120000 } = {}) {
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', authorization: `Bearer ${env.groqApiKey}` },
-    body: JSON.stringify({ model: env.groqModel, messages, ...(tools?.length ? { tools, tool_choice: 'auto' } : {}), temperature: tools?.length ? .2 : .5, max_completion_tokens: 3000 }),
-    signal: AbortSignal.timeout(timeoutMs),
-  })
-  const payload = await response.json().catch(() => ({}))
-  return { response, payload }
+  const models = [...new Set([env.groqModel, env.groqFallbackModel].filter(Boolean))]
+  let lastResult
+  for (const model of models) {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${env.groqApiKey}` },
+      body: JSON.stringify({ model, messages, ...(tools?.length ? { tools, tool_choice: 'auto', parallel_tool_calls: false } : {}), temperature: tools?.length ? .1 : .5, max_completion_tokens: 3000 }),
+      signal: AbortSignal.timeout(timeoutMs),
+    })
+    const payload = await response.json().catch(() => ({}))
+    lastResult = { response, payload, model }
+    if (response.ok) return lastResult
+    if (payload?.error?.code !== 'tool_use_failed' && response.status !== 429 && response.status < 500) return lastResult
+  }
+  return lastResult
 }
 
 function providerError(response, payload) {
@@ -95,6 +104,29 @@ function pendingSummary(name, args) {
   }
   const details = Object.entries(args || {}).filter(([, value]) => value !== undefined && value !== '').slice(0, 5).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`).join(' · ')
   return `${labels[name] || name}${details ? ` — ${details}` : ''}`
+}
+
+function normalizeVietnamese(value) {
+  return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/đ/g, 'd')
+}
+
+export function normalizeAgentAction(name, args = {}, message = '', context = {}) {
+  const result = { ...args }
+  if (!['create_request', 'create_sharing_post'].includes(name)) return result
+  const text = normalizeVietnamese(message)
+  if (name === 'create_request' && /trao doi ngan/.test(text) && !Number(result.durationMinutes)) result.durationMinutes = 30
+  if (!/(^|\s)(ngay mai|mai)(\s|$|[?.!,])/.test(text)) return result
+  const time = text.match(/(\d{1,2})(?:h|\s*gio)(\d{1,2})?/) || text.match(/(\d{1,2}):(\d{2})/)
+  if (!time) return result
+  let hour = Number(time[1]), minute = Number(time[2] || 0)
+  if (/(buoi toi|toi mai|chieu toi|chieu mai)/.test(text) && hour < 12) hour += 12
+  if (hour > 23 || minute > 59) return result
+  const now = new Date(context.now || Date.now())
+  const vietnam = new Date(now.getTime() + 7 * 60 * 60 * 1000)
+  vietnam.setUTCDate(vietnam.getUTCDate() + 1)
+  const date = `${vietnam.getUTCFullYear()}-${String(vietnam.getUTCMonth() + 1).padStart(2, '0')}-${String(vietnam.getUTCDate()).padStart(2, '0')}`
+  result.startsAt = `${date}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00+07:00`
+  return result
 }
 
 export async function askAssistant(message, history = []) {
@@ -125,7 +157,7 @@ async function planWithGemini(text, history, context) {
     contents.push({ role: 'model', parts })
     const responses = []
     for (const call of calls) {
-      const name = call.name, args = call.args || {}
+      const name = call.name, args = normalizeAgentAction(call.name, call.args || {}, text, context)
       if (MUTATING_ASSISTANT_TOOLS.has(name)) return { reply: 'Mình đã chuẩn bị thao tác dưới đây. Bạn kiểm tra rồi xác nhận để mình thực hiện.', action: { type: name, summary: pendingSummary(name, args), payload: args }, toolsUsed, steps: step }
       if (!READ_ASSISTANT_TOOLS.has(name)) { responses.push({ functionResponse: { name, response: { error: 'Tool không được hỗ trợ.' } } }); continue }
       try { const result = await executeAssistantTool(name, args, context); toolsUsed.push(name); responses.push({ functionResponse: { name, response: { result: trimToolResult(result) } } }) }
@@ -140,18 +172,19 @@ async function planWithGroq(text, history, context) {
   const messages = [{ role: 'system', content: `${systemInstruction}\nBối cảnh người dùng và thời gian hiện tại (JSON): ${JSON.stringify(context)}` }, ...cleanHistory(history).map(item => ({ role: item.role === 'model' ? 'assistant' : 'user', content: item.parts[0].text })), { role: 'user', content: text }]
   const toolsUsed = []
   for (let step = 1; step <= 12; step += 1) {
-    const { response, payload } = await generateGroqChat(messages, { tools: groqToolsFor(text) })
+    const { response, payload, model } = await generateGroqChat(messages, { tools: groqToolsFor(text) })
     if (!response.ok) throw groqError(response, payload)
     const message = payload.choices?.[0]?.message
     if (!message) throw Object.assign(new Error('Groq không trả về nội dung.'), { status: 502, code: 'AI_EMPTY_RESPONSE' })
     const calls = message.tool_calls || []
-    if (!calls.length) return { reply: String(message.content || '').trim() || 'Mình chưa biết câu trả lời đáng tin cậy cho yêu cầu này.', action: null, toolsUsed, steps: step, provider: 'groq' }
+    if (!calls.length) return { reply: String(message.content || '').trim() || 'Mình chưa biết câu trả lời đáng tin cậy cho yêu cầu này.', action: null, toolsUsed, steps: step, provider: 'groq', providerModel: model }
     messages.push(message)
     for (const call of calls) {
       const name = call.function?.name
       let args = {}
       try { args = JSON.parse(call.function?.arguments || '{}') } catch { args = {} }
-      if (MUTATING_ASSISTANT_TOOLS.has(name)) return { reply: 'Mình đã chuẩn bị thao tác dưới đây. Bạn kiểm tra rồi xác nhận để mình thực hiện.', action: { type: name, summary: pendingSummary(name, args), payload: args }, toolsUsed, steps: step, provider: 'groq' }
+      args = normalizeAgentAction(name, args, text, context)
+      if (MUTATING_ASSISTANT_TOOLS.has(name)) return { reply: 'Mình đã chuẩn bị thao tác dưới đây. Bạn kiểm tra rồi xác nhận để mình thực hiện.', action: { type: name, summary: pendingSummary(name, args), payload: args }, toolsUsed, steps: step, provider: 'groq', providerModel: model }
       if (!READ_ASSISTANT_TOOLS.has(name)) { messages.push({ role: 'tool', tool_call_id: call.id, name, content: JSON.stringify({ error: 'Tool không được hỗ trợ.' }) }); continue }
       try { const result = await executeAssistantTool(name, args, context); toolsUsed.push(name); messages.push({ role: 'tool', tool_call_id: call.id, name, content: JSON.stringify({ result: trimToolResult(result) }) }) }
       catch (error) { messages.push({ role: 'tool', tool_call_id: call.id, name, content: JSON.stringify({ error: error.message }) }) }
@@ -164,10 +197,16 @@ export async function planAgent(message, history = [], context = {}) {
   const text = String(message || '').trim()
   if (!text || text.length > 2000) throw Object.assign(new Error('Yêu cầu cần từ 1 đến 2.000 ký tự.'), { status: 422 })
   if (!env.groqApiKey && !env.geminiApiKey) throw Object.assign(new Error('AI Agent chưa được cấu hình. Tra cứu RAG nội bộ vẫn hoạt động.'), { status: 503, code: 'AI_NOT_CONFIGURED' })
+  let groqFailure
   if (env.aiProvider === 'groq' && env.groqApiKey) {
     try { return await planWithGroq(text, history, context) }
-    catch (error) { if (!env.geminiApiKey) throw error }
+    catch (error) { groqFailure = error; if (!env.geminiApiKey) throw error }
   }
-  const result = await planWithGemini(text, history, context)
-  return { ...result, provider: 'gemini' }
+  try {
+    const result = await planWithGemini(text, history, context)
+    return { ...result, provider: 'gemini' }
+  } catch (error) {
+    if (!groqFailure) throw error
+    throw Object.assign(new Error(`Groq chưa tạo được tool call hợp lệ và Gemini dự phòng cũng không khả dụng: ${error.message}`), { status: error.status || 502, code: 'AI_ALL_PROVIDERS_FAILED', providers: { groq: groqFailure.code, gemini: error.code } })
+  }
 }

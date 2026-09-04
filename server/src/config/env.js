@@ -23,6 +23,7 @@ export const env = {
   aiProvider: process.env.AI_PROVIDER || 'groq',
   groqApiKey: process.env.GROQ_API_KEY || '',
   groqModel: process.env.GROQ_MODEL || 'qwen/qwen3.6-27b',
+  groqFallbackModel: process.env.GROQ_FALLBACK_MODEL || 'openai/gpt-oss-20b',
   superAdminEmail: process.env.SUPER_ADMIN_EMAIL || '',
   superAdminPassword: process.env.SUPER_ADMIN_PASSWORD || '',
   adminEmail: process.env.ADMIN_EMAIL || '',

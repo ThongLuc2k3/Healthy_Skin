@@ -43,15 +43,15 @@ export default function AiChatbot() {
     }
     setBusy(true)
     try {
-      const history = messages.slice(-20).map(message => ({ role: message.role === 'bot' ? 'assistant' : 'user', text: message.text }))
-      if(session){const {data}=await api('/assistant/agent',{method:'POST',token:session.accessToken,body:{message:text,history}});setMessages(list=>[...list,{role:'bot',text:data.reply,toolsUsed:data.toolsUsed||[],steps:data.steps,mode:data.mode,provider:data.provider}]);setPendingAction(data.action||null)}
+      const history = messages.slice(-20).map(message => ({ role: message.role === 'bot' ? 'assistant' : 'user', text: message.text, ...(message.actionToken ? { actionToken: message.actionToken } : {}) }))
+      if(session){const {data}=await api('/assistant/agent',{method:'POST',token:session.accessToken,body:{message:text,history}});setMessages(list=>[...list,{role:'bot',text:data.reply,toolsUsed:data.toolsUsed||[],steps:data.steps,mode:data.mode,provider:data.provider,actionToken:data.action?.token}]);setPendingAction(data.action||null)}
       else {const { data } = await api('/assistant/chat', { method: 'POST', body: { message: text, history } });setMessages(list => [...list, { role: 'bot', text: data.answer,mode:data.mode }])}
     } catch (error) {
       setMessages(list => [...list, { role: 'bot', text: error.message || 'Agent chưa thể phản hồi lúc này. Bạn có thể thử lại sau.' }])
     } finally { setBusy(false) }
   }
   const actionDoneText={create_request:'Mình đã đăng yêu cầu thành công.',update_profile:'Mình đã cập nhật hồ sơ thành công.',create_sharing_post:'Mình đã đăng bài chia sẻ thành công.',wallet_topup:'Mình đã nạp tiền vào ví mô phỏng thành công.',wallet_withdraw:'Mình đã rút tiền khỏi ví mô phỏng thành công.',create_report:'Mình đã gửi báo cáo tới quản trị viên.',send_conversation_message:'Mình đã gửi tin nhắn.',send_channel_message:'Mình đã gửi tin nhắn vào kênh.',submit_verification:'Mình đã gửi yêu cầu xác minh.'}
-  async function executeAction(){if(!pendingAction||busy)return;setBusy(true);try{const {data}=await api('/assistant/actions/execute',{method:'POST',token:session.accessToken,body:{action:pendingAction}});setMessages(list=>[...list,{role:'bot',text:actionDoneText[data.type]||'Mình đã thực hiện thành công.'}]);setPendingAction(null)}catch(error){setMessages(list=>[...list,{role:'bot',text:`Chưa thể thực hiện: ${error.message}`}])}finally{setBusy(false)}}
+  async function executeAction(){if(!pendingAction?.token||busy)return;setBusy(true);try{const {data}=await api('/assistant/actions/execute',{method:'POST',token:session.accessToken,body:{token:pendingAction.token}});setMessages(list=>[...list,{role:'bot',text:actionDoneText[data.type]||'Mình đã thực hiện thành công.'}]);setPendingAction(null)}catch(error){setMessages(list=>[...list,{role:'bot',text:`Chưa thể thực hiện: ${error.message}`}])}finally{setBusy(false)}}
   function startComplaint() { setOpen(true); setAwaitingComplaint(true); setMessages(list => [...list, { role: 'bot', text: 'Bạn hãy mô tả vấn đề, thời điểm xảy ra và điều bạn mong muốn được hỗ trợ. Nội dung sẽ được chuyển đến quản trị viên.' }]) }
 
   return <div className="fixed bottom-5 right-4 z-[75] sm:bottom-7 sm:right-7">

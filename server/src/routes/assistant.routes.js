@@ -4,7 +4,7 @@ import { classifyAssistantIntent, planAgent } from '../services/assistantService
 import { requireAuth } from '../middleware/auth.js'
 import { getUser } from '../services/authService.js'
 import { answerFromKnowledge } from '../services/knowledgeService.js'
-import { MUTATING_ASSISTANT_TOOLS, executeAssistantTool } from '../services/assistantTools.js'
+import { executeSignedAssistantAction, isNaturalAssistantConfirmation, signAssistantAction } from '../services/pendingAssistantActionService.js'
 
 const router = Router()
 const aiLimiter = rateLimit({ windowMs: 5 * 60 * 1000, limit: 40, standardHeaders: 'draft-8', legacyHeaders: false, message: { error: { code: 'AI_RATE_LIMITED', message: 'Bạn đang thao tác với trợ lý AI quá nhanh. Vui lòng thử lại sau ít phút.' } } })
@@ -48,17 +48,25 @@ router.post('/agent', aiLimiter, requireAuth, async (req, res, next) => {
     }
     const user = await getUser(req.auth.sub)
     const context = { userId: req.auth.sub, universityId: user.default_university_id, user: { displayName: user.display_name, areaLabel: user.area_label, defaultUniversityId: user.default_university_id, memberships: user.memberships || [] }, now: new Date().toISOString(), timezone: 'Asia/Ho_Chi_Minh' }
-    res.json({ data: { ...(await planAgent(message, req.body.history, context)), intent } })
+    if (intent?.route === 'confirm' || isNaturalAssistantConfirmation(message)) {
+      const token = [...(Array.isArray(req.body.history) ? req.body.history : [])].reverse().find(item => item.role === 'assistant' && item.actionToken)?.actionToken
+      const completed = await executeSignedAssistantAction(token, req.auth.sub, context)
+      if (completed) return res.json({ data: { reply: `Đã thực hiện thành công: ${completed.summary}.`, action: null, toolsUsed: [completed.type], steps: 0, mode: 'confirmed_action', intent } })
+    }
+    const planned = await planAgent(message, req.body.history, context)
+    if (!planned.action) return res.json({ data: { ...planned, intent } })
+    const actionToken = signAssistantAction(planned.action, req.auth.sub)
+    const { action: _action, ...safePlanned } = planned
+    res.json({ data: { ...safePlanned, action: { type: planned.action.type, summary: planned.action.summary, token: actionToken }, intent } })
   } catch (error) { next(error) }
 })
 
 router.post('/actions/execute', requireAuth, async (req, res, next) => {
   try {
-    const action = req.body.action
-    if (!action || !MUTATING_ASSISTANT_TOOLS.has(action.type)) throw Object.assign(new Error('Hành động Agent không được hỗ trợ.'), { status: 422 })
     const user = await getUser(req.auth.sub)
-    const result = await executeAssistantTool(action.type, action.payload, { userId: req.auth.sub, universityId: user.default_university_id })
-    res.json({ data: { type: action.type, result } })
+    const completed = await executeSignedAssistantAction(req.body.token, req.auth.sub, { universityId: user.default_university_id })
+    if (!completed) throw Object.assign(new Error('Thao tác xác nhận không hợp lệ, đã dùng hoặc đã hết hạn.'), { status: 422 })
+    res.json({ data: { type: completed.type, result: completed.result } })
   } catch (error) { next(error) }
 })
 

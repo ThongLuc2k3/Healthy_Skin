@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "groups": [
+    {"intent":"about","terms":["tlucs","website","trang web","lĩnh vực","nền tảng sinh viên","cộng đồng đại học"]},
+    {"intent":"request","terms":["yêu cầu","đăng yêu cầu","nhận yêu cầu","miễn phí","trả phí","trao đổi","ứng viên","ghép người"]},
+    {"intent":"sharing","terms":["bảng chia sẻ","chia sẻ tài liệu","mở khóa","buổi trao đổi","tài liệu","quyền truy cập"]},
+    {"intent":"wallet","terms":["ví","nạp tiền","rút tiền","giữ cọc","thanh toán","giải ngân","phí nền tảng","1%"]},
+    {"intent":"session","terms":["phiên","check-in","điểm danh","hoàn tất","đánh giá","vắng mặt","tranh chấp"]},
+    {"intent":"community","terms":["diễn đàn","server trường","bài viết","bình luận","tin nhắn","kết bạn","lời mời trò chuyện"]},
+    {"intent":"account","terms":["tài khoản","đăng nhập google","xác minh","hồ sơ","trường đại học","quyền riêng tư"]},
+    {"intent":"safety","terms":["làm hộ","thi hộ","mua bán đáp án","lừa đảo","đa cấp","báo cáo","khiếu nại","kiểm duyệt"]},
+    {"intent":"agent","terms":["agent","trợ lý","chatbot","tool","công cụ","làm giúp"]}
+  ]
+}

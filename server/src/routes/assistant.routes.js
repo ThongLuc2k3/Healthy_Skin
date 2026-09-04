@@ -1,45 +1,49 @@
 import { Router } from 'express'
 import { rateLimit } from 'express-rate-limit'
-import { askAssistant,planAgent,runSearch,summarizeSearchResults } from '../services/assistantService.js'
+import { planAgent } from '../services/assistantService.js'
 import { requireAuth } from '../middleware/auth.js'
-import { getUser,updateBasicProfile } from '../services/authService.js'
-import { createRequest } from '../services/requestService.js'
-import { createSharingPostChecked } from '../services/sharingService.js'
-import { demoTopup,demoWithdraw } from '../services/walletService.js'
+import { getUser } from '../services/authService.js'
+import { answerFromKnowledge } from '../services/knowledgeService.js'
+import { MUTATING_ASSISTANT_TOOLS, executeAssistantTool } from '../services/assistantTools.js'
 
 const router = Router()
-const aiLimiter = rateLimit({ windowMs: 5 * 60 * 1000, limit: 20, standardHeaders: 'draft-8', legacyHeaders: false, message: { error: { code: 'AI_RATE_LIMITED', message: 'Bạn đang thao tác với trợ lý AI quá nhanh. Vui lòng thử lại sau ít phút.' } } })
+const aiLimiter = rateLimit({ windowMs: 5 * 60 * 1000, limit: 40, standardHeaders: 'draft-8', legacyHeaders: false, message: { error: { code: 'AI_RATE_LIMITED', message: 'Bạn đang thao tác với trợ lý AI quá nhanh. Vui lòng thử lại sau ít phút.' } } })
+const actionPattern = /\b(đăng|tạo|nhận|chọn|tham gia|mở khóa|xác nhận|hủy|cập nhật|đổi|nạp|rút|thanh toán|giải ngân|check.?in|hoàn tất|đánh giá|báo|khiếu nại|tranh chấp|bình luận|thả|lưu|theo dõi|tặng|gửi|nhắn|mời|chấp nhận|từ chối|đề xuất|xác minh|tìm|tra|xem|liệt kê)\b/i
+const commandHintPattern = /(^\s*(đăng|tạo|nhận|chọn|tham gia|mở khóa|xác nhận|hủy|cập nhật|đổi|nạp|rút|thanh toán|giải ngân|check.?in|hoàn tất|đánh giá|báo|khiếu nại|tranh chấp|bình luận|thả|lưu|theo dõi|tặng|gửi|nhắn|mời|chấp nhận|từ chối|đề xuất|xác minh|tìm|tra|xem|liệt kê)\b|\b(tôi muốn|mình muốn|hãy|giúp tôi|giúp mình|dùm|hộ tôi|cho tôi)\b)/i
+const greetingPattern = /^\s*(xin chào|chào|hello|hi|hey|alo)[!.?\s]*$/i
+const greeting = 'Chào bạn! Mình là Agent TLUCS. Bạn có thể hỏi kiến thức hoặc nhờ mình tra cứu và thao tác các chức năng ngay trong chat.'
 
 router.post('/chat', aiLimiter, async (req, res, next) => {
-  try { res.json({ data: { answer: await askAssistant(req.body.message, req.body.history) } }) }
-  catch (error) { next(error) }
+  try {
+    if (greetingPattern.test(String(req.body.message || ''))) return res.json({ data: { answer: greeting, mode: 'script' } })
+    const knowledge = await answerFromKnowledge(req.body.message)
+    res.json({ data: { answer: knowledge.answer, mode: 'rag', confidence: knowledge.confidence, source: knowledge.source } })
+  } catch (error) { next(error) }
 })
-router.post('/agent',aiLimiter,requireAuth,async(req,res,next)=>{
-  try{
-    const user=await getUser(req.auth.sub)
-    const context={user:{displayName:user.display_name,areaLabel:user.area_label,defaultUniversityId:user.default_university_id,memberships:user.memberships||[]},now:new Date().toISOString(),timezone:'Asia/Ho_Chi_Minh'}
-    const plan=await planAgent(req.body.message,req.body.history,context)
-    if(plan.action?.type==='search'){
-      const {target,q}=plan.action.payload||{}
-      const results=await runSearch(target,q,{universityId:user.default_university_id,userId:req.auth.sub})
-      const reply=await summarizeSearchResults(req.body.message,req.body.history,context,target,results)
-      return res.json({data:{reply,action:null}})
+
+router.post('/agent', aiLimiter, requireAuth, async (req, res, next) => {
+  try {
+    const message = String(req.body.message || '')
+    if (greetingPattern.test(message)) return res.json({ data: { reply: greeting, action: null, toolsUsed: [], steps: 0, mode: 'script' } })
+    const looksLikeCommand = actionPattern.test(message) && commandHintPattern.test(message) && !/^\s*(cách|làm sao|hướng dẫn|tại sao|vì sao)\b/i.test(message)
+    if (!looksLikeCommand) {
+      const knowledge = await answerFromKnowledge(message)
+      return res.json({ data: { reply: knowledge.answer, action: null, toolsUsed: knowledge.confidence >= .85 ? ['search_tlucs_knowledge'] : [], steps: 1, mode: 'rag', confidence: knowledge.confidence } })
     }
-    res.json({data:plan})
-  }catch(error){next(error)}
+    const user = await getUser(req.auth.sub)
+    const context = { userId: req.auth.sub, universityId: user.default_university_id, user: { displayName: user.display_name, areaLabel: user.area_label, defaultUniversityId: user.default_university_id, memberships: user.memberships || [] }, now: new Date().toISOString(), timezone: 'Asia/Ho_Chi_Minh' }
+    res.json({ data: await planAgent(message, req.body.history, context) })
+  } catch (error) { next(error) }
 })
-router.post('/actions/execute',requireAuth,async(req,res,next)=>{
-  try{
-    const action=req.body.action
-    const allowed=['create_request','update_profile','create_sharing_post','wallet_topup','wallet_withdraw']
-    if(!action||!allowed.includes(action.type))throw Object.assign(new Error('Hành động Agent không được hỗ trợ.'),{status:422})
-    let result
-    if(action.type==='create_request')result=await createRequest(req.auth.sub,action.payload)
-    else if(action.type==='update_profile')result=await updateBasicProfile(req.auth.sub,action.payload)
-    else if(action.type==='create_sharing_post')result=await createSharingPostChecked(req.auth.sub,action.payload)
-    else if(action.type==='wallet_topup')result=await demoTopup(req.auth.sub,Number(action.payload?.amountVnd))
-    else result=await demoWithdraw(req.auth.sub,Number(action.payload?.amountVnd))
-    res.json({data:{type:action.type,result}})
-  }catch(error){next(error)}
+
+router.post('/actions/execute', requireAuth, async (req, res, next) => {
+  try {
+    const action = req.body.action
+    if (!action || !MUTATING_ASSISTANT_TOOLS.has(action.type)) throw Object.assign(new Error('Hành động Agent không được hỗ trợ.'), { status: 422 })
+    const user = await getUser(req.auth.sub)
+    const result = await executeAssistantTool(action.type, action.payload, { userId: req.auth.sub, universityId: user.default_university_id })
+    res.json({ data: { type: action.type, result } })
+  } catch (error) { next(error) }
 })
+
 export default router

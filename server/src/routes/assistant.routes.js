@@ -8,10 +8,21 @@ import { MUTATING_ASSISTANT_TOOLS, executeAssistantTool } from '../services/assi
 
 const router = Router()
 const aiLimiter = rateLimit({ windowMs: 5 * 60 * 1000, limit: 40, standardHeaders: 'draft-8', legacyHeaders: false, message: { error: { code: 'AI_RATE_LIMITED', message: 'Bạn đang thao tác với trợ lý AI quá nhanh. Vui lòng thử lại sau ít phút.' } } })
-const actionPattern = /\b(đăng|tạo|nhận|chọn|tham gia|mở khóa|xác nhận|hủy|cập nhật|đổi|nạp|rút|thanh toán|giải ngân|check.?in|hoàn tất|đánh giá|báo|khiếu nại|tranh chấp|bình luận|thả|lưu|theo dõi|tặng|gửi|nhắn|mời|chấp nhận|từ chối|đề xuất|xác minh|tìm|tra|xem|liệt kê)\b/i
-const commandHintPattern = /(^\s*(đăng|tạo|nhận|chọn|tham gia|mở khóa|xác nhận|hủy|cập nhật|đổi|nạp|rút|thanh toán|giải ngân|check.?in|hoàn tất|đánh giá|báo|khiếu nại|tranh chấp|bình luận|thả|lưu|theo dõi|tặng|gửi|nhắn|mời|chấp nhận|từ chối|đề xuất|xác minh|tìm|tra|xem|liệt kê)\b|\b(tôi muốn|mình muốn|hãy|giúp tôi|giúp mình|dùm|hộ tôi|cho tôi)\b)/i
 const greetingPattern = /^\s*(xin chào|chào|hello|hi|hey|alo)[!.?\s]*$/i
 const greeting = 'Chào bạn! Mình là Agent TLUCS. Bạn có thể hỏi kiến thức hoặc nhờ mình tra cứu và thao tác các chức năng ngay trong chat.'
+
+function normalizeIntent(value) {
+  return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/đ/g, 'd').replace(/[^a-z0-9%]+/g, ' ').trim()
+}
+
+export function shouldUseAgent(message) {
+  const text = normalizeIntent(message)
+  const staticQuestion = /^(cach|lam sao|huong dan|tai sao|vi sao|la gi|quy dinh|chinh sach) /.test(text)
+  const personalData = /(cua toi|cua minh|vi toi|vi minh|so du|bao nhieu tien|lich su|thong bao cua|ho so cua|yeu cau cua|bai cua|phien cua|tin nhan cua)/.test(text)
+  const operation = /(dang|tao|nhan|chon|tham gia|mo khoa|xac nhan|xac nhat|huy|cap nhat|doi|nap|rut|thanh toan|giai ngan|check in|hoan tat|danh gia|bao cao|khieu nai|tranh chap|binh luan|tha|luu|theo doi|tang|gui|nhan tin|moi|chap nhan|tu choi|de xuat|xac minh|tim|tra cuu|xem|liet ke)/.test(text)
+  const requestCue = /^(dang|tao|nhan|chon|tham gia|mo khoa|xac nhan|xac nhat|huy|cap nhat|doi|nap|rut|thanh toan|giai ngan|check in|hoan tat|danh gia|bao cao|khieu nai|tranh chap|binh luan|tha|luu|theo doi|tang|gui|nhan tin|moi|chap nhan|tu choi|de xuat|xac minh|tim|tra cuu|xem|liet ke)( |$)|(toi muon|minh muon|co the|hay |giup toi|giup minh|dum|ho toi|cho toi|duoc khong|duoc k)/.test(text)
+  return personalData || (!staticQuestion && operation && requestCue)
+}
 
 router.post('/chat', aiLimiter, async (req, res, next) => {
   try {
@@ -25,8 +36,7 @@ router.post('/agent', aiLimiter, requireAuth, async (req, res, next) => {
   try {
     const message = String(req.body.message || '')
     if (greetingPattern.test(message)) return res.json({ data: { reply: greeting, action: null, toolsUsed: [], steps: 0, mode: 'script' } })
-    const looksLikeCommand = actionPattern.test(message) && commandHintPattern.test(message) && !/^\s*(cách|làm sao|hướng dẫn|tại sao|vì sao)\b/i.test(message)
-    if (!looksLikeCommand) {
+    if (!shouldUseAgent(message)) {
       const knowledge = await answerFromKnowledge(message)
       return res.json({ data: { reply: knowledge.answer, action: null, toolsUsed: knowledge.confidence >= .85 ? ['search_tlucs_knowledge'] : [], steps: 1, mode: 'rag', confidence: knowledge.confidence } })
     }

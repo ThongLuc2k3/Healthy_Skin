@@ -26,8 +26,10 @@ export function shouldUseAgent(message) {
 
 router.post('/chat', aiLimiter, async (req, res, next) => {
   try {
-    if (greetingPattern.test(String(req.body.message || ''))) return res.json({ data: { answer: greeting, mode: 'script' } })
-    const knowledge = await answerFromKnowledge(req.body.message)
+    const message = String(req.body.message || '')
+    if (greetingPattern.test(message)) return res.json({ data: { answer: greeting, mode: 'script' } })
+    if (shouldUseAgent(message)) return res.json({ data: { answer: 'Đây là yêu cầu cần Agent truy cập dữ liệu tài khoản. Bạn hãy đăng nhập TLUCS rồi gửi lại câu này; Agent sẽ xem số dư hoặc chuẩn bị thao tác và luôn hỏi xác nhận trước khi thay đổi dữ liệu.', mode: 'auth_required' } })
+    const knowledge = await answerFromKnowledge(message)
     res.json({ data: { answer: knowledge.answer, mode: 'rag', confidence: knowledge.confidence, source: knowledge.source } })
   } catch (error) { next(error) }
 })

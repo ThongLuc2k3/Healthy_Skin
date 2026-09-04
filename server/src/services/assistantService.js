@@ -64,14 +64,14 @@ function groqToolsFor(text) {
   return ASSISTANT_TOOL_SCHEMAS.filter(tool => names.has(tool.name)).map(toGroqTool)
 }
 
-async function generateGroqChat(messages, { tools, timeoutMs = 120000 } = {}) {
-  const models = [...new Set([env.groqModel, env.groqFallbackModel].filter(Boolean))]
+async function generateGroqChat(messages, { tools, timeoutMs = 120000, responseFormat, temperature, modelOverride } = {}) {
+  const models = modelOverride ? [modelOverride] : [...new Set([env.groqModel, env.groqFallbackModel].filter(Boolean))]
   let lastResult
   for (const model of models) {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: { 'content-type': 'application/json', authorization: `Bearer ${env.groqApiKey}` },
-      body: JSON.stringify({ model, messages, ...(tools?.length ? { tools, tool_choice: 'auto', parallel_tool_calls: false } : {}), temperature: tools?.length ? .1 : .5, max_completion_tokens: 3000 }),
+      body: JSON.stringify({ model, messages, ...(tools?.length ? { tools, tool_choice: 'auto', parallel_tool_calls: false } : {}), ...(responseFormat ? { response_format: responseFormat } : {}), temperature: temperature ?? (tools?.length ? .1 : .5), max_completion_tokens: responseFormat ? 300 : 3000 }),
       signal: AbortSignal.timeout(timeoutMs),
     })
     const payload = await response.json().catch(() => ({}))
@@ -80,6 +80,55 @@ async function generateGroqChat(messages, { tools, timeoutMs = 120000 } = {}) {
     if (payload?.error?.code !== 'tool_use_failed' && response.status !== 429 && response.status < 500) return lastResult
   }
   return lastResult
+}
+
+export const ASSISTANT_INTENT_ROUTES = ['static', 'rag', 'agent_read', 'agent_write', 'confirm', 'clarify']
+const intentRouterInstruction = `Bạn là bộ định tuyến ý định cho TLUCS. Chỉ phân loại, không trả lời và không quyết định thực thi.
+Chọn đúng một route:
+- static: chào hỏi, cảm ơn, giới thiệu TLUCS.
+- rag: hỏi kiến thức hoặc chính sách chung; không yêu cầu dữ liệu tài khoản hay thao tác thật.
+- agent_read: muốn xem, tìm hoặc mở dữ liệu thật như ví, hồ sơ, yêu cầu, phiên, bài chia sẻ, người dùng, tin nhắn, thông báo.
+- agent_write: muốn tạo, sửa, xóa, đăng, nhận, chọn, gửi, nạp, rút, thanh toán hoặc thực hiện thao tác thật.
+- confirm: tin mới nhất xác nhận, đồng ý, chốt hoặc sửa lựa chọn của thao tác đang bàn ở các tin trước.
+- clarify: ý định chưa rõ hoặc ngoài phạm vi.
+Dùng ngữ cảnh tối đa 10 tin gần nhất. Trả JSON duy nhất: {"route":"...","confidence":0.0,"reason":"..."}. Phân loại confirm không phải quyền thực thi; server kiểm tra action và quyền riêng.`
+
+export function normalizeIntentResult(value, provider = 'fallback') {
+  const route = String(value?.route || '').toLowerCase()
+  if (!ASSISTANT_INTENT_ROUTES.includes(route)) throw new Error('Intent route không hợp lệ.')
+  return { route, confidence: Math.min(Math.max(Number(value?.confidence) || 0, 0), 1), reason: String(value?.reason || '').slice(0, 160), provider }
+}
+
+function intentConversation(message, history) {
+  return [...cleanHistory(history).slice(-9).map(item => ({ role: item.role === 'model' ? 'assistant' : 'user', content: item.parts[0].text.slice(0, 700) })), { role: 'user', content: String(message).slice(0, 700) }]
+}
+
+export async function classifyAssistantIntent(message, history = []) {
+  const messages = intentConversation(message, history)
+  if (env.aiProvider === 'groq' && env.groqApiKey) {
+    for (const model of [...new Set([env.groqModel, env.groqFallbackModel].filter(Boolean))]) {
+      try {
+        const { response, payload } = await generateGroqChat([{ role: 'system', content: intentRouterInstruction }, ...messages], { timeoutMs: 15000, responseFormat: { type: 'json_object' }, temperature: 0, modelOverride: model })
+        if (response.ok) return normalizeIntentResult(JSON.parse(payload.choices?.[0]?.message?.content || '{}'), `groq:${model}`)
+      } catch (error) { console.warn(`[intent-router] Groq ${model} fallback:`, error.message) }
+    }
+  }
+  if (env.geminiApiKey) {
+    try {
+      const transcript = messages.map(item => `${item.role}: ${item.content}`).join('\n')
+      const { response, payload } = await generateGeminiContent({
+        contents: [{ role: 'user', parts: [{ text: `${intentRouterInstruction}\n\nHội thoại:\n${transcript}` }] }],
+        generationConfig: {
+          temperature: 0,
+          maxOutputTokens: 800,
+          responseMimeType: 'application/json',
+          responseSchema: { type: 'OBJECT', properties: { route: { type: 'STRING', enum: ASSISTANT_INTENT_ROUTES.map(item => item.toUpperCase()) }, confidence: { type: 'NUMBER' }, reason: { type: 'STRING' } }, required: ['route', 'confidence', 'reason'] },
+        },
+      }, 15000)
+      if (response.ok) return normalizeIntentResult(JSON.parse(textFromParts(responseParts(payload))), `gemini:${env.geminiModel}`)
+    } catch (error) { console.warn('[intent-router] Gemini fallback:', error.message) }
+  }
+  return null
 }
 
 function providerError(response, payload) {

@@ -24,7 +24,7 @@ export function cleanHistory(history) {
 
 const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
 
-async function generateContent(body, timeoutMs = 120000) {
+async function generateGeminiContent(body, timeoutMs = 120000) {
   let lastResult
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(env.geminiModel)}:generateContent`, {
@@ -38,10 +38,51 @@ async function generateContent(body, timeoutMs = 120000) {
   return lastResult
 }
 
+function lowerCaseSchema(value) {
+  if (Array.isArray(value)) return value.map(lowerCaseSchema)
+  if (!value || typeof value !== 'object') return value
+  return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, key === 'type' ? String(item).toLowerCase() : lowerCaseSchema(item)]))
+}
+
+const toGroqTool = tool => ({ type: 'function', function: { name: tool.name, description: tool.description, parameters: lowerCaseSchema(tool.parameters) } })
+const toolGroups = [
+  { pattern: /yêu cầu|hỗ trợ|ứng viên|gia sư|môn học/i, names: ['search_tlucs','search_requests','list_my_requests','list_my_sessions','create_request','accept_request','select_request_application','pay_request_remaining','release_request_payment','check_in_session','complete_session','review_session','report_no_show','open_request_dispute'] },
+  { pattern: /chia sẻ|tài liệu|mở khóa|buổi trao đổi/i, names: ['search_tlucs','search_sharing_posts','list_my_conversations','create_sharing_post','join_sharing_post','confirm_sharing_access','cancel_sharing_participation','cancel_sharing_post','open_sharing_dispute','review_sharing'] },
+  { pattern: /ví|tiền|số dư|nạp|rút|thanh toán|giải ngân|tặng/i, names: ['get_my_wallet','wallet_topup','wallet_withdraw','pay_request_remaining','release_request_payment','gift_forum_post','gift_forum_comment'] },
+  { pattern: /diễn đàn|bài viết|bình luận|cảm xúc|theo dõi|lưu bài/i, names: ['list_forum_posts','list_forum_comments','create_forum_post','add_forum_comment','react_forum_post','react_forum_comment','save_forum_post','follow_forum_post','gift_forum_post','gift_forum_comment'] },
+  { pattern: /tin nhắn|trò chuyện|chat|kênh|server|cộng đồng|thành viên|người dùng/i, names: ['search_people','list_my_conversations','list_my_chat_requests','list_community_servers','list_conversation_messages','list_channel_messages','send_conversation_message','send_channel_message','request_direct_chat','respond_chat_request','block_user','propose_community_channel'] },
+  { pattern: /hồ sơ|tài khoản|xác minh|thông báo|tên hiển thị|khu vực/i, names: ['get_my_profile','list_my_notifications','update_profile','mark_notification_read','submit_verification'] },
+  { pattern: /báo cáo|khiếu nại|vi phạm|lừa đảo|an toàn/i, names: ['search_tlucs_knowledge','create_report','open_request_dispute','open_sharing_dispute','block_user'] },
+]
+
+function groqToolsFor(text) {
+  const names = new Set(['search_tlucs', 'search_tlucs_knowledge', 'get_my_profile'])
+  for (const group of toolGroups) if (group.pattern.test(text)) group.names.forEach(name => names.add(name))
+  if (names.size === 3) ['search_requests','search_sharing_posts','search_people','get_my_wallet','list_my_notifications','list_my_conversations','create_report'].forEach(name => names.add(name))
+  return ASSISTANT_TOOL_SCHEMAS.filter(tool => names.has(tool.name)).map(toGroqTool)
+}
+
+async function generateGroqChat(messages, { tools, timeoutMs = 120000 } = {}) {
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', authorization: `Bearer ${env.groqApiKey}` },
+    body: JSON.stringify({ model: env.groqModel, messages, ...(tools?.length ? { tools, tool_choice: 'auto' } : {}), temperature: tools?.length ? .2 : .5, max_completion_tokens: 3000 }),
+    signal: AbortSignal.timeout(timeoutMs),
+  })
+  const payload = await response.json().catch(() => ({}))
+  return { response, payload }
+}
+
 function providerError(response, payload) {
   const providerMessage = payload?.error?.message || ''
   const quota = response.status === 429 || /quota|rate limit|resource exhausted/i.test(providerMessage)
   return Object.assign(new Error(quota ? 'Gemini đã hết hạn mức API hiện tại. Bạn vẫn có thể dùng tra cứu RAG nội bộ.' : 'AI Agent đang bận hoặc chưa phản hồi. Bạn có thể thử lại sau.'), { status: response.status === 429 ? 429 : 502, code: quota ? 'AI_QUOTA_EXCEEDED' : 'AI_PROVIDER_ERROR', cause: payload?.error })
+}
+
+function groqError(response, payload) {
+  const message = payload?.error?.message || ''
+  const quota = response.status === 429 || /quota|rate limit|tokens per/i.test(message)
+  return Object.assign(new Error(quota ? 'Groq đã chạm giới hạn hiện tại; Agent sẽ thử Gemini dự phòng.' : 'Groq đang bận hoặc từ chối yêu cầu.'), { status: response.status === 429 ? 429 : 502, code: quota ? 'AI_QUOTA_EXCEEDED' : 'AI_PROVIDER_ERROR', cause: payload?.error })
 }
 
 const responseParts = payload => payload?.candidates?.[0]?.content?.parts || []
@@ -59,22 +100,25 @@ function pendingSummary(name, args) {
 export async function askAssistant(message, history = []) {
   const text = String(message || '').trim()
   if (!text || text.length > 2000) throw Object.assign(new Error('Câu hỏi cần từ 1 đến 2.000 ký tự.'), { status: 422 })
+  if (env.groqApiKey) {
+    const messages = [{ role: 'system', content: systemInstruction }, ...cleanHistory(history).map(item => ({ role: item.role === 'model' ? 'assistant' : 'user', content: item.parts[0].text })), { role: 'user', content: text }]
+    const { response, payload } = await generateGroqChat(messages)
+    if (response.ok && payload.choices?.[0]?.message?.content) return payload.choices[0].message.content.trim()
+    if (!env.geminiApiKey) throw groqError(response, payload)
+  }
   if (!env.geminiApiKey) throw Object.assign(new Error('Trợ lý AI chưa được cấu hình.'), { status: 503, code: 'AI_NOT_CONFIGURED' })
-  const { response, payload } = await generateContent({ system_instruction: { parts: [{ text: systemInstruction }] }, contents: [...cleanHistory(history), { role: 'user', parts: [{ text }] }], generationConfig: { temperature: 0.5, maxOutputTokens: 1024 } })
+  const { response, payload } = await generateGeminiContent({ system_instruction: { parts: [{ text: systemInstruction }] }, contents: [...cleanHistory(history), { role: 'user', parts: [{ text }] }], generationConfig: { temperature: 0.5, maxOutputTokens: 1024 } })
   if (!response.ok) throw providerError(response, payload)
   const answer = textFromParts(responseParts(payload))
   if (!answer) throw Object.assign(new Error('Trợ lý AI chưa tạo được câu trả lời.'), { status: 502, code: 'AI_EMPTY_RESPONSE' })
   return answer
 }
 
-export async function planAgent(message, history = [], context = {}) {
-  const text = String(message || '').trim()
-  if (!text || text.length > 2000) throw Object.assign(new Error('Yêu cầu cần từ 1 đến 2.000 ký tự.'), { status: 422 })
-  if (!env.geminiApiKey) throw Object.assign(new Error('AI Agent chưa được cấu hình. Tra cứu RAG nội bộ vẫn hoạt động.'), { status: 503, code: 'AI_NOT_CONFIGURED' })
+async function planWithGemini(text, history, context) {
   const contents = [...cleanHistory(history), { role: 'user', parts: [{ text }] }], toolsUsed = []
   const instruction = `${systemInstruction}\nBối cảnh người dùng và thời gian hiện tại (JSON): ${JSON.stringify(context)}`
   for (let step = 1; step <= 12; step += 1) {
-    const { response, payload } = await generateContent({ system_instruction: { parts: [{ text: instruction }] }, contents, tools: [{ functionDeclarations: ASSISTANT_TOOL_SCHEMAS }], toolConfig: { functionCallingConfig: { mode: 'AUTO' } }, generationConfig: { temperature: 0.2, maxOutputTokens: 3000 } })
+    const { response, payload } = await generateGeminiContent({ system_instruction: { parts: [{ text: instruction }] }, contents, tools: [{ functionDeclarations: ASSISTANT_TOOL_SCHEMAS }], toolConfig: { functionCallingConfig: { mode: 'AUTO' } }, generationConfig: { temperature: 0.2, maxOutputTokens: 3000 } })
     if (!response.ok) throw providerError(response, payload)
     const parts = responseParts(payload), calls = parts.filter(part => part.functionCall).map(part => part.functionCall)
     if (!calls.length) return { reply: textFromParts(parts) || 'Mình chưa biết câu trả lời đáng tin cậy cho yêu cầu này.', action: null, toolsUsed, steps: step }
@@ -90,4 +134,40 @@ export async function planAgent(message, history = [], context = {}) {
     contents.push({ role: 'user', parts: responses })
   }
   return { reply: 'Mình đã dùng tối đa 12 bước nhưng chưa đủ dữ liệu để hoàn tất. Bạn hãy nói cụ thể hơn một chút.', action: null, toolsUsed, steps: 12 }
+}
+
+async function planWithGroq(text, history, context) {
+  const messages = [{ role: 'system', content: `${systemInstruction}\nBối cảnh người dùng và thời gian hiện tại (JSON): ${JSON.stringify(context)}` }, ...cleanHistory(history).map(item => ({ role: item.role === 'model' ? 'assistant' : 'user', content: item.parts[0].text })), { role: 'user', content: text }]
+  const toolsUsed = []
+  for (let step = 1; step <= 12; step += 1) {
+    const { response, payload } = await generateGroqChat(messages, { tools: groqToolsFor(text) })
+    if (!response.ok) throw groqError(response, payload)
+    const message = payload.choices?.[0]?.message
+    if (!message) throw Object.assign(new Error('Groq không trả về nội dung.'), { status: 502, code: 'AI_EMPTY_RESPONSE' })
+    const calls = message.tool_calls || []
+    if (!calls.length) return { reply: String(message.content || '').trim() || 'Mình chưa biết câu trả lời đáng tin cậy cho yêu cầu này.', action: null, toolsUsed, steps: step, provider: 'groq' }
+    messages.push(message)
+    for (const call of calls) {
+      const name = call.function?.name
+      let args = {}
+      try { args = JSON.parse(call.function?.arguments || '{}') } catch { args = {} }
+      if (MUTATING_ASSISTANT_TOOLS.has(name)) return { reply: 'Mình đã chuẩn bị thao tác dưới đây. Bạn kiểm tra rồi xác nhận để mình thực hiện.', action: { type: name, summary: pendingSummary(name, args), payload: args }, toolsUsed, steps: step, provider: 'groq' }
+      if (!READ_ASSISTANT_TOOLS.has(name)) { messages.push({ role: 'tool', tool_call_id: call.id, name, content: JSON.stringify({ error: 'Tool không được hỗ trợ.' }) }); continue }
+      try { const result = await executeAssistantTool(name, args, context); toolsUsed.push(name); messages.push({ role: 'tool', tool_call_id: call.id, name, content: JSON.stringify({ result: trimToolResult(result) }) }) }
+      catch (error) { messages.push({ role: 'tool', tool_call_id: call.id, name, content: JSON.stringify({ error: error.message }) }) }
+    }
+  }
+  return { reply: 'Mình đã dùng tối đa 12 bước nhưng chưa đủ dữ liệu để hoàn tất. Bạn hãy nói cụ thể hơn một chút.', action: null, toolsUsed, steps: 12, provider: 'groq' }
+}
+
+export async function planAgent(message, history = [], context = {}) {
+  const text = String(message || '').trim()
+  if (!text || text.length > 2000) throw Object.assign(new Error('Yêu cầu cần từ 1 đến 2.000 ký tự.'), { status: 422 })
+  if (!env.groqApiKey && !env.geminiApiKey) throw Object.assign(new Error('AI Agent chưa được cấu hình. Tra cứu RAG nội bộ vẫn hoạt động.'), { status: 503, code: 'AI_NOT_CONFIGURED' })
+  if (env.aiProvider === 'groq' && env.groqApiKey) {
+    try { return await planWithGroq(text, history, context) }
+    catch (error) { if (!env.geminiApiKey) throw error }
+  }
+  const result = await planWithGemini(text, history, context)
+  return { ...result, provider: 'gemini' }
 }
